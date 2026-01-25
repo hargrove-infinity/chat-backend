@@ -1,16 +1,47 @@
 import { createServer } from "node:http";
 
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { Server } from "socket.io";
 
 import { envVariables } from "./common";
-import { mockedUsers } from "./_mock";
+import { mockedChats, mockedMessages, mockedUsers, User } from "./_mock";
 
+/**
+ * Initialize Express application, enable CORS for cross-origin requests,
+ * and parse incoming JSON request bodies
+ */
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+/**
+ * Middleware that validates the auth token from request headers,
+ * decodes user data, and attaches the authenticated user to req.user
+ */
+async function authMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  const { authorization } = req.headers;
+
+  if (!authorization) {
+    res.status(400).send({ errors: ["Auth token is missing"] });
+    return;
+  }
+
+  const decoded: Omit<User, "password"> = JSON.parse(atob(authorization));
+
+  req.user = decoded;
+
+  next();
+}
+
+/**
+ * Authenticates user credentials against mocked data,
+ * and returns a base64-encoded user payload on successful login
+ */
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -19,11 +50,82 @@ app.post("/login", async (req, res) => {
   );
 
   if (foundUser) {
-    res.send({ payload: foundUser.token });
+    const { password, ...restUserData } = foundUser;
+    const encoded = Buffer.from(JSON.stringify(restUserData)).toString(
+      "base64",
+    );
+
+    res.send({ payload: encoded });
     return;
   }
 
   res.status(400).send({ errors: ["Wrong credentials"] });
+});
+
+/**
+ * Returns all chats for the authenticated user,
+ * including the last message and resolved chat name for direct chats
+ */
+app.get("/chats", authMiddleware, async (req: Request, res) => {
+  const { user } = req;
+
+  if (user) {
+    const chats = mockedChats
+      .filter((chat) => chat.participants.includes(user.id))
+      .map((chat) => {
+        const lastMessage = mockedMessages
+          .filter((msg) => msg.chatId === chat.id)
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          )[0];
+
+        if (chat.type === "direct" && !chat.name) {
+          const interlocutorId = chat.participants.find(
+            (userId) => userId !== user.id,
+          );
+
+          const foundUser = mockedUsers.find(
+            (user) => user.id === interlocutorId,
+          );
+
+          return {
+            ...chat,
+            lastMessage: lastMessage?.content,
+            name: `${foundUser?.firstName} ${foundUser?.lastName}`,
+          };
+        }
+
+        return {
+          ...chat,
+          lastMessage: lastMessage?.content,
+        };
+      });
+
+    res.send({ payload: chats });
+    return;
+  }
+
+  res.status(400).send({ errors: ["User is not attached"] });
+});
+
+/**
+ * Returns all messages for a specific chat,
+ * marking each message as owned by the current user when applicable
+ */
+app.get("/chats/:chatId/messages", authMiddleware, (req: Request, res) => {
+  const { params, user } = req;
+  const { chatId } = params;
+  if (user) {
+    const messages = mockedMessages
+      .filter((msg) => msg.chatId === chatId)
+      .map((msg) => ({ ...msg, isMine: msg.senderId === user.id }));
+
+    res.send({ payload: messages });
+    return;
+  }
+
+  res.status(400).send({ errors: ["User is not attached"] });
 });
 
 const server = createServer(app);
@@ -89,6 +191,9 @@ chatNamespace.on("connection", (socket) => {
   console.log("a chat user connected");
 
   socket.on("chat message", (msg) => {
+    // TODO: Here message is being received from the frontend
+    // TODO: stored in database (temporarily in mockedMessages)
+    // TODO: sent back to the frontend socket.emit("chat message", message)
     console.log(`message: ${msg}`);
   });
 
