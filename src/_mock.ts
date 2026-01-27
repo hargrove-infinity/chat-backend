@@ -1,5 +1,9 @@
 export type User = {
   id: string;
+  // Id of the connected socket
+  // Used for exchanging messages
+  // By default null
+  socketId: string | null;
   email: string;
   password: string;
   firstName: string;
@@ -33,6 +37,7 @@ type Message = {
 export const mockedUsers: User[] = [
   {
     id: "7c2c8c6a-4b6d-4c1a-9c8b-4f1a5e3d2a10",
+    socketId: null,
     email: "michael.thompson@mail.com",
     password: "Coffee92",
     firstName: "Michael",
@@ -43,6 +48,7 @@ export const mockedUsers: User[] = [
   },
   {
     id: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
+    socketId: null,
     email: "james.walker@mail.com",
     password: "Sunrise24",
     firstName: "James",
@@ -53,6 +59,7 @@ export const mockedUsers: User[] = [
   },
   {
     id: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    socketId: null,
     email: "daniel.harris@mail.com",
     password: "BlueSky07",
     firstName: "Daniel",
@@ -63,6 +70,7 @@ export const mockedUsers: User[] = [
   },
   {
     id: "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b43",
+    socketId: null,
     email: "ryan.mitchell@mail.com",
     password: "NightMoon15",
     firstName: "Ryan",
@@ -73,6 +81,7 @@ export const mockedUsers: User[] = [
   },
   {
     id: "8e7d6c5b-4a3f-4e2d-9c8b-1a0f2e3d4c54",
+    socketId: null,
     email: "christopher.reynolds@mail.com",
     password: "River88",
     firstName: "Christopher",
