@@ -1,4 +1,4 @@
-import { Router, Request } from "express";
+import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { paths } from "../common";
 import { mockedChats, mockedMessages, mockedUsers } from "../_mock";
@@ -9,7 +9,7 @@ export const chatsRoutes = Router();
  * Returns all chats for the authenticated user,
  * including the last message and resolved chat name for direct chats
  */
-chatsRoutes.get(paths.chats.list, authMiddleware, (req: Request, res) => {
+chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
   const { user } = req;
 
   if (!user) {
@@ -49,7 +49,7 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req: Request, res) => {
 chatsRoutes.get(
   paths.chats.messagesByChatId,
   authMiddleware,
-  (req: Request, res) => {
+  (req, res) => {
     const { params, user } = req;
     const { chatId } = params;
 

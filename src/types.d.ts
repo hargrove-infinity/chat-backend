@@ -1,7 +1,10 @@
-import { Request } from "express";
+import type { Request } from "express";
+import { User } from './_mock'
 
-declare module "express" {
-  export interface Request {
-    user?: Omit<User, "password">;
+declare global {
+  namespace Express {
+    interface Request {
+      user?: Omit<User, "password">;
+    }
   }
 }
