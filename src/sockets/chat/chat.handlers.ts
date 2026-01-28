@@ -44,13 +44,11 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
 
           if (interlocutor && interlocutor.socketId) {
             if (user.socketId) {
-              namespace
-                .to(user.socketId)
-                .emit(CHAT_EVENTS.MESSAGE, { ...message, isMine: true });
+              namespace.to(user.socketId).emit(CHAT_EVENTS.MESSAGE, message);
 
               namespace
                 .to(interlocutor.socketId)
-                .emit(CHAT_EVENTS.MESSAGE, { ...message, isMine: false });
+                .emit(CHAT_EVENTS.MESSAGE, message);
             }
           }
         }

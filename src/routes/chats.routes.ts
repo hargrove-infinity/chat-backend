@@ -43,25 +43,18 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
 });
 
 /**
- * Returns all messages for a specific chat,
- * marking each message as owned by the current user when applicable
+ * Returns all messages for a specific chat
  */
-chatsRoutes.get(
-  paths.chats.messagesByChatId,
-  authMiddleware,
-  (req, res) => {
-    const { params, user } = req;
-    const { chatId } = params;
+chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
+  const { params, user } = req;
+  const { chatId } = params;
 
-    if (!user) {
-      res.status(400).send({ errors: ["User is not attached"] });
-      return;
-    }
+  if (!user) {
+    res.status(400).send({ errors: ["User is not attached"] });
+    return;
+  }
 
-    const messages = mockedMessages
-      .filter((msg) => msg.chatId === chatId)
-      .map((msg) => ({ ...msg, isMine: msg.senderId === user.id }));
+  const messages = mockedMessages.filter((msg) => msg.chatId === chatId);
 
-    res.send({ payload: messages });
-  },
-);
+  res.send({ payload: messages });
+});
