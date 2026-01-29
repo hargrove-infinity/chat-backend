@@ -1,6 +1,6 @@
 import { Namespace, Socket } from "socket.io";
 import { CHAT_EVENTS, CONNECTION_EVENTS, WELCOME_EVENTS } from "../../common";
-import { mockedChats, mockedMessages, mockedUsers } from "../../_mock";
+import { db } from "../../_mock/db";
 import { v4 as uuidv4 } from "uuid";
 
 export function registerChatHandlers(namespace: Namespace, socket: Socket) {
@@ -10,7 +10,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     console.log("Chat message:", msg);
   });
 
-  const user = mockedUsers.find((user) => user.socketId === socket.id);
+  const user = db.users.find((user) => user.socketId === socket.id);
 
   if (!user) {
     throw new Error("User is missing");
@@ -19,7 +19,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
   socket.on(
     CHAT_EVENTS.MESSAGE,
     ({ content, chatId }: { content: string; chatId: string }) => {
-      const foundChat = mockedChats.find((chat) => chat.id === chatId);
+      const foundChat = db.chats.find((chat) => chat.id === chatId);
 
       const message = {
         id: uuidv4(),
@@ -30,7 +30,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
         updatedAt: new Date().toISOString(),
       };
 
-      mockedMessages.push(message);
+      db.messages.push(message);
 
       if (foundChat?.type === "direct") {
         const interlocutorId = foundChat.participants.find(
@@ -38,7 +38,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
         );
 
         if (interlocutorId) {
-          const interlocutor = mockedUsers.find(
+          const interlocutor = db.users.find(
             (user) => user.id === interlocutorId,
           );
 
