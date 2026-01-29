@@ -35,4 +35,7 @@ export const ADMIN_EVENTS = {
 
 export const CHAT_EVENTS = {
   MESSAGE: "chat:message",
+  JOIN_ROOM: "join:room",
+  JOIN_ROOM_MESSAGE: "join:room:message",
+  LEAVE_ROOM: "leave:room",
 } as const;

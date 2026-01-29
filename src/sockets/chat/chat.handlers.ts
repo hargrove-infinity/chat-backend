@@ -16,6 +16,22 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     throw new Error("User is missing");
   }
 
+  socket.on(CHAT_EVENTS.JOIN_ROOM, (roomName) => {
+    socket.join(roomName);
+    console.log(`Socket ${socket.id} has joined ${roomName} room`);
+    namespace
+      .in(roomName)
+      .emit(
+        CHAT_EVENTS.JOIN_ROOM_MESSAGE,
+        `Socket ${socket.id} has joined ${roomName} room`,
+      );
+  });
+
+  socket.on(CHAT_EVENTS.LEAVE_ROOM, (roomName) => {
+    socket.leave(roomName);
+    console.log(`Socket ${socket.id} has left ${roomName} room`);
+  });
+
   socket.on(
     CHAT_EVENTS.MESSAGE,
     ({ content, chatId }: { content: string; chatId: string }) => {
