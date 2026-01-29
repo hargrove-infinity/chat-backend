@@ -199,4 +199,72 @@ export const mockedMessages: Message[] = [
     createdAt: "2024-01-08T10:50:00Z",
     updatedAt: "2024-01-08T10:50:00Z",
   },
+
+  // Plans & Hangouts group
+  {
+    id: "2025811d-b5d8-44ad-81c4-61ad84d593f3",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    senderId: "a4d1c2b3-1111-4eaa-9f01-123456789001",
+    content: "Anyone up for a BBQ this weekend?",
+    createdAt: "2024-01-11T10:05:00Z",
+    updatedAt: "2024-01-11T10:05:00Z",
+  },
+  {
+    id: "8de07d9a-9887-4147-a54c-80908d7756a3",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    senderId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
+    content: "I’m in! Saturday works best for me.",
+    createdAt: "2024-01-11T10:07:00Z",
+    updatedAt: "2024-01-11T10:07:00Z",
+  },
+  {
+    id: "607bea78-3f41-46c5-b9f7-01e78edeef73",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    senderId: "b5e2d3c4-2222-4fbb-8e02-123456789002",
+    content: "Saturday sounds good. I can bring drinks 🍹",
+    createdAt: "2024-01-11T10:09:00Z",
+    updatedAt: "2024-01-11T10:09:00Z",
+  },
+  {
+    id: "c7f27ba4-2db7-4a76-84c2-15f054d5ffee",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    senderId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    content: "Perfect. I’ll handle the grill.",
+    createdAt: "2024-01-11T10:12:00Z",
+    updatedAt: "2024-01-11T10:12:00Z",
+  },
+
+  // Travel group
+  {
+    id: "c1a8f2e4-5c7d-4b4b-9c1f-8a4e2d6f9b01",
+    chatId: "9f3a7b2e-4d6c-4c8a-9c12-1e8f4a6d2b90",
+    senderId: "b5e2d3c4-2222-4fbb-8e02-123456789002", // Olivia
+    content: "What’s everyone’s dream travel destination?",
+    createdAt: "2024-01-12T10:05:00Z",
+    updatedAt: "2024-01-12T10:05:00Z",
+  },
+  {
+    id: "8e2b6d9f-7a4c-4f1d-9b7e-2c6a1e5f4d02",
+    chatId: "9f3a7b2e-4d6c-4c8a-9c12-1e8f4a6d2b90",
+    senderId: "a4d1c2b3-1111-4eaa-9f01-123456789001", // Emma
+    content: "Japan 🇯🇵 — especially during cherry blossom season.",
+    createdAt: "2024-01-12T10:07:00Z",
+    updatedAt: "2024-01-12T10:07:00Z",
+  },
+  {
+    id: "4f9d2b7c-3e6a-4d1f-8c52-9a1e6b5d0f03",
+    chatId: "9f3a7b2e-4d6c-4c8a-9c12-1e8f4a6d2b90",
+    senderId: "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b43", // Ryan
+    content: "I’d love to do a road trip across the US.",
+    createdAt: "2024-01-12T10:09:00Z",
+    updatedAt: "2024-01-12T10:09:00Z",
+  },
+  {
+    id: "7a6c4e1b-9d2f-4a5b-8c3e-0f1e6b2d9a04",
+    chatId: "9f3a7b2e-4d6c-4c8a-9c12-1e8f4a6d2b90",
+    senderId: "8e7d6c5b-4a3f-4e2d-9c8b-1a0f2e3d4c54", // Christopher
+    content: "Europe for me. Italy and France are top of the list.",
+    createdAt: "2024-01-12T10:12:00Z",
+    updatedAt: "2024-01-12T10:12:00Z",
+  },
 ];
