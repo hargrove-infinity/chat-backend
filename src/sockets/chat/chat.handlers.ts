@@ -16,20 +16,40 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     throw new Error("User is missing");
   }
 
-  socket.on(CHAT_EVENTS.JOIN_ROOM, (roomName) => {
-    socket.join(roomName);
-    console.log(`Socket ${socket.id} has joined ${roomName} room`);
+  socket.on(CHAT_EVENTS.JOIN_ROOM, (roomId) => {
+    socket.join(roomId);
+    console.log(`Socket ${socket.id} has joined ${roomId} room`);
     namespace
-      .in(roomName)
+      .in(roomId)
       .emit(
         CHAT_EVENTS.JOIN_ROOM_MESSAGE,
-        `Socket ${socket.id} has joined ${roomName} room`,
+        `Socket ${socket.id} has joined ${roomId} room`,
       );
   });
 
-  socket.on(CHAT_EVENTS.LEAVE_ROOM, (roomName) => {
-    socket.leave(roomName);
-    console.log(`Socket ${socket.id} has left ${roomName} room`);
+  socket.on(
+    CHAT_EVENTS.MESSAGE_GROUP,
+    ({ content, chatId }: { content: string; chatId: string }) => {
+      console.log(`Socket ${socket.id} has sent message to ${chatId} room`);
+
+      const message = {
+        id: uuidv4(),
+        chatId,
+        senderId: user.id,
+        content,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      db.messages.push(message);
+
+      namespace.in(chatId).emit(CHAT_EVENTS.MESSAGE_GROUP, message);
+    },
+  );
+
+  socket.on(CHAT_EVENTS.LEAVE_ROOM, (roomId) => {
+    socket.leave(roomId);
+    console.log(`Socket ${socket.id} has left ${roomId} room`);
   });
 
   socket.on(
