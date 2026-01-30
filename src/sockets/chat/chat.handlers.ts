@@ -1,7 +1,7 @@
 import { Namespace, Socket } from "socket.io";
+import { v4 as uuidv4 } from "uuid";
 import { CHAT_EVENTS, CONNECTION_EVENTS, WELCOME_EVENTS } from "../../common";
 import { db } from "../../_mock/db";
-import { v4 as uuidv4 } from "uuid";
 
 export function registerChatHandlers(namespace: Namespace, socket: Socket) {
   socket.emit(WELCOME_EVENTS.CHAT, "Hello from the Backend chat namespace");
@@ -53,7 +53,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
   });
 
   socket.on(
-    CHAT_EVENTS.MESSAGE,
+    CHAT_EVENTS.MESSAGE_DIRECT,
     ({ content, chatId }: { content: string; chatId: string }) => {
       const foundChat = db.chats.find((chat) => chat.id === chatId);
 
@@ -80,11 +80,13 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
 
           if (interlocutor && interlocutor.socketId) {
             if (user.socketId) {
-              namespace.to(user.socketId).emit(CHAT_EVENTS.MESSAGE, message);
+              namespace
+                .to(user.socketId)
+                .emit(CHAT_EVENTS.MESSAGE_DIRECT, message);
 
               namespace
                 .to(interlocutor.socketId)
-                .emit(CHAT_EVENTS.MESSAGE, message);
+                .emit(CHAT_EVENTS.MESSAGE_DIRECT, message);
             }
           }
         }
