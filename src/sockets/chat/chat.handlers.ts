@@ -69,6 +69,10 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
       db.messages.push(message);
 
       if (foundChat?.type === "direct") {
+        if (user.socketId) {
+          namespace.to(user.socketId).emit(CHAT_EVENTS.MESSAGE_DIRECT, message);
+        }
+
         const interlocutorId = foundChat.participants.find(
           (userId) => userId !== user.id,
         );
@@ -79,15 +83,9 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
           );
 
           if (interlocutor && interlocutor.socketId) {
-            if (user.socketId) {
-              namespace
-                .to(user.socketId)
-                .emit(CHAT_EVENTS.MESSAGE_DIRECT, message);
-
-              namespace
-                .to(interlocutor.socketId)
-                .emit(CHAT_EVENTS.MESSAGE_DIRECT, message);
-            }
+            namespace
+              .to(interlocutor.socketId)
+              .emit(CHAT_EVENTS.MESSAGE_DIRECT, message);
           }
         }
       } else {
