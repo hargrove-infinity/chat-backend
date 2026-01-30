@@ -32,10 +32,15 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     ({ content, chatId }: { content: string; chatId: string }) => {
       console.log(`Socket ${socket.id} has sent message to ${chatId} room`);
 
+      const foundSender = db.users.find((userDb) => userDb.id === user.id);
+
       const message = {
         id: uuidv4(),
         chatId,
         senderId: user.id,
+        senderName: foundSender
+          ? `${foundSender.firstName} ${foundSender.lastName}`
+          : null,
         content,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -57,10 +62,15 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     ({ content, chatId }: { content: string; chatId: string }) => {
       const foundChat = db.chats.find((chat) => chat.id === chatId);
 
+      const foundSender = db.users.find((userDb) => userDb.id === user.id);
+
       const message = {
         id: uuidv4(),
         chatId,
         senderId: user.id,
+        senderName: foundSender
+          ? `${foundSender.firstName} ${foundSender.lastName}`
+          : null,
         content,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

@@ -54,7 +54,18 @@ chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
     return;
   }
 
-  const messages = db.messages.filter((msg) => msg.chatId === chatId);
+  const messages = db.messages
+    .filter((msg) => msg.chatId === chatId)
+    .map((msg) => {
+      const foundSender = db.users.find((user) => user.id === msg.senderId);
+
+      return {
+        ...msg,
+        senderName: foundSender
+          ? `${foundSender.firstName} ${foundSender.lastName}`
+          : null,
+      };
+    });
 
   res.send({ payload: messages });
 });
