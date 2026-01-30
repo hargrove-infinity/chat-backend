@@ -1,5 +1,6 @@
 import { Socket } from "socket.io";
-import { mockedUsers, User } from "../../_mock";
+import { User } from "../../_mock/types";
+import { db } from "../../_mock/db";
 
 /**
  * Middleware that validates chat user socket connections,
@@ -13,7 +14,7 @@ export function chatMiddleware(socket: Socket, next: Function) {
 
   const decoded: Omit<User, "password"> = JSON.parse(atob(token));
 
-  const user = mockedUsers.find((u) => u.id === decoded.id);
+  const user = db.users.find((u) => u.id === decoded.id);
   if (user) user.socketId = socket.id;
 
   next();

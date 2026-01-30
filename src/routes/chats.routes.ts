@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { paths } from "../common";
-import { mockedChats, mockedMessages, mockedUsers } from "../_mock";
+import { db } from "../_mock/db";
 
 export const chatsRoutes = Router();
 
@@ -17,15 +17,15 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
     return;
   }
 
-  const chats = mockedChats
+  const chats = db.chats
     .filter((chat) => chat.participants.includes(user.id))
     .map((chat) => {
-      const lastMessage = mockedMessages
+      const lastMessage = db.messages
         .filter((msg) => msg.chatId === chat.id)
         .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))[0];
 
       if (chat.type === "direct" && !chat.name) {
-        const interlocutor = mockedUsers.find(
+        const interlocutor = db.users.find(
           (u) => u.id !== user.id && chat.participants.includes(u.id),
         );
 
@@ -54,7 +54,18 @@ chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
     return;
   }
 
-  const messages = mockedMessages.filter((msg) => msg.chatId === chatId);
+  const messages = db.messages
+    .filter((msg) => msg.chatId === chatId)
+    .map((msg) => {
+      const foundSender = db.users.find((user) => user.id === msg.senderId);
+
+      return {
+        ...msg,
+        senderName: foundSender
+          ? `${foundSender.firstName} ${foundSender.lastName}`
+          : null,
+      };
+    });
 
   res.send({ payload: messages });
 });

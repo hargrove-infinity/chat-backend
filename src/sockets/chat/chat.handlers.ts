@@ -1,7 +1,7 @@
 import { Namespace, Socket } from "socket.io";
-import { CHAT_EVENTS, CONNECTION_EVENTS, WELCOME_EVENTS } from "../../common";
-import { mockedChats, mockedMessages, mockedUsers } from "../../_mock";
 import { v4 as uuidv4 } from "uuid";
+import { CHAT_EVENTS, CONNECTION_EVENTS, WELCOME_EVENTS } from "../../common";
+import { db } from "../../_mock/db";
 
 export function registerChatHandlers(namespace: Namespace, socket: Socket) {
   socket.emit(WELCOME_EVENTS.CHAT, "Hello from the Backend chat namespace");
@@ -10,50 +10,94 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     console.log("Chat message:", msg);
   });
 
-  const user = mockedUsers.find((user) => user.socketId === socket.id);
+  const user = db.users.find((user) => user.socketId === socket.id);
 
   if (!user) {
     throw new Error("User is missing");
   }
 
+  socket.on(CHAT_EVENTS.JOIN_ROOM, (roomId) => {
+    socket.join(roomId);
+    console.log(`Socket ${socket.id} has joined ${roomId} room`);
+    namespace
+      .in(roomId)
+      .emit(
+        CHAT_EVENTS.JOIN_ROOM_MESSAGE,
+        `Socket ${socket.id} has joined ${roomId} room`,
+      );
+  });
+
   socket.on(
-    CHAT_EVENTS.MESSAGE,
+    CHAT_EVENTS.MESSAGE_GROUP,
     ({ content, chatId }: { content: string; chatId: string }) => {
-      const foundChat = mockedChats.find((chat) => chat.id === chatId);
+      console.log(`Socket ${socket.id} has sent message to ${chatId} room`);
+
+      const foundSender = db.users.find((userDb) => userDb.id === user.id);
 
       const message = {
         id: uuidv4(),
         chatId,
         senderId: user.id,
+        senderName: foundSender
+          ? `${foundSender.firstName} ${foundSender.lastName}`
+          : null,
         content,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      mockedMessages.push(message);
+      db.messages.push(message);
+
+      namespace.in(chatId).emit(CHAT_EVENTS.MESSAGE_GROUP, message);
+    },
+  );
+
+  socket.on(CHAT_EVENTS.LEAVE_ROOM, (roomId) => {
+    socket.leave(roomId);
+    console.log(`Socket ${socket.id} has left ${roomId} room`);
+  });
+
+  socket.on(
+    CHAT_EVENTS.MESSAGE_DIRECT,
+    ({ content, chatId }: { content: string; chatId: string }) => {
+      const foundChat = db.chats.find((chat) => chat.id === chatId);
+
+      const foundSender = db.users.find((userDb) => userDb.id === user.id);
+
+      const message = {
+        id: uuidv4(),
+        chatId,
+        senderId: user.id,
+        senderName: foundSender
+          ? `${foundSender.firstName} ${foundSender.lastName}`
+          : null,
+        content,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      db.messages.push(message);
 
       if (foundChat?.type === "direct") {
+        if (user.socketId) {
+          namespace.to(user.socketId).emit(CHAT_EVENTS.MESSAGE_DIRECT, message);
+        }
+
         const interlocutorId = foundChat.participants.find(
           (userId) => userId !== user.id,
         );
 
         if (interlocutorId) {
-          const interlocutor = mockedUsers.find(
+          const interlocutor = db.users.find(
             (user) => user.id === interlocutorId,
           );
 
           if (interlocutor && interlocutor.socketId) {
-            if (user.socketId) {
-              namespace.to(user.socketId).emit(CHAT_EVENTS.MESSAGE, message);
-
-              namespace
-                .to(interlocutor.socketId)
-                .emit(CHAT_EVENTS.MESSAGE, message);
-            }
+            namespace
+              .to(interlocutor.socketId)
+              .emit(CHAT_EVENTS.MESSAGE_DIRECT, message);
           }
         }
-      } else {
-        // TODO: Add later handling group chat
       }
     },
   );
