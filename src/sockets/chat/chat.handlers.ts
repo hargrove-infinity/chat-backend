@@ -88,8 +88,6 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
               .emit(CHAT_EVENTS.MESSAGE_DIRECT, message);
           }
         }
-      } else {
-        // TODO: Add later handling group chat
       }
     },
   );
