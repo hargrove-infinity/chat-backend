@@ -29,10 +29,15 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
           (u) => u.id !== user.id && chat.participants.includes(u.id),
         );
 
+        if (!interlocutor) {
+          throw new Error("interlocutor is not found");
+        }
+
         return {
           ...chat,
-          name: `${interlocutor?.firstName} ${interlocutor?.lastName}`,
+          name: `${interlocutor.firstName} ${interlocutor.lastName}`,
           lastMessage: lastMessage?.content,
+          isOnline: !!interlocutor.socketId,
         };
       }
 

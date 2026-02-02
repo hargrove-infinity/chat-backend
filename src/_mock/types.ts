@@ -33,3 +33,9 @@ export type Message = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type DB = {
+  users: User[];
+  chats: Chat[];
+  messages: Message[];
+};
