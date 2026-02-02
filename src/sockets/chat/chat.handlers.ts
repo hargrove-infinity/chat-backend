@@ -26,19 +26,12 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     }
   });
 
-  socket.on(CHAT_EVENTS.JOIN_ROOM, (roomId) => {
-    socket.join(roomId);
-    console.log(`Socket ${socket.id} has joined ${roomId} room`);
-    namespace
-      .in(roomId)
-      .emit(
-        CHAT_EVENTS.JOIN_ROOM_MESSAGE,
-        `Socket ${socket.id} has joined ${roomId} room`,
-      );
+  socket.on(CHAT_EVENTS.JOIN_ROOMS, (roomIds: string[]) => {
+    socket.join(roomIds);
   });
 
   socket.on(
-    CHAT_EVENTS.MESSAGE_GROUP,
+    CHAT_EVENTS.MESSAGE,
     ({ content, chatId }: { content: string; chatId: string }) => {
       console.log(`Socket ${socket.id} has sent message to ${chatId} room`);
 
@@ -58,57 +51,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
 
       db.messages.push(message);
 
-      namespace.in(chatId).emit(CHAT_EVENTS.MESSAGE_GROUP, message);
-    },
-  );
-
-  socket.on(CHAT_EVENTS.LEAVE_ROOM, (roomId) => {
-    socket.leave(roomId);
-    console.log(`Socket ${socket.id} has left ${roomId} room`);
-  });
-
-  socket.on(
-    CHAT_EVENTS.MESSAGE_DIRECT,
-    ({ content, chatId }: { content: string; chatId: string }) => {
-      const foundChat = db.chats.find((chat) => chat.id === chatId);
-
-      const foundSender = db.users.find((userDb) => userDb.id === user.id);
-
-      const message = {
-        id: uuidv4(),
-        chatId,
-        senderId: user.id,
-        senderName: foundSender
-          ? `${foundSender.firstName} ${foundSender.lastName}`
-          : null,
-        content,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      db.messages.push(message);
-
-      if (foundChat?.type === "direct") {
-        if (user.socketId) {
-          namespace.to(user.socketId).emit(CHAT_EVENTS.MESSAGE_DIRECT, message);
-        }
-
-        const interlocutorId = foundChat.participants.find(
-          (userId) => userId !== user.id,
-        );
-
-        if (interlocutorId) {
-          const interlocutor = db.users.find(
-            (user) => user.id === interlocutorId,
-          );
-
-          if (interlocutor && interlocutor.socketId) {
-            namespace
-              .to(interlocutor.socketId)
-              .emit(CHAT_EVENTS.MESSAGE_DIRECT, message);
-          }
-        }
-      }
+      namespace.in(chatId).emit(CHAT_EVENTS.MESSAGE, message);
     },
   );
 
