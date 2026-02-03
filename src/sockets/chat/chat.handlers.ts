@@ -21,18 +21,14 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     socket.join(chatIds);
   }
 
-  socket.on(CONNECTION_EVENTS.CHAT, () => {
-    const interlocutorSocketIds = getDirectInterlocutorSocketIds({
-      db,
-      userId: user.id,
-    });
-
-    if (interlocutorSocketIds.length) {
-      namespace
-        .to(interlocutorSocketIds)
-        .emit(CONNECTION_EVENTS.ONLINE, user.id);
-    }
+  const interlocutorSocketIds = getDirectInterlocutorSocketIds({
+    db,
+    userId: user.id,
   });
+
+  if (interlocutorSocketIds.length) {
+    namespace.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
+  }
 
   socket.on(
     CHAT_EVENTS.MESSAGE,
