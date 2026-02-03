@@ -26,7 +26,8 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     }
   });
 
-  socket.on(CHAT_EVENTS.JOIN_ROOMS, (roomIds: string[]) => {
+  socket.on(CONNECTION_EVENTS.CHAT, (roomIds: string[]) => {
+    console.log("Connecting to the chat and joining rooms", roomIds);
     socket.join(roomIds);
   });
 

@@ -36,6 +36,5 @@ export const ADMIN_EVENTS = {
 } as const;
 
 export const CHAT_EVENTS = {
-  JOIN_ROOMS: "join:rooms",
   MESSAGE: "chat:message",
 } as const;
