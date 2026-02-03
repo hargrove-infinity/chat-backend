@@ -13,15 +13,15 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     throw new Error("User is missing");
   }
 
+  const chatIds = db.chats
+    .filter((chat) => chat.participants.includes(user.id))
+    .map((chat) => chat.id);
+
+  if (chatIds.length) {
+    socket.join(chatIds);
+  }
+
   socket.on(CONNECTION_EVENTS.CHAT, () => {
-    const chatIds = db.chats
-      .filter((chat) => chat.participants.includes(user.id))
-      .map((chat) => chat.id);
-
-    if (chatIds.length) {
-      socket.join(chatIds);
-    }
-
     const interlocutorSocketIds = getDirectInterlocutorSocketIds({
       db,
       userId: user.id,
