@@ -1,60 +1,57 @@
 import { Namespace, Socket } from "socket.io";
-import { CHAT_EVENTS, CONNECTION_EVENTS, WELCOME_EVENTS } from "../../common";
-import { mockedChats, mockedMessages, mockedUsers } from "../../_mock";
 import { v4 as uuidv4 } from "uuid";
+import { CHAT_EVENTS, CONNECTION_EVENTS, WELCOME_EVENTS } from "../../common";
+import { db } from "../../_mock/db";
+import { getDirectInterlocutorSocketIds } from "./chat.helpers";
 
 export function registerChatHandlers(namespace: Namespace, socket: Socket) {
   socket.emit(WELCOME_EVENTS.CHAT, "Hello from the Backend chat namespace");
 
-  socket.on(CONNECTION_EVENTS.CHAT, (msg) => {
-    console.log("Chat message:", msg);
-  });
-
-  const user = mockedUsers.find((user) => user.socketId === socket.id);
+  const user = db.users.find((user) => user.socketId === socket.id);
 
   if (!user) {
     throw new Error("User is missing");
   }
 
+  const chatIds = db.chats
+    .filter((chat) => chat.participants.includes(user.id))
+    .map((chat) => chat.id);
+
+  if (chatIds.length) {
+    socket.join(chatIds);
+  }
+
+  const interlocutorSocketIds = getDirectInterlocutorSocketIds({
+    db,
+    userId: user.id,
+  });
+
+  if (interlocutorSocketIds.length) {
+    namespace.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
+  }
+
   socket.on(
     CHAT_EVENTS.MESSAGE,
     ({ content, chatId }: { content: string; chatId: string }) => {
-      const foundChat = mockedChats.find((chat) => chat.id === chatId);
+      console.log(`Socket ${socket.id} has sent message to ${chatId} room`);
+
+      const foundSender = db.users.find((userDb) => userDb.id === user.id);
 
       const message = {
         id: uuidv4(),
         chatId,
         senderId: user.id,
+        senderName: foundSender
+          ? `${foundSender.firstName} ${foundSender.lastName}`
+          : null,
         content,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      mockedMessages.push(message);
+      db.messages.push(message);
 
-      if (foundChat?.type === "direct") {
-        const interlocutorId = foundChat.participants.find(
-          (userId) => userId !== user.id,
-        );
-
-        if (interlocutorId) {
-          const interlocutor = mockedUsers.find(
-            (user) => user.id === interlocutorId,
-          );
-
-          if (interlocutor && interlocutor.socketId) {
-            if (user.socketId) {
-              namespace.to(user.socketId).emit(CHAT_EVENTS.MESSAGE, message);
-
-              namespace
-                .to(interlocutor.socketId)
-                .emit(CHAT_EVENTS.MESSAGE, message);
-            }
-          }
-        }
-      } else {
-        // TODO: Add later handling group chat
-      }
+      namespace.in(chatId).emit(CHAT_EVENTS.MESSAGE, message);
     },
   );
 
@@ -65,6 +62,17 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
   socket.on("disconnect", (reason) => {
     console.log("Reason of a disconnect chat:", reason);
     user.socketId = null;
+
+    const interlocutorSocketIds = getDirectInterlocutorSocketIds({
+      db,
+      userId: user.id,
+    });
+
+    if (interlocutorSocketIds.length) {
+      namespace
+        .to(interlocutorSocketIds)
+        .emit(CONNECTION_EVENTS.OFFLINE, user.id);
+    }
   });
 
   // TODO: add disconnection later

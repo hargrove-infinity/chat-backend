@@ -26,11 +26,11 @@ export const WELCOME_EVENTS = {
 
 export const CONNECTION_EVENTS = {
   ADMIN: "connection:admin",
-  CHAT: "connection:chat",
+  ONLINE: "connection:online",
+  OFFLINE: "connection:offline",
 } as const;
 
 export const ADMIN_EVENTS = {
-  MESSAGE: "admin:message",
   METRICS: "admin:metrics",
 } as const;
 

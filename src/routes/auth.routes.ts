@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { paths } from "../common";
-import { mockedUsers } from "../_mock";
+import { db } from "../_mock/db";
 
 export const authRoutes = Router();
 
@@ -11,7 +11,7 @@ export const authRoutes = Router();
 authRoutes.post(paths.auth.login, async (req, res) => {
   const { email, password } = req.body;
 
-  const foundUser = mockedUsers.find(
+  const foundUser = db.users.find(
     (user) => user.email === email && user.password === password,
   );
 
