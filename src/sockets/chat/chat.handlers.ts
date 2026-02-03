@@ -14,6 +14,14 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
   }
 
   socket.on(CONNECTION_EVENTS.CHAT, () => {
+    const chatIds = db.chats
+      .filter((chat) => chat.participants.includes(user.id))
+      .map((chat) => chat.id);
+
+    if (chatIds.length) {
+      socket.join(chatIds);
+    }
+
     const interlocutorSocketIds = getDirectInterlocutorSocketIds({
       db,
       userId: user.id,
@@ -24,11 +32,6 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
         .to(interlocutorSocketIds)
         .emit(CONNECTION_EVENTS.ONLINE, user.id);
     }
-  });
-
-  socket.on(CONNECTION_EVENTS.CHAT, (roomIds: string[]) => {
-    console.log("Connecting to the chat and joining rooms", roomIds);
-    socket.join(roomIds);
   });
 
   socket.on(
