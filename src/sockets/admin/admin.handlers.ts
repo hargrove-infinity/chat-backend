@@ -1,4 +1,4 @@
-import { Socket } from "socket.io";
+import type { Socket } from "socket.io";
 import { CONNECTION_EVENTS, WELCOME_EVENTS } from "../../common";
 
 export function registerAdminHandlers(socket: Socket) {

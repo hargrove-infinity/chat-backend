@@ -1,4 +1,4 @@
-import { DB } from "../../_mock/types";
+import type { DB } from "../../_mock/types";
 
 /**
  * Returns socket IDs of users who:

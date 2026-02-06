@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { User } from "../_mock/types";
+import type { NextFunction, Request, Response } from "express";
+import type { User } from "../_mock/types";
 
 /**
  * Middleware that validates the auth token from request headers,

@@ -1,5 +1,4 @@
-import type { Request } from "express";
-import type { User } from './_mock'
+import type { User } from "./_mock";
 
 declare global {
   namespace Express {

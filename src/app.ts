@@ -1,5 +1,5 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 
 import { authRoutes } from "./routes/auth.routes";
 import { chatsRoutes } from "./routes/chats.routes";

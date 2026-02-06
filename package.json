@@ -3,15 +3,21 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "npx tsc && node dist/server.js",
-    "dev:watch": "npx onchange -i -k \"**/*.ts\" -e \"dist/**\" -- npm run dev"
+    "build": "tsc",
+    "lint": "biome check src",
+    "lint:watch": "npx onchange \"src/**/*.ts\" -- biome check src",
+    "dev": "npm run --silent build && node dist/server.js",
+    "dev:watch": "npx onchange -i -k \"**/*.ts\" -e \"dist/**\" -- npm run --silent dev",
+    "dev:all": "npx concurrently     --names \"lint,server\"     --prefix-colors \"magenta,cyan\"     --prefix \"[{name}]\"     \"npm run --silent lint:watch\"     \"npm run --silent dev:watch\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@biomejs/biome": "2.3.14",
     "@types/express": "5.0.6",
+    "concurrently": "9.2.1",
     "typescript": "5.9.3"
   },
   "dependencies": {

@@ -1,7 +1,7 @@
-import { Server } from "socket.io";
+import type { Server } from "socket.io";
 import { ADMIN_NAMESPACE } from "../../common";
-import { adminMiddleware } from "./admin.middleware";
 import { registerAdminHandlers } from "./admin.handlers";
+import { adminMiddleware } from "./admin.middleware";
 
 export function initAdminNamespace(io: Server) {
   const namespace = io.of(ADMIN_NAMESPACE);

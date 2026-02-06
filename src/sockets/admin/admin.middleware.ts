@@ -1,11 +1,14 @@
-import { Socket } from "socket.io";
+import type { ExtendedError, Socket } from "socket.io";
 
 /**
  * Middleware that restricts admin namespace access,
  * ensures the connecting socket belongs to an admin user
  * and validates presence of an auth token
  */
-export function adminMiddleware(socket: Socket, next: Function) {
+export function adminMiddleware(
+  socket: Socket,
+  next: (err?: ExtendedError) => void,
+) {
   const { isAdmin, token } = socket.handshake.auth;
 
   if (!isAdmin) {

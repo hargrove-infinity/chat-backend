@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { paths } from "../common";
 import { db } from "../_mock/db";
+import { paths } from "../common";
 
 export const authRoutes = Router();
 

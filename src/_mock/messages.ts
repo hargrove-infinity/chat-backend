@@ -1,4 +1,4 @@
-import { Message } from "./types";
+import type { Message } from "./types";
 
 export const mockedMessages: Message[] = [
   // James Walker ↔ Daniel Harris

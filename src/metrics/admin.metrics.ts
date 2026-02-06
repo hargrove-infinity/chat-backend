@@ -1,4 +1,4 @@
-import { Namespace } from "socket.io";
+import type { Namespace } from "socket.io";
 import { ADMIN_EVENTS } from "../common";
 
 /**

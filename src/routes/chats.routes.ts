@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { authMiddleware } from "../middlewares/auth.middleware";
-import { paths } from "../common";
 import { db } from "../_mock/db";
+import { paths } from "../common";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 export const chatsRoutes = Router();
 

@@ -1,7 +1,7 @@
-import { Namespace, Socket } from "socket.io";
+import type { Namespace, Socket } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
-import { CHAT_EVENTS, CONNECTION_EVENTS, WELCOME_EVENTS } from "../../common";
 import { db } from "../../_mock/db";
+import { CHAT_EVENTS, CONNECTION_EVENTS, WELCOME_EVENTS } from "../../common";
 import { getDirectInterlocutorSocketIds } from "./chat.helpers";
 
 export function registerChatHandlers(namespace: Namespace, socket: Socket) {
