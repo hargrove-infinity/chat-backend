@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { Server } from "socket.io";
 
 import { createApp } from "./app";
-import { envVariables } from "./common";
+import { envVariables } from "./common/envVariables";
 import { initSockets } from "./sockets";
 
 const app = createApp();

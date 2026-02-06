@@ -1,5 +1,5 @@
 import type { Namespace } from "socket.io";
-import { ADMIN_EVENTS } from "../common";
+import { ADMIN_EVENTS } from "../common/socket";
 
 /**
  * Periodically emits metrics to all connected admin clients,

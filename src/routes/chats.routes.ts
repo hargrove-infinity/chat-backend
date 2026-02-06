@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "../_mock/db";
-import { paths } from "../common";
+import { paths } from "../common/paths";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
 export const chatsRoutes = Router();

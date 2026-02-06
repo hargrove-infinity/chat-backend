@@ -1,6 +1,6 @@
 import type { Server } from "socket.io";
 
-import { CHAT_NAMESPACE } from "../../common";
+import { CHAT_NAMESPACE } from "../../common/socket";
 import { registerChatHandlers } from "./chat.handlers";
 import { chatMiddleware } from "./chat.middleware";
 

@@ -1,21 +1,3 @@
-import "dotenv/config";
-import { envSchema } from "./validation";
-
-export const envVariables = envSchema.parse({
-  port: process.env.PORT,
-  frontendUrl: process.env.FRONTEND_URL,
-});
-
-export const paths = {
-  auth: {
-    login: "/login",
-  },
-  chats: {
-    list: "/chats",
-    messagesByChatId: "/chats/:chatId/messages",
-  },
-};
-
 export const CHAT_NAMESPACE = "/chat";
 export const ADMIN_NAMESPACE = "/admin";
 

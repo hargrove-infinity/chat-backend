@@ -1,5 +1,5 @@
 import type { Server } from "socket.io";
-import { ADMIN_NAMESPACE } from "../../common";
+import { ADMIN_NAMESPACE } from "../../common/socket";
 import { registerAdminHandlers } from "./admin.handlers";
 import { adminMiddleware } from "./admin.middleware";
 
