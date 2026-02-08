@@ -1,12 +1,14 @@
 import type { Namespace, Socket } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../../_mock/db";
+import { MessageStatusEnum } from "../../_mock/types";
 import {
   CHAT_EVENTS,
   CONNECTION_EVENTS,
   WELCOME_EVENTS,
 } from "../../common/socket";
 import { getDirectInterlocutorSocketIds } from "./chat.helpers";
+import type { ChatMessagePayload, SendMessageCallback } from "./chat.types";
 
 export function registerChatHandlers(namespace: Namespace, socket: Socket) {
   socket.emit(WELCOME_EVENTS.CHAT, "Hello from the Backend chat namespace");
@@ -35,8 +37,9 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
   }
 
   socket.on(
-    CHAT_EVENTS.MESSAGE,
-    ({ content, chatId }: { content: string; chatId: string }) => {
+    CHAT_EVENTS.SEND_MESSAGE,
+    (payload: ChatMessagePayload, callback: SendMessageCallback) => {
+      const { chatId, content, tempId } = payload;
       console.log(`Socket ${socket.id} has sent message to ${chatId} room`);
 
       const foundSender = db.users.find((userDb) => userDb.id === user.id);
@@ -49,13 +52,28 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
           ? `${foundSender.firstName} ${foundSender.lastName}`
           : null,
         content,
+        status: MessageStatusEnum.SENT,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
       db.messages.push(message);
 
-      namespace.in(chatId).emit(CHAT_EVENTS.MESSAGE, message);
+      if (!user.socketId) {
+        callback({ ok: false, tempId, error: "User socket id is not set" });
+        return;
+      }
+
+      callback({ ok: true, tempId, message });
+
+      // TODO: choose between .except() and .broadcast()
+      namespace
+        .in(chatId)
+        .except(user.socketId)
+        .emit(CHAT_EVENTS.NEW_MESSAGE, message);
+
+      // TODO: choose between .except() and .broadcast()
+      // socket.broadcast.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, message);
     },
   );
 

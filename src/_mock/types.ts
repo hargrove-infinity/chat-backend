@@ -1,8 +1,10 @@
 export type User = {
   id: string;
-  // Id of the connected socket
-  // Used for exchanging messages
-  // By default null
+  /**
+   * Socket ID when user is connected
+   * Used for real-time message delivery and online status
+   * Null when user is disconnected
+   */
   socketId: string | null;
   email: string;
   password: string;
@@ -17,12 +19,38 @@ export type User = {
 export type Chat = {
   id: string;
   type: "direct" | "group";
-  // Name only for group type Chat
+  /**
+   * Group chats: stored name
+   * Direct chats: null (resolved on BE to participant's name in ChatDTO)
+   */
   name: string | null;
-  // (User ids)
+  // Array of user IDs participating in the chat
   participants: string[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type ChatDTO = Chat & {
+  /**
+   * Resolved name for display
+   * Group chats: stored name from Chat
+   * Direct chats: participant's full name (resolved on BE)
+   * Can be null if participant not found
+   */
+  name: string | null;
+
+  /**
+   * Content of the last message in the chat
+   * Null if no messages exist
+   */
+  lastMessage: string | null;
+
+  /**
+   * Online status of the other participant
+   * Only relevant for direct chats
+   * Always false for group chats
+   */
+  isOnline: boolean;
 };
 
 export type Message = {
@@ -32,6 +60,17 @@ export type Message = {
   content: string;
   createdAt: string;
   updatedAt: string;
+};
+
+export enum MessageStatusEnum {
+  SENDING = "SENDING",
+  SENT = "SENT",
+  ERROR = "ERROR",
+}
+
+export type MessageDTO = Message & {
+  senderName: string | null;
+  status: MessageStatusEnum;
 };
 
 export type DB = {

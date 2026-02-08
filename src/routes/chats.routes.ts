@@ -1,5 +1,10 @@
 import { Router } from "express";
 import { db } from "../_mock/db";
+import {
+  type ChatDTO,
+  type MessageDTO,
+  MessageStatusEnum,
+} from "../_mock/types";
 import { paths } from "../common/paths";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
@@ -17,7 +22,7 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
     return;
   }
 
-  const chats = db.chats
+  const chats: ChatDTO[] = db.chats
     .filter((chat) => chat.participants.includes(user.id))
     .map((chat) => {
       const lastMessage = db.messages
@@ -29,19 +34,21 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
           (u) => u.id !== user.id && chat.participants.includes(u.id),
         );
 
-        if (!interlocutor) {
-          throw new Error("interlocutor is not found");
-        }
-
         return {
           ...chat,
-          name: `${interlocutor.firstName} ${interlocutor.lastName}`,
-          lastMessage: lastMessage?.content,
-          isOnline: !!interlocutor.socketId,
+          name: interlocutor
+            ? `${interlocutor.firstName} ${interlocutor.lastName}`
+            : null,
+          lastMessage: lastMessage?.content ?? null,
+          isOnline: !!interlocutor?.socketId,
         };
       }
 
-      return { ...chat, lastMessage: lastMessage?.content };
+      return {
+        ...chat,
+        lastMessage: lastMessage?.content ?? null,
+        isOnline: false,
+      };
     });
 
   res.send({ payload: chats });
@@ -59,13 +66,14 @@ chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
     return;
   }
 
-  const messages = db.messages
+  const messages: MessageDTO[] = db.messages
     .filter((msg) => msg.chatId === chatId)
     .map((msg) => {
       const foundSender = db.users.find((user) => user.id === msg.senderId);
 
       return {
         ...msg,
+        status: MessageStatusEnum.SENT,
         senderName: foundSender
           ? `${foundSender.firstName} ${foundSender.lastName}`
           : null,
