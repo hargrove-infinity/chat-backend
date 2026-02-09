@@ -17,5 +17,8 @@ export const ADMIN_EVENTS = {
 } as const;
 
 export const CHAT_EVENTS = {
-  MESSAGE: "chat:message",
+  // Client → Server: User sends a message
+  SEND_MESSAGE: "chat:send_message",
+  // Server → Client(s): Broadcast new message to chat participants
+  NEW_MESSAGE: "chat:new_message",
 } as const;
