@@ -66,14 +66,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
 
       callback({ ok: true, tempId, message });
 
-      // TODO: choose between .except() and .broadcast()
-      namespace
-        .in(chatId)
-        .except(user.socketId)
-        .emit(CHAT_EVENTS.NEW_MESSAGE, message);
-
-      // TODO: choose between .except() and .broadcast()
-      // socket.broadcast.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, message);
+      socket.broadcast.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, message);
     },
   );
 
