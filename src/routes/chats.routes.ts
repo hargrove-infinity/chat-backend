@@ -29,6 +29,20 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
         .filter((msg) => msg.chatId === chat.id)
         .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))[0];
 
+      const extendedParticipants = chat.participants.map((participantId) => {
+        const foundUser = db.users.find((u) => u.id === participantId);
+
+        if (!foundUser) {
+          throw new Error("User is not found");
+        }
+
+        return {
+          id: participantId,
+          name: `${foundUser.firstName} ${foundUser.lastName}`,
+          isTyping: false,
+        };
+      });
+
       if (chat.type === "direct" && !chat.name) {
         const interlocutor = db.users.find(
           (u) => u.id !== user.id && chat.participants.includes(u.id),
@@ -41,6 +55,7 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
             : null,
           lastMessage: lastMessage?.content ?? null,
           isOnline: !!interlocutor?.socketId,
+          participants: extendedParticipants,
         };
       }
 
@@ -48,6 +63,7 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
         ...chat,
         lastMessage: lastMessage?.content ?? null,
         isOnline: false,
+        participants: extendedParticipants,
       };
     });
 

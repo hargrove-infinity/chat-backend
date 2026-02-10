@@ -30,7 +30,9 @@ export type Chat = {
   updatedAt: string;
 };
 
-export type ChatDTO = Chat & {
+type Participant = { id: string; name: string; isTyping: boolean };
+
+export type ChatDTO = Omit<Chat, "participants"> & {
   /**
    * Resolved name for display
    * Group chats: stored name from Chat
@@ -51,6 +53,16 @@ export type ChatDTO = Chat & {
    * Always false for group chats
    */
   isOnline: boolean;
+
+  /**
+   * Enhanced participant information with enriched details
+   * Transforms Chat's participant IDs (string[]) into full participant objects
+   * Each participant includes:
+   * - id: User's unique identifier
+   * - name: User's full name (firstName + lastName), null if user not found
+   * - isTyping: Real-time typing indicator status for this chat
+   */
+  participants: Participant[];
 };
 
 export type Message = {
