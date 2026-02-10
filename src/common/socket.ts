@@ -31,9 +31,9 @@ export const CHAT_EVENTS = {
    */
 
   // Client → Server: User starts typing
-  START_TYPING: "chat:start_typing",
+  START_TYPING_DISPATCH: "chat:start_typing_dispatch",
   // Client → Server: User stops typing
-  STOP_TYPING: "chat:stop_typing",
+  STOP_TYPING_DISPATCH: "chat:stop_typing_dispatch",
 
   // Server → Client(s): Broadcast start typing to chat participants
   START_TYPING_BROADCAST: "chat:start_typing_broadcast",

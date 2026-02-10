@@ -70,21 +70,27 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     },
   );
 
-  socket.on(CHAT_EVENTS.START_TYPING, ({ chatId }: { chatId: string }) => {
-    console.log(`Start typing in ${chatId}`);
+  socket.on(
+    CHAT_EVENTS.START_TYPING_DISPATCH,
+    ({ chatId }: { chatId: string }) => {
+      console.log(`Start typing in ${chatId}`);
 
-    socket.broadcast
-      .to(chatId)
-      .emit(CHAT_EVENTS.START_TYPING_BROADCAST, { chatId, userId: user.id });
-  });
+      socket.broadcast
+        .to(chatId)
+        .emit(CHAT_EVENTS.START_TYPING_BROADCAST, { chatId, userId: user.id });
+    },
+  );
 
-  socket.on(CHAT_EVENTS.STOP_TYPING, ({ chatId }: { chatId: string }) => {
-    console.log(`Stop typing in ${chatId}`);
+  socket.on(
+    CHAT_EVENTS.STOP_TYPING_DISPATCH,
+    ({ chatId }: { chatId: string }) => {
+      console.log(`Stop typing in ${chatId}`);
 
-    socket.broadcast
-      .to(chatId)
-      .emit(CHAT_EVENTS.STOP_TYPING_BROADCAST, { chatId, userId: user.id });
-  });
+      socket.broadcast
+        .to(chatId)
+        .emit(CHAT_EVENTS.STOP_TYPING_BROADCAST, { chatId, userId: user.id });
+    },
+  );
 
   socket.on("disconnecting", (reason) => {
     console.log("Reason of a disconnecting chat:", reason);
