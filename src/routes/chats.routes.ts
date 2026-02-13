@@ -74,13 +74,8 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
  * Returns all messages for a specific chat
  */
 chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
-  const { params, user } = req;
+  const { params } = req;
   const { chatId } = params;
-
-  if (!user) {
-    res.status(400).send({ errors: ["User is not attached"] });
-    return;
-  }
 
   const messages: MessageDTO[] = db.messages
     .filter((msg) => msg.chatId === chatId)

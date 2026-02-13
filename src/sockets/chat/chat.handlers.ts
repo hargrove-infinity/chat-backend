@@ -1,18 +1,12 @@
-import type { Namespace, Socket } from "socket.io";
+import type { Socket } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../../_mock/db";
 import { MessageStatusEnum } from "../../_mock/types";
-import {
-  CHAT_EVENTS,
-  CONNECTION_EVENTS,
-  WELCOME_EVENTS,
-} from "../../common/socket";
+import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
 import { getDirectInterlocutorSocketIds } from "./chat.helpers";
 import type { ChatMessagePayload, SendMessageCallback } from "./chat.types";
 
-export function registerChatHandlers(namespace: Namespace, socket: Socket) {
-  socket.emit(WELCOME_EVENTS.CHAT, "Hello from the Backend chat namespace");
-
+export function registerChatHandlers(socket: Socket) {
   const user = db.users.find((user) => user.socketId === socket.id);
 
   if (!user) {
@@ -33,7 +27,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
   });
 
   if (interlocutorSocketIds.length) {
-    namespace.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
+    socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
   }
 
   socket.on(
@@ -66,7 +60,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
 
       callback({ ok: true, tempId, message });
 
-      socket.broadcast.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, message);
+      socket.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, message);
     },
   );
 
@@ -75,7 +69,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     ({ chatId }: { chatId: string }) => {
       console.log(`Start typing in ${chatId}`);
 
-      socket.broadcast
+      socket
         .to(chatId)
         .emit(CHAT_EVENTS.START_TYPING_BROADCAST, { chatId, userId: user.id });
     },
@@ -86,7 +80,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     ({ chatId }: { chatId: string }) => {
       console.log(`Stop typing in ${chatId}`);
 
-      socket.broadcast
+      socket
         .to(chatId)
         .emit(CHAT_EVENTS.STOP_TYPING_BROADCAST, { chatId, userId: user.id });
     },
@@ -106,9 +100,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     });
 
     if (interlocutorSocketIds.length) {
-      namespace
-        .to(interlocutorSocketIds)
-        .emit(CONNECTION_EVENTS.OFFLINE, user.id);
+      socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.OFFLINE, user.id);
     }
   });
 

@@ -9,9 +9,7 @@ export function initChatNamespace(io: Server) {
 
   namespace.use(chatMiddleware);
 
-  namespace.on("connection", (socket) =>
-    registerChatHandlers(namespace, socket),
-  );
+  namespace.on("connection", (socket) => registerChatHandlers(socket));
 
   return namespace;
 }
