@@ -2,17 +2,11 @@ import type { Namespace, Socket } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../../_mock/db";
 import { MessageStatusEnum } from "../../_mock/types";
-import {
-  CHAT_EVENTS,
-  CONNECTION_EVENTS,
-  WELCOME_EVENTS,
-} from "../../common/socket";
+import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
 import { getDirectInterlocutorSocketIds } from "./chat.helpers";
 import type { ChatMessagePayload, SendMessageCallback } from "./chat.types";
 
 export function registerChatHandlers(namespace: Namespace, socket: Socket) {
-  socket.emit(WELCOME_EVENTS.CHAT, "Hello from the Backend chat namespace");
-
   const user = db.users.find((user) => user.socketId === socket.id);
 
   if (!user) {

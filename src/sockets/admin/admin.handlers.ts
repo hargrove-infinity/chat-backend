@@ -1,9 +1,7 @@
 import type { Socket } from "socket.io";
-import { CONNECTION_EVENTS, WELCOME_EVENTS } from "../../common/socket";
+import { CONNECTION_EVENTS } from "../../common/socket";
 
 export function registerAdminHandlers(socket: Socket) {
-  socket.emit(WELCOME_EVENTS.ADMIN, "Hello from the Backend admin namespace");
-
   socket.on(CONNECTION_EVENTS.ADMIN, (msg) => {
     console.log("Admin message:", msg);
   });
