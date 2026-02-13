@@ -66,9 +66,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
 
       callback({ ok: true, tempId, message });
 
-      // TODO: I think I can remove .broadcast here
-      // TODO: because my purpose is to send everyone in room except sender
-      socket.broadcast.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, message);
+      socket.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, message);
     },
   );
 
