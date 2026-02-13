@@ -33,7 +33,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
   });
 
   if (interlocutorSocketIds.length) {
-    namespace.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
+    socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
   }
 
   socket.on(
@@ -66,6 +66,8 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
 
       callback({ ok: true, tempId, message });
 
+      // TODO: I think I can remove .broadcast here
+      // TODO: because my purpose is to send everyone in room except sender
       socket.broadcast.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, message);
     },
   );
@@ -75,6 +77,8 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     ({ chatId }: { chatId: string }) => {
       console.log(`Start typing in ${chatId}`);
 
+      // TODO: I think I can remove .broadcast here
+      // TODO: because my purpose is to send everyone in room except sender
       socket.broadcast
         .to(chatId)
         .emit(CHAT_EVENTS.START_TYPING_BROADCAST, { chatId, userId: user.id });
@@ -86,6 +90,8 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     ({ chatId }: { chatId: string }) => {
       console.log(`Stop typing in ${chatId}`);
 
+      // TODO: I think I can remove .broadcast here
+      // TODO: because my purpose is to send everyone in room except sender
       socket.broadcast
         .to(chatId)
         .emit(CHAT_EVENTS.STOP_TYPING_BROADCAST, { chatId, userId: user.id });
