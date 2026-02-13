@@ -8,9 +8,7 @@ export function initAdminNamespace(io: Server) {
 
   namespace.use(adminMiddleware);
 
-  namespace.on("connection", (socket) => {
-    registerAdminHandlers(socket);
-  });
+  namespace.on("connection", (socket) => registerAdminHandlers(socket));
 
   return namespace;
 }
