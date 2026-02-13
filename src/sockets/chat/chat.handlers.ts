@@ -75,9 +75,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     ({ chatId }: { chatId: string }) => {
       console.log(`Start typing in ${chatId}`);
 
-      // TODO: I think I can remove .broadcast here
-      // TODO: because my purpose is to send everyone in room except sender
-      socket.broadcast
+      socket
         .to(chatId)
         .emit(CHAT_EVENTS.START_TYPING_BROADCAST, { chatId, userId: user.id });
     },
@@ -88,9 +86,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     ({ chatId }: { chatId: string }) => {
       console.log(`Stop typing in ${chatId}`);
 
-      // TODO: I think I can remove .broadcast here
-      // TODO: because my purpose is to send everyone in room except sender
-      socket.broadcast
+      socket
         .to(chatId)
         .emit(CHAT_EVENTS.STOP_TYPING_BROADCAST, { chatId, userId: user.id });
     },
