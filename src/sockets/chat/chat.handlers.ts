@@ -106,9 +106,7 @@ export function registerChatHandlers(namespace: Namespace, socket: Socket) {
     });
 
     if (interlocutorSocketIds.length) {
-      namespace
-        .to(interlocutorSocketIds)
-        .emit(CONNECTION_EVENTS.OFFLINE, user.id);
+      socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.OFFLINE, user.id);
     }
   });
 
