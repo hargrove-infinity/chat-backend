@@ -6,7 +6,7 @@ import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
  * Events emitted from server to client in the chat namespace
  * These events are broadcast to clients to notify them of changes
  */
-export type ServerToClientEventsChatsNamespace = {
+type ServerToClientEventsChatsNamespace = {
   [CONNECTION_EVENTS.ONLINE]: (userId: string) => void;
   [CHAT_EVENTS.NEW_MESSAGE]: (message: MessageDTO) => void;
   [CHAT_EVENTS.START_TYPING_BROADCAST]: (
@@ -22,7 +22,7 @@ export type ServerToClientEventsChatsNamespace = {
  * Events emitted from client to server in the chat namespace
  * These events are triggered by client actions and handled on the server
  */
-export type ClientToServerEventsChatsNamespace = {
+type ClientToServerEventsChatsNamespace = {
   [CHAT_EVENTS.SEND_MESSAGE]: (
     payload: ChatMessagePayload,
     callback: SendMessageCallback,
@@ -78,7 +78,7 @@ export type ChatMessagePayload = {
  * Acknowledgment response from server after sending a message
  * Discriminated union based on success/failure
  */
-export type SendMessageAck =
+type SendMessageAck =
   | {
       ok: true;
       tempId: string;

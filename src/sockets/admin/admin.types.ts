@@ -5,7 +5,7 @@ import { CONNECTION_EVENTS } from "../../common/socket";
  * Events emitted from client to server in the admin namespace
  * These events are triggered by admin clients and handled on the server
  */
-export type ClientToServerEventsAdmin = {
+type ClientToServerEventsAdmin = {
   [CONNECTION_EVENTS.ADMIN]: (msg: string) => void;
 };
 
