@@ -199,6 +199,14 @@ export const mockedMessages: Message[] = [
     createdAt: "2024-01-08T10:50:00Z",
     updatedAt: "2024-01-08T10:50:00Z",
   },
+  {
+    id: "51c0f11e-4dc5-4596-aafa-76f48fc5c2c3",
+    chatId: "3425c4ce-b2c6-441d-b1bb-ea95d05bc535",
+    senderId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
+    content: "How is it going on?",
+    createdAt: "2024-01-09T08:30:00Z",
+    updatedAt: "2024-01-09T08:30:00Z",
+  },
 
   // Plans & Hangouts group
   {

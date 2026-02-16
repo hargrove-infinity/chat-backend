@@ -23,6 +23,7 @@ export const mockedChats: Chat[] = [
     createdAt: "2024-01-07T10:00:00Z",
     updatedAt: "2024-01-07T10:00:00Z",
   },
+  // James Walker ↔ Christopher Reynolds
   {
     id: "3425c4ce-b2c6-441d-b1bb-ea95d05bc535",
     type: "direct",

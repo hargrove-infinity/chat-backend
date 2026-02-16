@@ -89,4 +89,42 @@ export type DB = {
   users: User[];
   chats: Chat[];
   messages: Message[];
+  readEvents: ReadEvent[];
+};
+
+/**
+ * ReadEvent should be created in amount of N-participants in the current chat
+ */
+
+/**
+ * Bob sent message to Mike
+ * Bob read message (because he's sender), Mike didn't
+ * Mike didn't read message
+ * Mike read message
+ * Mike marked message as unread
+ * Mike accidentally read message
+ * Mike marked message as unread again
+ * Bob sent new message to Mike
+ * Bob read new message (because he's sender), Mike didn't
+ * Mike didn't read message yet
+ * Mike has 2 unread messages
+ */
+
+export type ReadEvent = {
+  id: string;
+  userId: string;
+  /**
+   * Do I really need chatId because
+   * I have messageId
+   * and by messageId I can find chatId
+   */
+  chatId: string;
+  messageId: string;
+  /**
+   * Since status field has only two options
+   * maybe it's better to replace if with boolean
+   * like isRead: boolean
+   */
+  status: "read" | "unread";
+  timestamp: string;
 };
