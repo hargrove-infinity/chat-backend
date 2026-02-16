@@ -6,6 +6,7 @@
     "build": "tsc",
     "lint": "biome check src",
     "lint:watch": "npx onchange \"src/**/*.ts\" -- biome check src",
+    "lint:write": "npx @biomejs/biome check --write",
     "dev": "npm run --silent build && node dist/server.js",
     "dev:watch": "npx onchange -i -k \"**/*.ts\" -e \"dist/**\" -- npm run --silent dev",
     "dev:all": "npx concurrently     --names \"lint,server\"     --prefix-colors \"magenta,cyan\"     --prefix \"[{name}]\"     \"npm run --silent lint:watch\"     \"npm run --silent dev:watch\""
