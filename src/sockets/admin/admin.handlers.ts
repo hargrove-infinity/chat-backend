@@ -1,7 +1,7 @@
-import type { Socket } from "socket.io";
 import { CONNECTION_EVENTS } from "../../common/socket";
+import type { AdminSocket } from "./admin.types";
 
-export function registerAdminHandlers(socket: Socket) {
+export function registerAdminHandlers(socket: AdminSocket) {
   socket.on(CONNECTION_EVENTS.ADMIN, (msg) => {
     console.log("Admin message:", msg);
   });
