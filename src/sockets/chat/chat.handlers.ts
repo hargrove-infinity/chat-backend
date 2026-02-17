@@ -6,6 +6,9 @@ import { getDirectInterlocutorSocketIds } from "./chat.helpers";
 import type { ChatSocket } from "./chat.types";
 
 export function registerChatHandlers(socket: ChatSocket) {
+  console.log("SERVER socket.id:", socket.id);
+  console.log("SERVER recovered:", socket.recovered);
+
   const user = db.users.find((user) => user.socketId === socket.id);
 
   if (!user) {

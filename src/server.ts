@@ -13,6 +13,18 @@ const io = new Server(server, {
     origin: envVariables.frontendUrl,
     methods: ["GET", "POST"],
   },
+  // transports: ["websocket"],
+  pingInterval: 5000,
+  pingTimeout: 5000,
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 120000,
+    skipMiddlewares: false,
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log('io.on("connection").id', socket.id);
+  console.log('io.on("connection").recovered', socket.recovered);
 });
 
 initSockets(io);
