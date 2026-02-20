@@ -8,6 +8,8 @@ import type { ChatSocket } from "./chat.types";
 export function registerChatHandlers(socket: ChatSocket) {
   console.log("SERVER socket.id:", socket.id);
   console.log("SERVER recovered:", socket.recovered);
+  socket.emit("test" as any, { hello: "world" });
+  console.log("Emitted test event");
 
   const user = db.users.find((user) => user.socketId === socket.id);
 
