@@ -6,8 +6,8 @@ import { getDirectInterlocutorSocketIds } from "./chat.helpers";
 import type { ChatSocket } from "./chat.types";
 
 export function registerChatHandlers(socket: ChatSocket) {
-  console.log("SERVER socket.id:", socket.id);
-  console.log("SERVER recovered:", socket.recovered);
+  console.log("Chat Handlers socket.id:", socket.id);
+  console.log("Chat Handlers socket.recovered:", socket.recovered);
   socket.emit("test" as any, { hello: "world" });
   console.log("Emitted test event");
 

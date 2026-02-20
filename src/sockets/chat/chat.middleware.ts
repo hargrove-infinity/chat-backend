@@ -19,6 +19,7 @@ export function chatMiddleware(
 
   const user = db.users.find((u) => u.id === decoded.id);
   if (user) user.socketId = socket.id;
-  console.log("Middleware run. recovered:", socket.recovered);
+  console.log("Chat Middleware socket.id:", socket.id);
+  console.log("Chat Middleware socket.recovered:", socket.recovered);
   next();
 }
