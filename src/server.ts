@@ -24,5 +24,6 @@ const io = new Server(server, {
 initSockets(io);
 
 server.listen(envVariables.port, () => {
+  // biome-ignore lint/suspicious/noConsole: needed for debugging
   console.log("Server is running");
 });

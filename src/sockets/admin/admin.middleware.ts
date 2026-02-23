@@ -19,6 +19,5 @@ export function adminMiddleware(
     return next(new Error("Missing admin token"));
   }
 
-  console.log("Admin with token has been accepted");
   next();
 }
