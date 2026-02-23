@@ -6,6 +6,13 @@ import { getDirectInterlocutorSocketIds } from "./chat.helpers";
 import type { ChatSocket } from "./chat.types";
 
 export function registerChatHandlers(socket: ChatSocket) {
+  /**
+   * Emit immediately to initialize the offset on the client side.
+   * Required for connection state recovery.
+   * @see CONNECTION_EVENTS.CONNECTED
+   */
+  socket.emit(CONNECTION_EVENTS.CONNECTED);
+
   const user = db.users.find((user) => user.socketId === socket.id);
 
   if (!user) {

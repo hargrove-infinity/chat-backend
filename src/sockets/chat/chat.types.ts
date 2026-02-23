@@ -7,6 +7,7 @@ import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
  * These events are broadcast to clients to notify them of changes
  */
 type ServerToClientEventsChatsNamespace = {
+  [CONNECTION_EVENTS.CONNECTED]: () => void;
   [CONNECTION_EVENTS.ONLINE]: (userId: string) => void;
   [CHAT_EVENTS.NEW_MESSAGE]: (message: MessageDTO) => void;
   [CHAT_EVENTS.START_TYPING_BROADCAST]: (
