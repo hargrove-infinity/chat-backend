@@ -13,10 +13,17 @@ const io = new Server(server, {
     origin: envVariables.frontendUrl,
     methods: ["GET", "POST"],
   },
+  pingInterval: 5000,
+  pingTimeout: 5000,
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 120000,
+    skipMiddlewares: false,
+  },
 });
 
 initSockets(io);
 
 server.listen(envVariables.port, () => {
+  // biome-ignore lint/suspicious/noConsole: needed for debugging
   console.log("Server is running");
 });

@@ -6,6 +6,13 @@ import { getDirectInterlocutorSocketIds } from "./chat.helpers";
 import type { ChatSocket } from "./chat.types";
 
 export function registerChatHandlers(socket: ChatSocket) {
+  /**
+   * Emit immediately to initialize the offset on the client side.
+   * Required for connection state recovery.
+   * @see CONNECTION_EVENTS.CONNECTED
+   */
+  socket.emit(CONNECTION_EVENTS.CONNECTED);
+
   const user = db.users.find((user) => user.socketId === socket.id);
 
   if (!user) {
@@ -31,7 +38,6 @@ export function registerChatHandlers(socket: ChatSocket) {
 
   socket.on(CHAT_EVENTS.SEND_MESSAGE, (payload, callback) => {
     const { chatId, content, tempId } = payload;
-    console.log(`Socket ${socket.id} has sent message to ${chatId} room`);
 
     const foundSender = db.users.find((userDb) => userDb.id === user.id);
 
@@ -61,27 +67,18 @@ export function registerChatHandlers(socket: ChatSocket) {
   });
 
   socket.on(CHAT_EVENTS.START_TYPING_DISPATCH, ({ chatId }) => {
-    console.log(`Start typing in ${chatId}`);
-
     socket
       .to(chatId)
       .emit(CHAT_EVENTS.START_TYPING_BROADCAST, { chatId, userId: user.id });
   });
 
   socket.on(CHAT_EVENTS.STOP_TYPING_DISPATCH, ({ chatId }) => {
-    console.log(`Stop typing in ${chatId}`);
-
     socket
       .to(chatId)
       .emit(CHAT_EVENTS.STOP_TYPING_BROADCAST, { chatId, userId: user.id });
   });
 
-  socket.on("disconnecting", (reason) => {
-    console.log("Reason of a disconnecting chat:", reason);
-  });
-
-  socket.on("disconnect", (reason) => {
-    console.log("Reason of a disconnect chat:", reason);
+  socket.on("disconnect", () => {
     user.socketId = null;
 
     const interlocutorSocketIds = getDirectInterlocutorSocketIds({
@@ -93,16 +90,4 @@ export function registerChatHandlers(socket: ChatSocket) {
       socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.OFFLINE, user.id);
     }
   });
-
-  // TODO: add disconnection later
-  // Disconnect for socket
-  // setTimeout(() => {
-  //   // true closes the underlying connection
-  //   socket.disconnect(true);
-  // }, 2000);
-
-  // TODO: apply this later
-  // if (namespace.sockets.size > 1) {
-  //   namespace.disconnectSockets();
-  // }
 }

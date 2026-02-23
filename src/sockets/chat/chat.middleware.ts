@@ -13,12 +13,17 @@ export function chatMiddleware(
 ) {
   const { token } = socket.handshake.auth;
 
-  if (!token) return next(new Error("Missing token"));
+  if (!token) {
+    return next(new Error("Missing token"));
+  }
 
   const decoded: Omit<User, "password"> = JSON.parse(atob(token));
 
   const user = db.users.find((u) => u.id === decoded.id);
-  if (user) user.socketId = socket.id;
+
+  if (user) {
+    user.socketId = socket.id;
+  }
 
   next();
 }
