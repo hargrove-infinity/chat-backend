@@ -78,15 +78,7 @@ export function registerChatHandlers(socket: ChatSocket) {
       .emit(CHAT_EVENTS.STOP_TYPING_BROADCAST, { chatId, userId: user.id });
   });
 
-  socket.on("disconnecting", (reason) => {
-    // biome-ignore lint/suspicious/noConsole: needed for debugging
-    console.log("Chat namespace disconnecting:", reason);
-  });
-
-  socket.on("disconnect", (reason) => {
-    // biome-ignore lint/suspicious/noConsole: needed for debugging
-    console.log("Chat namespace disconnect:", reason);
-
+  socket.on("disconnect", () => {
     user.socketId = null;
 
     const interlocutorSocketIds = getDirectInterlocutorSocketIds({

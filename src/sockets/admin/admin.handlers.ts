@@ -7,11 +7,6 @@ export function registerAdminHandlers(socket: AdminSocket) {
     console.log("Admin namespace connection:admin message:", msg);
   });
 
-  socket.on("disconnecting", (reason) => {
-    // biome-ignore lint/suspicious/noConsole: needed for debugging
-    console.log("Admin namespace disconnecting:", reason);
-  });
-
   socket.on("disconnect", (reason) => {
     // biome-ignore lint/suspicious/noConsole: needed for debugging
     console.log("Admin namespace disconnected:", reason);
