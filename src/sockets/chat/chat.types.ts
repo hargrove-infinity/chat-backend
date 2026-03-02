@@ -28,8 +28,8 @@ type ClientToServerEventsChatsNamespace = {
     payload: ChatMessagePayload,
     callback: SendMessageCallback,
   ) => void;
-  [CHAT_EVENTS.START_TYPING_DISPATCH]: (payload: TypingDispatchPayload) => void;
-  [CHAT_EVENTS.STOP_TYPING_DISPATCH]: (payload: TypingDispatchPayload) => void;
+  [CHAT_EVENTS.START_TYPING_DISPATCH]: (chatId: string) => void;
+  [CHAT_EVENTS.STOP_TYPING_DISPATCH]: (chatId: string) => void;
 };
 
 /**
@@ -55,12 +55,6 @@ export type ChatNamespace = Namespace<
  * Contains both the chat and the user who is typing
  */
 type TypingBroadcastPayload = { chatId: string; userId: string };
-
-/**
- * Payload dispatched from client to indicate typing status
- * Only includes chatId since userId is inferred from the socket connection
- */
-type TypingDispatchPayload = Pick<TypingBroadcastPayload, "chatId">;
 
 /**
  * Payload sent from client when sending a message

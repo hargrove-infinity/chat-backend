@@ -1,9 +1,11 @@
-import { v4 as uuidv4 } from "uuid";
 import { db } from "../../_mock/db";
-import { type MessageDTO, MessageStatusEnum } from "../../_mock/types";
 import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
-import { getDirectInterlocutorSocketIds } from "./chat.helpers";
+import { getDirectInterlocutorSocketIds, handleEvent } from "./chat.helpers";
 import type { ChatSocket } from "./chat.types";
+import { disconnectHandler } from "./handlers/disconnectHandler";
+import { sendMessageHandler } from "./handlers/sendMessageHandler";
+import { startTypingDispatchHandler } from "./handlers/startTypingDispatchHandler";
+import { stopTypingDispatchHandler } from "./handlers/stopTypingDispatchHandler";
 
 export function registerChatHandlers(socket: ChatSocket) {
   /**
@@ -36,58 +38,32 @@ export function registerChatHandlers(socket: ChatSocket) {
     socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
   }
 
-  socket.on(CHAT_EVENTS.SEND_MESSAGE, (payload, callback) => {
+  socket.on(CHAT_EVENTS.SEND_MESSAGE, (payload, acknowledge) => {
     const { chatId, content, tempId } = payload;
 
-    const foundSender = db.users.find((userDb) => userDb.id === user.id);
-
-    const message: MessageDTO = {
-      id: uuidv4(),
-      chatId,
-      senderId: user.id,
-      senderName: foundSender
-        ? `${foundSender.firstName} ${foundSender.lastName}`
-        : null,
-      content,
-      status: MessageStatusEnum.SENT,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    db.messages.push(message);
-
-    if (!user.socketId) {
-      callback({ ok: false, tempId, error: "User socket id is not set" });
-      return;
-    }
-
-    callback({ ok: true, tempId, message });
-
-    socket.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, message);
-  });
-
-  socket.on(CHAT_EVENTS.START_TYPING_DISPATCH, ({ chatId }) => {
-    socket
-      .to(chatId)
-      .emit(CHAT_EVENTS.START_TYPING_BROADCAST, { chatId, userId: user.id });
-  });
-
-  socket.on(CHAT_EVENTS.STOP_TYPING_DISPATCH, ({ chatId }) => {
-    socket
-      .to(chatId)
-      .emit(CHAT_EVENTS.STOP_TYPING_BROADCAST, { chatId, userId: user.id });
-  });
-
-  socket.on("disconnect", () => {
-    user.socketId = null;
-
-    const interlocutorSocketIds = getDirectInterlocutorSocketIds({
-      db,
-      userId: user.id,
+    handleEvent({
+      ackData: { tempId },
+      acknowledge,
+      operation: sendMessageHandler({
+        user,
+        chatId,
+        content,
+        tempId,
+        socket,
+        acknowledge,
+      }),
     });
-
-    if (interlocutorSocketIds.length) {
-      socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.OFFLINE, user.id);
-    }
   });
+
+  socket.on(
+    CHAT_EVENTS.START_TYPING_DISPATCH,
+    startTypingDispatchHandler({ userId: user.id, socket }),
+  );
+
+  socket.on(
+    CHAT_EVENTS.STOP_TYPING_DISPATCH,
+    stopTypingDispatchHandler({ userId: user.id, socket }),
+  );
+
+  socket.on("disconnect", disconnectHandler({ db, user, socket }));
 }
