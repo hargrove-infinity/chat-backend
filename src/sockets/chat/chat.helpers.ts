@@ -52,15 +52,13 @@ export function getDirectInterlocutorSocketIds(args: {
 
 type ErrorAck = { ok: false; error: string };
 
-type HandleEventArgs<AckData, Ack extends ErrorAck & AckData> = {
+type HandleEventArgs<AckData> = {
   operation: () => void;
-  acknowledge: (ack: Ack) => void;
+  acknowledge: (ack: ErrorAck & AckData) => void;
   ackData: AckData;
 };
 
-export function handleEvent<AckData, Ack extends ErrorAck & AckData>(
-  args: HandleEventArgs<AckData, Ack>,
-) {
+export function handleEvent<AckData>(args: HandleEventArgs<AckData>) {
   const { ackData, acknowledge, operation } = args;
 
   try {
@@ -70,7 +68,7 @@ export function handleEvent<AckData, Ack extends ErrorAck & AckData>(
       ...ackData,
       ok: false,
       error: error instanceof Error ? error.message : "Unknown error",
-    } as Ack;
+    } as const;
 
     acknowledge(ack);
   }
