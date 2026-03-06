@@ -85,8 +85,19 @@ export type MessageDTO = Message & {
   status: MessageStatusEnum;
 };
 
+export type Log = {
+  id: string;
+  socketId: string | null;
+  userId: string | null;
+  event: string;
+  message: string | null;
+  name: string | null;
+  timestamp: string;
+};
+
 export type DB = {
   users: User[];
   chats: Chat[];
   messages: Message[];
+  logs: Log[];
 };
