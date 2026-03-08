@@ -15,6 +15,8 @@ export function createApp() {
    */
   app.use(cors());
   app.use(express.json());
+  // Parse plain text request bodies (used by sendBeacon on POST /metrics/logs which sends text/plain)
+  app.use(express.text({ type: "text/plain" }));
 
   /**
    * Register application routes:
