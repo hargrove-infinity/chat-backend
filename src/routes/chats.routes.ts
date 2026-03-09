@@ -71,7 +71,8 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
 });
 
 /**
- * Returns all messages for a specific chat
+ * Returns all messages for a specific chat,
+ * including resolved sender name and message status
  */
 chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
   const { params } = req;

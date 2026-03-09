@@ -2,10 +2,10 @@ import { db } from "../../_mock/db";
 import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
 import { getDirectInterlocutorSocketIds, handleEvent } from "./chat.helpers";
 import type { ChatSocket } from "./chat.types";
-import { disconnectHandler } from "./handlers/disconnectHandler";
-import { sendMessageHandler } from "./handlers/sendMessageHandler";
-import { startTypingDispatchHandler } from "./handlers/startTypingDispatchHandler";
-import { stopTypingDispatchHandler } from "./handlers/stopTypingDispatchHandler";
+import { disconnectHandler } from "./handlers/disconnect.handler";
+import { sendMessageHandler } from "./handlers/send-message.handler";
+import { startTypingDispatchHandler } from "./handlers/start-typing-dispatch.handler";
+import { stopTypingDispatchHandler } from "./handlers/stop-typing-dispatch.handler";
 
 export function registerChatHandlers(socket: ChatSocket) {
   /**
