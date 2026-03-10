@@ -92,6 +92,8 @@ export type Log = {
   event: string;
   message: string | null;
   name: string | null;
+  namespace: string | null;
+  source: string | null;
   timestamp: string;
 };
 
