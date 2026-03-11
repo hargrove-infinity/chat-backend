@@ -3,6 +3,7 @@ import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
 import { getDirectInterlocutorSocketIds, handleEvent } from "./chat.helpers";
 import type { ChatSocket } from "./chat.types";
 import { disconnectHandler } from "./handlers/disconnect.handler";
+import { errorHandler } from "./handlers/error.handler";
 import { sendMessageHandler } from "./handlers/send-message.handler";
 import { startTypingDispatchHandler } from "./handlers/start-typing-dispatch.handler";
 import { stopTypingDispatchHandler } from "./handlers/stop-typing-dispatch.handler";
@@ -37,6 +38,8 @@ export function registerChatHandlers(socket: ChatSocket) {
   if (interlocutorSocketIds.length) {
     socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
   }
+
+  socket.on("error", errorHandler({ db, user, socket }));
 
   socket.on(CHAT_EVENTS.SEND_MESSAGE, (payload, acknowledge) => {
     const { chatId, content, tempId } = payload;
