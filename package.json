@@ -7,7 +7,7 @@
     "lint": "biome check src",
     "lint:watch": "npx onchange \"src/**/*.ts\" -- biome check src",
     "lint:write": "npx @biomejs/biome check --write",
-    "dev": "biome check src && npm run --silent build && node dist/server.js",
+    "dev": "npm run --silent build && node dist/server.js",
     "dev:watch": "npx onchange -i -k \"**/*.ts\" -e \"dist/**\" -- npm run --silent dev",
     "dev:all": "npx concurrently   --names \"Lint,Server\"   --prefix \"[{time} {name}]\"   --timestamp-format \"yyyy-MM-dd HH:mm:ss.SSS\"   --prefix-colors \"magenta,cyan\"   \"npm run --silent lint:watch\"   \"npm run --silent dev:watch\""
   },
