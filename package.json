@@ -3,10 +3,8 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "lint:watch": "npx onchange \"src/**/*.ts\" -- biome check src",
-    "build:watch": "npx onchange -i -k \"**/*.ts\" -e \"dist/**\" -- npm run --silent build:run",
-    "build:run": "npx tsc && node dist/server.js",
-    "dev": "npx concurrently --names \"Lint,Server\"   --prefix \"[{time} {name}]\"   --timestamp-format \"yyyy-MM-dd HH:mm:ss.SSS\"   --prefix-colors \"magenta,cyan\"   \"npm run --silent lint:watch\"   \"npm run --silent build:watch\""
+    "build:run": "tsc && node dist/server.js",
+    "dev": "npx onchange -i -k \"src/**/*.ts\" -- sh -c \"biome check src && npm run --silent build:run\""
   },
   "keywords": [],
   "author": "",
