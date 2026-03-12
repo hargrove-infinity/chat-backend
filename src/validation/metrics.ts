@@ -6,6 +6,8 @@ const logSchema = z.object({
   event: z.string(),
   message: z.string().nullable(),
   name: z.string().nullable(),
+  namespace: z.string().nullable(),
+  source: z.string().nullable(),
   timestamp: z.iso.datetime(),
 });
 
