@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 
 import { createApp } from "./app";
 import { envVariables } from "./common/env.config";
+import { logger } from "./logger";
 import { initSockets } from "./sockets";
 
 const app = createApp();
@@ -24,6 +25,5 @@ const io = new Server(server, {
 initSockets(io);
 
 server.listen(envVariables.port, () => {
-  // biome-ignore lint/suspicious/noConsole: needed for debugging
-  console.log("Server is running");
+  logger.info("Server is running");
 });
