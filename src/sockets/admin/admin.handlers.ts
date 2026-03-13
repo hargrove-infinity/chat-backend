@@ -1,14 +1,10 @@
-import { CONNECTION_EVENTS } from "../../common/socket";
-import type { AdminSocket } from "./admin.types";
+import type { Socket } from "socket.io";
+import { logger } from "../../logger";
 
-export function registerAdminHandlers(socket: AdminSocket) {
-  socket.on(CONNECTION_EVENTS.ADMIN, (msg) => {
-    // biome-ignore lint/suspicious/noConsole: needed for debugging
-    console.log("Admin namespace connection:admin message:", msg);
-  });
+const log = logger.child({ context: "Admin namespace handlers" });
 
+export function registerAdminHandlers(socket: Socket) {
   socket.on("disconnect", (reason) => {
-    // biome-ignore lint/suspicious/noConsole: needed for debugging
-    console.log("Admin namespace disconnected:", reason);
+    log.info({ socketId: socket.id, reason }, "Admin disconnected");
   });
 }

@@ -2,7 +2,6 @@ export const CHAT_NAMESPACE = "/chat";
 export const ADMIN_NAMESPACE = "/admin";
 
 export const CONNECTION_EVENTS = {
-  ADMIN: "connection:admin",
   ONLINE: "connection:online",
   OFFLINE: "connection:offline",
   /**
