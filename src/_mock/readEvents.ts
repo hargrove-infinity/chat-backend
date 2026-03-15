@@ -96,4 +96,46 @@ export const mockedReadEvents: ReadEvent[] = [
     status: "unread",
     timestamp: "2024-01-10T10:50:00Z",
   },
+
+  /* James Walker ↔ Ryan Mitchell */
+
+  // Ryan Mitchell sent and read his message for James Walker
+  {
+    id: "abc8bbad-3cf7-4160-8fa5-dd716c80341b",
+    userId: "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b43",
+    chatId: "5a7892fe-3942-40c8-8b84-237b83cee480",
+    messageId: "b2c3d4e5-2222-4bbb-9ccc-000000000011",
+    status: "read",
+    timestamp: "2024-01-08T09:05:00Z",
+  },
+
+  // James Walker has just received message from  Ryan Mitchell  (UNREAD)
+  {
+    id: "0307ca6c-35b1-4f12-b4c4-411c1e789b3f",
+    userId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
+    chatId: "5a7892fe-3942-40c8-8b84-237b83cee480",
+    messageId: "b2c3d4e5-2222-4bbb-9ccc-000000000011",
+    status: "unread",
+    timestamp: "2024-01-08T09:05:00Z",
+  },
+
+  // Ryan Mitchell sent and read his new message for James Walker
+  {
+    id: "41298e00-6f62-42d0-b96f-42719619d467",
+    userId: "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b43",
+    chatId: "5a7892fe-3942-40c8-8b84-237b83cee480",
+    messageId: "b2c3d4e5-2222-4bbb-9ccc-000000000012",
+    status: "read",
+    timestamp: "2024-01-08T09:06:00Z",
+  },
+
+  // James Walker has just received new message from  Ryan Mitchell  (UNREAD)
+  {
+    id: "ac733930-3341-4e6c-a557-18673dca904a",
+    userId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
+    chatId: "5a7892fe-3942-40c8-8b84-237b83cee480",
+    messageId: "b2c3d4e5-2222-4bbb-9ccc-000000000012",
+    status: "unread",
+    timestamp: "2024-01-08T09:06:00Z",
+  },
 ];

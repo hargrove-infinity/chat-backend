@@ -125,6 +125,24 @@ export const mockedMessages: Message[] = [
     createdAt: "2024-01-07T11:10:00Z",
     updatedAt: "2024-01-07T11:10:00Z",
   },
+  {
+    id: "b2c3d4e5-2222-4bbb-9ccc-000000000011",
+    chatId: "5a7892fe-3942-40c8-8b84-237b83cee480",
+    senderId: "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b43",
+    content:
+      "Hey James, are you around? I have a quick question about the new feature spec.",
+    createdAt: "2024-01-08T09:05:00Z",
+    updatedAt: "2024-01-08T09:05:00Z",
+  },
+  {
+    id: "b2c3d4e5-2222-4bbb-9ccc-000000000012",
+    chatId: "5a7892fe-3942-40c8-8b84-237b83cee480",
+    senderId: "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b43",
+    content:
+      "Specifically about the onboarding flow — do we have final copy for it yet?",
+    createdAt: "2024-01-08T09:06:00Z",
+    updatedAt: "2024-01-08T09:06:00Z",
+  },
 
   // James Walker ↔ Christopher Reynolds
   {
