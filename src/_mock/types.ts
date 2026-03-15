@@ -152,5 +152,9 @@ export type ReadEvent = {
    * like isRead: boolean
    */
   status: "read" | "unread";
+  /**
+   * timestamp of ReadEvent (read status) for sender is equal to createdAt of message
+   * timestamp of ReadEvent (first unread status) for interlocutor(s) is equal to createdAt of message
+   */
   timestamp: string;
 };

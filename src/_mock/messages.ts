@@ -318,4 +318,13 @@ export const mockedMessages: Message[] = [
     createdAt: "2024-01-12T10:12:00Z",
     updatedAt: "2024-01-12T10:12:00Z",
   },
+  {
+    id: "3b7e1f9a-6d4c-4a2e-8f5b-1c9d2e4a7b05",
+    chatId: "9f3a7b2e-4d6c-4c8a-9c12-1e8f4a6d2b90",
+    senderId: "a4d1c2b3-1111-4eaa-9f01-123456789001", // Emma
+    content:
+      "Hey guys! Has anyone ever been to Portugal? Thinking of going this spring 🌍",
+    createdAt: "2024-01-23T09:30:00Z",
+    updatedAt: "2024-01-23T09:30:00Z",
+  },
 ];

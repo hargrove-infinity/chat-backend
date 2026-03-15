@@ -251,7 +251,7 @@ export const mockedReadEvents: ReadEvent[] = [
     timestamp: "2024-01-12T08:20:05Z",
   },
 
-  // Olivia Brown read message from  Daniel Harris (READ)
+  // Olivia Brown read message from Daniel Harris (READ)
   {
     id: "521327e1-3e12-47d2-9afd-679ee85ecf0d",
     userId: "b5e2d3c4-2222-4fbb-8e02-123456789002",
@@ -259,5 +259,57 @@ export const mockedReadEvents: ReadEvent[] = [
     messageId: "38fdc2c6-f006-4a0f-8b1b-a425c4774af8",
     status: "read",
     timestamp: "2024-01-12T08:20:10Z",
+  },
+
+  /* Travel group */
+
+  // Emma Wilson sent and read her message
+  {
+    id: "727850c5-0b85-4b78-a029-bee5b49e25f2",
+    userId: "a4d1c2b3-1111-4eaa-9f01-123456789001",
+    chatId: "9f3a7b2e-4d6c-4c8a-9c12-1e8f4a6d2b90",
+    messageId: "3b7e1f9a-6d4c-4a2e-8f5b-1c9d2e4a7b05",
+    status: "read",
+    timestamp: "2024-01-23T09:30:00Z",
+  },
+
+  // Olivia Brown has just received message from Emma Wilson (UNREAD)
+  {
+    id: "25ce0857-d638-4ebd-89f4-8b5e538504db",
+    userId: "b5e2d3c4-2222-4fbb-8e02-123456789002",
+    chatId: "9f3a7b2e-4d6c-4c8a-9c12-1e8f4a6d2b90",
+    messageId: "3b7e1f9a-6d4c-4a2e-8f5b-1c9d2e4a7b05",
+    status: "unread",
+    timestamp: "2024-01-23T09:30:00Z",
+  },
+
+  // Ryan Mitchell has just received message from Emma Wilson (UNREAD)
+  {
+    id: "b0651128-6877-420c-b150-4598e6d86cd8",
+    userId: "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b43",
+    chatId: "9f3a7b2e-4d6c-4c8a-9c12-1e8f4a6d2b90",
+    messageId: "3b7e1f9a-6d4c-4a2e-8f5b-1c9d2e4a7b05",
+    status: "unread",
+    timestamp: "2024-01-23T09:30:00Z",
+  },
+
+  // Christopher Reynolds has just received message from Emma Wilson (UNREAD)
+  {
+    id: "53fa0f65-fef0-4fec-8e89-fdb28578783e",
+    userId: "8e7d6c5b-4a3f-4e2d-9c8b-1a0f2e3d4c54",
+    chatId: "9f3a7b2e-4d6c-4c8a-9c12-1e8f4a6d2b90",
+    messageId: "3b7e1f9a-6d4c-4a2e-8f5b-1c9d2e4a7b05",
+    status: "unread",
+    timestamp: "2024-01-23T09:30:00Z",
+  },
+
+  // Olivia Brown read message from Emma Wilson (READ)
+  {
+    id: "17a0bf28-8d5a-47c3-b411-91d9d8a9f43c",
+    userId: "b5e2d3c4-2222-4fbb-8e02-123456789002",
+    chatId: "9f3a7b2e-4d6c-4c8a-9c12-1e8f4a6d2b90",
+    messageId: "3b7e1f9a-6d4c-4a2e-8f5b-1c9d2e4a7b05",
+    status: "read",
+    timestamp: "2024-01-23T09:30:051Z",
   },
 ];
