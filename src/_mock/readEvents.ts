@@ -87,7 +87,7 @@ export const mockedReadEvents: ReadEvent[] = [
     status: "read",
     timestamp: "2024-01-10T10:50:00Z",
   },
-  // James Walker has just received message from Daniel Harris  (UNREAD)
+  // James Walker has just received message from Daniel Harris (UNREAD)
   {
     id: "4e43759d-738e-485c-baec-b326205daf6e",
     userId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
@@ -109,7 +109,7 @@ export const mockedReadEvents: ReadEvent[] = [
     timestamp: "2024-01-08T09:05:00Z",
   },
 
-  // James Walker has just received message from  Ryan Mitchell  (UNREAD)
+  // James Walker has just received message from Ryan Mitchell  (UNREAD)
   {
     id: "0307ca6c-35b1-4f12-b4c4-411c1e789b3f",
     userId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
@@ -129,7 +129,7 @@ export const mockedReadEvents: ReadEvent[] = [
     timestamp: "2024-01-08T09:06:00Z",
   },
 
-  // James Walker has just received new message from  Ryan Mitchell  (UNREAD)
+  // James Walker has just received new message from Ryan Mitchell  (UNREAD)
   {
     id: "ac733930-3341-4e6c-a557-18673dca904a",
     userId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
@@ -137,5 +137,127 @@ export const mockedReadEvents: ReadEvent[] = [
     messageId: "b2c3d4e5-2222-4bbb-9ccc-000000000012",
     status: "unread",
     timestamp: "2024-01-08T09:06:00Z",
+  },
+
+  /* Plans & Hangouts */
+
+  // Olivia Brown sent and read her message
+  {
+    id: "fbebfc56-f46b-4b31-aeea-c99bc045125d",
+    userId: "b5e2d3c4-2222-4fbb-8e02-123456789002",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    messageId: "b9956344-fb45-4147-b0a3-f4a649452ca5",
+    status: "read",
+    timestamp: "2024-01-12T08:15:00Z",
+  },
+
+  // Emma Wilson has just received message from Olivia Brown (UNREAD)
+  {
+    id: "11fc32c0-c91c-45ec-8dd9-20cb386bfcc6",
+    userId: "a4d1c2b3-1111-4eaa-9f01-123456789001",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    messageId: "b9956344-fb45-4147-b0a3-f4a649452ca5",
+    status: "unread",
+    timestamp: "2024-01-12T08:15:00Z",
+  },
+
+  // James Walker has just received message from Olivia Brown (UNREAD)
+  {
+    id: "6a1fba34-8d50-4dc3-b7a2-fa79de5d8030",
+    userId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    messageId: "b9956344-fb45-4147-b0a3-f4a649452ca5",
+    status: "unread",
+    timestamp: "2024-01-12T08:15:00Z",
+  },
+
+  // Daniel Harris has just received message from Olivia Brown (UNREAD)
+  {
+    id: "dfd2f434-91c9-4290-a558-c37583eb3e96",
+    userId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    messageId: "b9956344-fb45-4147-b0a3-f4a649452ca5",
+    status: "unread",
+    timestamp: "2024-01-12T08:15:00Z",
+  },
+
+  // Emma Wilson read message from Olivia Brown (READ)
+  {
+    id: "94f270ff-027c-4142-93c0-55cc046335a2",
+    userId: "a4d1c2b3-1111-4eaa-9f01-123456789001",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    messageId: "b9956344-fb45-4147-b0a3-f4a649452ca5",
+    status: "read",
+    timestamp: "2024-01-12T08:15:42Z",
+  },
+
+  // Daniel Harris read message from Olivia Brown (READ)
+  {
+    id: "ec064520-0d5c-4744-94ec-444c78e99db9",
+    userId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    messageId: "b9956344-fb45-4147-b0a3-f4a649452ca5",
+    status: "read",
+    timestamp: "2024-01-12T08:16:01Z",
+  },
+
+  // Daniel Harris sent and read his message
+  {
+    id: "45751fbc-2582-4749-9fc7-beea6ea13f74",
+    userId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    messageId: "38fdc2c6-f006-4a0f-8b1b-a425c4774af8",
+    status: "read",
+    timestamp: "2024-01-12T08:20:00Z",
+  },
+
+  // Emma Wilson has just received message from Daniel Harris (UNREAD)
+  {
+    id: "366c55ef-afc5-4238-8864-912800e35ffa",
+    userId: "a4d1c2b3-1111-4eaa-9f01-123456789001",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    messageId: "38fdc2c6-f006-4a0f-8b1b-a425c4774af8",
+    status: "unread",
+    timestamp: "2024-01-12T08:20:00Z",
+  },
+
+  // James Walker has just received message from Daniel Harris (UNREAD)
+  {
+    id: "a18898e3-88a3-4d77-925b-908137461618",
+    userId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    messageId: "38fdc2c6-f006-4a0f-8b1b-a425c4774af8",
+    status: "unread",
+    timestamp: "2024-01-12T08:20:00Z",
+  },
+
+  // Olivia Brown has just received message from Daniel Harris (UNREAD)
+  {
+    id: "13d41a17-898b-4c88-b2ac-6f7f4937be2e",
+    userId: "b5e2d3c4-2222-4fbb-8e02-123456789002",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    messageId: "38fdc2c6-f006-4a0f-8b1b-a425c4774af8",
+    status: "unread",
+    timestamp: "2024-01-12T08:20:00Z",
+  },
+
+  // Emma Wilson read message from Daniel Harris (READ)
+  {
+    id: "928bd10c-f361-4e4e-97c5-704024fa8321",
+    userId: "a4d1c2b3-1111-4eaa-9f01-123456789001",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    messageId: "38fdc2c6-f006-4a0f-8b1b-a425c4774af8",
+    status: "read",
+    timestamp: "2024-01-12T08:20:05Z",
+  },
+
+  // Olivia Brown read message from  Daniel Harris (READ)
+  {
+    id: "521327e1-3e12-47d2-9afd-679ee85ecf0d",
+    userId: "b5e2d3c4-2222-4fbb-8e02-123456789002",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    messageId: "38fdc2c6-f006-4a0f-8b1b-a425c4774af8",
+    status: "read",
+    timestamp: "2024-01-12T08:20:10Z",
   },
 ];

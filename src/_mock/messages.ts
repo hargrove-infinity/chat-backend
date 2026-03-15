@@ -267,6 +267,23 @@ export const mockedMessages: Message[] = [
     createdAt: "2024-01-11T10:12:00Z",
     updatedAt: "2024-01-11T10:12:00Z",
   },
+  {
+    id: "b9956344-fb45-4147-b0a3-f4a649452ca5",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    senderId: "b5e2d3c4-2222-4fbb-8e02-123456789002",
+    content: "Hey everyone, are we still on for the hiking trip next weekend?",
+    createdAt: "2024-01-12T08:15:00Z",
+    updatedAt: "2024-01-12T08:15:00Z",
+  },
+  {
+    id: "38fdc2c6-f006-4a0f-8b1b-a425c4774af8",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    senderId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    content:
+      "Yeah, I've been checking the trail. Weather looks great on Saturday!",
+    createdAt: "2024-01-12T08:20:00Z",
+    updatedAt: "2024-01-12T08:20:00Z",
+  },
 
   // Travel group
   {
