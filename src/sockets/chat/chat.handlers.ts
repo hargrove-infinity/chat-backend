@@ -1,12 +1,21 @@
-import type { Socket } from "socket.io";
-import { v4 as uuidv4 } from "uuid";
 import { db } from "../../_mock/db";
-import { MessageStatusEnum } from "../../_mock/types";
 import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
-import { getDirectInterlocutorSocketIds } from "./chat.helpers";
-import type { ChatMessagePayload, SendMessageCallback } from "./chat.types";
+import { getDirectInterlocutorSocketIds, handleEvent } from "./chat.helpers";
+import type { ChatSocket } from "./chat.types";
+import { disconnectHandler } from "./handlers/disconnect.handler";
+import { errorHandler } from "./handlers/error.handler";
+import { sendMessageHandler } from "./handlers/send-message.handler";
+import { startTypingDispatchHandler } from "./handlers/start-typing-dispatch.handler";
+import { stopTypingDispatchHandler } from "./handlers/stop-typing-dispatch.handler";
 
-export function registerChatHandlers(socket: Socket) {
+export function registerChatHandlers(socket: ChatSocket) {
+  /**
+   * Emit immediately to initialize the offset on the client side.
+   * Required for connection state recovery.
+   * @see CONNECTION_EVENTS.CONNECTED
+   */
+  socket.emit(CONNECTION_EVENTS.CONNECTED);
+
   const user = db.users.find((user) => user.socketId === socket.id);
 
   if (!user) {
@@ -30,89 +39,34 @@ export function registerChatHandlers(socket: Socket) {
     socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
   }
 
-  socket.on(
-    CHAT_EVENTS.SEND_MESSAGE,
-    (payload: ChatMessagePayload, callback: SendMessageCallback) => {
-      const { chatId, content, tempId } = payload;
-      console.log(`Socket ${socket.id} has sent message to ${chatId} room`);
+  socket.on("error", errorHandler({ db, user, socket }));
 
-      const foundSender = db.users.find((userDb) => userDb.id === user.id);
+  socket.on(CHAT_EVENTS.SEND_MESSAGE, (payload, acknowledge) => {
+    const { chatId, content, tempId } = payload;
 
-      const message = {
-        id: uuidv4(),
+    handleEvent({
+      ackData: { tempId },
+      acknowledge,
+      operation: sendMessageHandler({
+        user,
         chatId,
-        senderId: user.id,
-        senderName: foundSender
-          ? `${foundSender.firstName} ${foundSender.lastName}`
-          : null,
         content,
-        status: MessageStatusEnum.SENT,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      db.messages.push(message);
-
-      if (!user.socketId) {
-        callback({ ok: false, tempId, error: "User socket id is not set" });
-        return;
-      }
-
-      callback({ ok: true, tempId, message });
-
-      socket.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, message);
-    },
-  );
+        tempId,
+        socket,
+        acknowledge,
+      }),
+    });
+  });
 
   socket.on(
     CHAT_EVENTS.START_TYPING_DISPATCH,
-    ({ chatId }: { chatId: string }) => {
-      console.log(`Start typing in ${chatId}`);
-
-      socket
-        .to(chatId)
-        .emit(CHAT_EVENTS.START_TYPING_BROADCAST, { chatId, userId: user.id });
-    },
+    startTypingDispatchHandler({ userId: user.id, socket }),
   );
 
   socket.on(
     CHAT_EVENTS.STOP_TYPING_DISPATCH,
-    ({ chatId }: { chatId: string }) => {
-      console.log(`Stop typing in ${chatId}`);
-
-      socket
-        .to(chatId)
-        .emit(CHAT_EVENTS.STOP_TYPING_BROADCAST, { chatId, userId: user.id });
-    },
+    stopTypingDispatchHandler({ userId: user.id, socket }),
   );
 
-  socket.on("disconnecting", (reason) => {
-    console.log("Reason of a disconnecting chat:", reason);
-  });
-
-  socket.on("disconnect", (reason) => {
-    console.log("Reason of a disconnect chat:", reason);
-    user.socketId = null;
-
-    const interlocutorSocketIds = getDirectInterlocutorSocketIds({
-      db,
-      userId: user.id,
-    });
-
-    if (interlocutorSocketIds.length) {
-      socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.OFFLINE, user.id);
-    }
-  });
-
-  // TODO: add disconnection later
-  // Disconnect for socket
-  // setTimeout(() => {
-  //   // true closes the underlying connection
-  //   socket.disconnect(true);
-  // }, 2000);
-
-  // TODO: apply this later
-  // if (namespace.sockets.size > 1) {
-  //   namespace.disconnectSockets();
-  // }
+  socket.on("disconnect", disconnectHandler({ db, user, socket }));
 }

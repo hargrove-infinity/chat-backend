@@ -2,7 +2,8 @@ import { createServer } from "node:http";
 import { Server } from "socket.io";
 
 import { createApp } from "./app";
-import { envVariables } from "./common/envVariables";
+import { envVariables } from "./common/env.config";
+import { logger } from "./logger";
 import { initSockets } from "./sockets";
 
 const app = createApp();
@@ -13,10 +14,16 @@ const io = new Server(server, {
     origin: envVariables.frontendUrl,
     methods: ["GET", "POST"],
   },
+  pingInterval: 5000,
+  pingTimeout: 5000,
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 120000,
+    skipMiddlewares: false,
+  },
 });
 
 initSockets(io);
 
 server.listen(envVariables.port, () => {
-  console.log("Server is running");
+  logger.info("Server is running");
 });

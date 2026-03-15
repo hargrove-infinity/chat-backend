@@ -63,6 +63,15 @@ export type ChatDTO = Omit<Chat, "participants"> & {
    * - isTyping: Real-time typing indicator status for this chat
    */
   participants: Participant[];
+
+  /**
+   * Count of unread messages for the authenticated user in this chat.
+   * Computed by filtering ReadEvents for this user+chat with status "unread",
+   * then deduplicating by messageId (keeping the latest event per message)
+   * to account for toggled read/unread states.
+   * Each remaining event represents one distinct unread message.
+   */
+  unreadMessages: number;
 };
 
 export type Message = {
@@ -85,17 +94,32 @@ export type MessageDTO = Message & {
   status: MessageStatusEnum;
 };
 
+export type Log = {
+  id: string;
+  socketId: string | null;
+  userId: string | null;
+  event: string;
+  message: string | null;
+  name: string | null;
+  namespace: string | null;
+  source: string | null;
+  timestamp: string;
+};
+
 export type DB = {
   users: User[];
   chats: Chat[];
   messages: Message[];
   readEvents: ReadEvent[];
+  logs: Log[];
 };
 
+// TODO: Remove later
 /**
  * ReadEvent should be created in amount of N-participants in the current chat
  */
 
+// TODO: Remove later
 /**
  * Bob sent message to Mike
  * Bob read message (because he's sender), Mike didn't
@@ -113,6 +137,7 @@ export type DB = {
 export type ReadEvent = {
   id: string;
   userId: string;
+  // TODO: Remove later
   /**
    * Do I really need chatId because
    * I have messageId
@@ -120,6 +145,7 @@ export type ReadEvent = {
    */
   chatId: string;
   messageId: string;
+  // TODO: Remove later
   /**
    * Since status field has only two options
    * maybe it's better to replace if with boolean

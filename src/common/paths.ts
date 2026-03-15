@@ -6,4 +6,7 @@ export const paths = {
     list: "/chats",
     messagesByChatId: "/chats/:chatId/messages",
   },
+  metrics: {
+    logs: "/metrics/logs",
+  },
 };

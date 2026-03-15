@@ -9,4 +9,5 @@ export const db: DB = {
   chats: mockedChats,
   messages: mockedMessages,
   readEvents: mockedReadEvents,
+  logs: [],
 };

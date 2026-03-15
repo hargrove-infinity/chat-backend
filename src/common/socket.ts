@@ -2,9 +2,17 @@ export const CHAT_NAMESPACE = "/chat";
 export const ADMIN_NAMESPACE = "/admin";
 
 export const CONNECTION_EVENTS = {
-  ADMIN: "connection:admin",
   ONLINE: "connection:online",
   OFFLINE: "connection:offline",
+  /**
+   * Emitted by the server to the client immediately upon connection.
+   * Purpose: initializes the offset on the client side, which is required
+   * for connection state recovery to succeed on reconnection.
+   * Without at least one server → client event, the client has no offset
+   * to send back to the server, making session recovery impossible.
+   * @see https://socket.io/docs/v4/connection-state-recovery
+   */
+  CONNECTED: "connection:connected",
 } as const;
 
 export const ADMIN_EVENTS = {

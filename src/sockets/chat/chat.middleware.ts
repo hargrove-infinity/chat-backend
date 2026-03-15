@@ -1,6 +1,7 @@
 import type { ExtendedError, Socket } from "socket.io";
 import { db } from "../../_mock/db";
 import type { User } from "../../_mock/types";
+import { CHAT_NAMESPACE } from "../../common/socket";
 
 /**
  * Middleware that validates chat user socket connections,
@@ -13,12 +14,19 @@ export function chatMiddleware(
 ) {
   const { token } = socket.handshake.auth;
 
-  if (!token) return next(new Error("Missing token"));
+  if (!token) {
+    const err: ExtendedError = new Error("Missing token");
+    err.data = { namespace: CHAT_NAMESPACE, source: "middleware" };
+    return next(err);
+  }
 
   const decoded: Omit<User, "password"> = JSON.parse(atob(token));
 
   const user = db.users.find((u) => u.id === decoded.id);
-  if (user) user.socketId = socket.id;
+
+  if (user) {
+    user.socketId = socket.id;
+  }
 
   next();
 }
