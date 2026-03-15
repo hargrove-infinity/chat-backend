@@ -1,6 +1,8 @@
 import type { ReadEvent } from "./types";
 
 export const mockedReadEvents: ReadEvent[] = [
+  /* James Walker ↔ Christopher Reynolds */
+
   // James Walker sent and read his message for Christopher Reynolds
   {
     id: "9e7358e9-d92f-4284-a703-3d1e02d73656",
@@ -72,5 +74,26 @@ export const mockedReadEvents: ReadEvent[] = [
     messageId: "51c0f11e-4dc5-4596-aafa-76f48fc5c2c3",
     status: "unread",
     timestamp: "2024-01-09T08:30:00Z",
+  },
+
+  /* James Walker ↔ Daniel Harris */
+
+  // Daniel Harris sent and read his message for James Walker
+  {
+    id: "db1412da-6902-4457-a7d4-c090b11a2d66",
+    userId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
+    messageId: "2fb84f2b-2b77-4a4d-9e24-b68d803459c7",
+    status: "read",
+    timestamp: "2024-01-10T10:50:00Z",
+  },
+  // James Walker has just received message from Daniel Harris  (UNREAD)
+  {
+    id: "4e43759d-738e-485c-baec-b326205daf6e",
+    userId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
+    chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
+    messageId: "2fb84f2b-2b77-4a4d-9e24-b68d803459c7",
+    status: "unread",
+    timestamp: "2024-01-10T10:50:00Z",
   },
 ];

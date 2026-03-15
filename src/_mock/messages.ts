@@ -35,6 +35,14 @@ export const mockedMessages: Message[] = [
     createdAt: "2024-01-06T10:00:40Z",
     updatedAt: "2024-01-06T10:00:40Z",
   },
+  {
+    id: "2fb84f2b-2b77-4a4d-9e24-b68d803459c7",
+    chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
+    senderId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    content: "Hi James. How are you?",
+    createdAt: "2024-01-10T10:50:00Z",
+    updatedAt: "2024-01-10T10:50:00Z",
+  },
 
   // James Walker ↔ Ryan Mitchell
   {
