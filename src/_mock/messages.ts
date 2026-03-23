@@ -35,6 +35,14 @@ export const mockedMessages: Message[] = [
     createdAt: "2024-01-06T10:00:40Z",
     updatedAt: "2024-01-06T10:00:40Z",
   },
+  {
+    id: "2fb84f2b-2b77-4a4d-9e24-b68d803459c7",
+    chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
+    senderId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    content: "Hi James. How are you?",
+    createdAt: "2024-01-10T10:50:00Z",
+    updatedAt: "2024-01-10T10:50:00Z",
+  },
 
   // James Walker ↔ Ryan Mitchell
   {
@@ -116,6 +124,24 @@ export const mockedMessages: Message[] = [
     content: "Yes, Friday end of day.",
     createdAt: "2024-01-07T11:10:00Z",
     updatedAt: "2024-01-07T11:10:00Z",
+  },
+  {
+    id: "b2c3d4e5-2222-4bbb-9ccc-000000000011",
+    chatId: "5a7892fe-3942-40c8-8b84-237b83cee480",
+    senderId: "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b43",
+    content:
+      "Hey James, are you around? I have a quick question about the new feature spec.",
+    createdAt: "2024-01-08T09:05:00Z",
+    updatedAt: "2024-01-08T09:05:00Z",
+  },
+  {
+    id: "b2c3d4e5-2222-4bbb-9ccc-000000000012",
+    chatId: "5a7892fe-3942-40c8-8b84-237b83cee480",
+    senderId: "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b43",
+    content:
+      "Specifically about the onboarding flow — do we have final copy for it yet?",
+    createdAt: "2024-01-08T09:06:00Z",
+    updatedAt: "2024-01-08T09:06:00Z",
   },
 
   // James Walker ↔ Christopher Reynolds
@@ -199,6 +225,22 @@ export const mockedMessages: Message[] = [
     createdAt: "2024-01-08T10:50:00Z",
     updatedAt: "2024-01-08T10:50:00Z",
   },
+  {
+    id: "d4e5f6g7-4444-4ddd-beee-000000000001",
+    chatId: "3425c4ce-b2c6-441d-b1bb-ea95d05bc535",
+    senderId: "8e7d6c5b-4a3f-4e2d-9c8b-1a0f2e3d4c54",
+    content: "Hey! Are you around? Wanted to ask you something.",
+    createdAt: "2024-01-09T08:10:00Z",
+    updatedAt: "2024-01-09T08:10:00Z",
+  },
+  {
+    id: "d4e5f6g7-4444-4ddd-beee-000000000002",
+    chatId: "3425c4ce-b2c6-441d-b1bb-ea95d05bc535",
+    senderId: "8e7d6c5b-4a3f-4e2d-9c8b-1a0f2e3d4c54",
+    content: "It’s about the plan for this week, nothing urgent though 🙂",
+    createdAt: "2024-01-09T08:12:00Z",
+    updatedAt: "2024-01-09T08:12:00Z",
+  },
 
   // Plans & Hangouts group
   {
@@ -233,6 +275,23 @@ export const mockedMessages: Message[] = [
     createdAt: "2024-01-11T10:12:00Z",
     updatedAt: "2024-01-11T10:12:00Z",
   },
+  {
+    id: "b9956344-fb45-4147-b0a3-f4a649452ca5",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    senderId: "b5e2d3c4-2222-4fbb-8e02-123456789002",
+    content: "Hey everyone, are we still on for the hiking trip next weekend?",
+    createdAt: "2024-01-12T08:15:00Z",
+    updatedAt: "2024-01-12T08:15:00Z",
+  },
+  {
+    id: "38fdc2c6-f006-4a0f-8b1b-a425c4774af8",
+    chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
+    senderId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    content:
+      "Yeah, I've been checking the trail. Weather looks great on Saturday!",
+    createdAt: "2024-01-12T08:20:00Z",
+    updatedAt: "2024-01-12T08:20:00Z",
+  },
 
   // Travel group
   {
@@ -266,5 +325,14 @@ export const mockedMessages: Message[] = [
     content: "Europe for me. Italy and France are top of the list.",
     createdAt: "2024-01-12T10:12:00Z",
     updatedAt: "2024-01-12T10:12:00Z",
+  },
+  {
+    id: "3b7e1f9a-6d4c-4a2e-8f5b-1c9d2e4a7b05",
+    chatId: "9f3a7b2e-4d6c-4c8a-9c12-1e8f4a6d2b90",
+    senderId: "a4d1c2b3-1111-4eaa-9f01-123456789001", // Emma
+    content:
+      "Hey guys! Has anyone ever been to Portugal? Thinking of going this spring 🌍",
+    createdAt: "2024-01-23T09:30:00Z",
+    updatedAt: "2024-01-23T09:30:00Z",
   },
 ];

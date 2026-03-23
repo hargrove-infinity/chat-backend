@@ -63,6 +63,15 @@ export type ChatDTO = Omit<Chat, "participants"> & {
    * - isTyping: Real-time typing indicator status for this chat
    */
   participants: Participant[];
+
+  /**
+   * Count of unread messages for the authenticated user in this chat.
+   * Computed by filtering ReadEvents for this user+chat with status "unread",
+   * then deduplicating by messageId (keeping the latest event per message)
+   * to account for toggled read/unread states.
+   * Each remaining event represents one distinct unread message.
+   */
+  unreadMessages: number;
 };
 
 export type Message = {
@@ -101,5 +110,22 @@ export type DB = {
   users: User[];
   chats: Chat[];
   messages: Message[];
+  readEvents: ReadEvent[];
   logs: Log[];
+};
+
+// TODO: Remove later
+/**
+ * ReadEvent should be created in amount of N-participants in the current chat
+ */
+
+export type ReadEvent = {
+  // TODO: Remove later
+  // id: string; // Do I need id here
+  userId: string;
+  messageId: string;
+  read: boolean;
+  // TODO: Remove later
+  createdAt: string; // Should be as created of corresponded message
+  updatedAt: string;
 };

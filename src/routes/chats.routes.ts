@@ -43,6 +43,24 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
         };
       });
 
+      // 1. Filter readEvents array by userId and status: unread
+      const userUnreadEvents = db.readEvents.filter(
+        (readEvent) => readEvent.userId === user.id && !readEvent.read,
+      );
+
+      // 2. Narrow down to unread events belonging to the current chat
+      const chatUnreadEvents = userUnreadEvents.filter((unreadEvent) => {
+        const unreadMessage = db.messages.find(
+          (message) => message.id === unreadEvent.messageId,
+        );
+
+        if (!unreadMessage) {
+          throw new Error("Unread message is not found");
+        }
+
+        return unreadMessage.chatId === chat.id;
+      });
+
       if (chat.type === "direct" && !chat.name) {
         const interlocutor = db.users.find(
           (u) => u.id !== user.id && chat.participants.includes(u.id),
@@ -56,6 +74,7 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
           lastMessage: lastMessage?.content ?? null,
           isOnline: !!interlocutor?.socketId,
           participants: extendedParticipants,
+          unreadMessages: chatUnreadEvents.length,
         };
       }
 
@@ -64,6 +83,7 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
         lastMessage: lastMessage?.content ?? null,
         isOnline: false,
         participants: extendedParticipants,
+        unreadMessages: chatUnreadEvents.length,
       };
     });
 
