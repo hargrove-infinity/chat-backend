@@ -103,12 +103,23 @@ chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
     .map((msg) => {
       const foundSender = db.users.find((user) => user.id === msg.senderId);
 
+      if (!foundSender) {
+        throw new Error("Sender is not found");
+      }
+
+      const foundReadEvent = db.readEvents.find(
+        (readEvent) => readEvent.messageId === msg.id,
+      );
+
+      if (!foundReadEvent) {
+        throw new Error("Read event is not found");
+      }
+
       return {
         ...msg,
         status: MessageStatusEnum.SENT,
-        senderName: foundSender
-          ? `${foundSender.firstName} ${foundSender.lastName}`
-          : null,
+        read: foundReadEvent.read,
+        senderName: `${foundSender.firstName} ${foundSender.lastName}`,
       };
     });
 

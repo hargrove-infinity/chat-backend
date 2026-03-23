@@ -3,6 +3,7 @@ import { db } from "../../../_mock/db";
 import {
   type MessageDTO,
   MessageStatusEnum,
+  type ReadEvent,
   type User,
 } from "../../../_mock/types";
 import { CHAT_EVENTS } from "../../../common/socket";
@@ -20,8 +21,6 @@ type SendMessageHandlerArgs = {
 export const sendMessageHandler = (args: SendMessageHandlerArgs) => () => {
   const { user, chatId, content, tempId, socket, acknowledge } = args;
 
-  const foundSender = db.users.find((userDb) => userDb.id === user.id);
-
   if (!user.socketId) {
     throw new Error("User socket id is not set");
   }
@@ -30,11 +29,10 @@ export const sendMessageHandler = (args: SendMessageHandlerArgs) => () => {
     id: uuidv4(),
     chatId: chatId,
     senderId: user.id,
-    senderName: foundSender
-      ? `${foundSender.firstName} ${foundSender.lastName}`
-      : null,
+    senderName: `${user.firstName} ${user.lastName}`,
     content: content,
     status: MessageStatusEnum.SENT,
+    read: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -46,6 +44,30 @@ export const sendMessageHandler = (args: SendMessageHandlerArgs) => () => {
   if (res === prevCount) {
     throw new Error("Message is not stored in DB");
   }
+
+  // TODO: implement transaction when real db will be add
+  // db.transaction((db) => {
+  //   db.messages.insert(message);
+  //   db.readEvents.insert(readEvent);
+  // });
+
+  const foundChat = db.chats.find((chat) => chat.id === chatId);
+
+  if (!foundChat) {
+    throw new Error("Chat is not found");
+  }
+
+  const readEvents: ReadEvent[] = foundChat.participants.map(
+    (participantId) => ({
+      userId: participantId,
+      messageId: message.id,
+      read: participantId === user.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }),
+  );
+
+  db.readEvents.push(...readEvents);
 
   acknowledge({ ok: true, tempId: tempId, message });
 

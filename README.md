@@ -49,6 +49,7 @@ The `-k` flag kills the previous server process before starting a new one, so th
 
 ```typescript
 type ReadEvent = {
+  // [userId, messageId] serve as a composite identifier
   userId: string;
   messageId: string;
   read: boolean;
@@ -67,6 +68,45 @@ When a message is sent, `N` ReadEvents are created — one per chat participant:
 - **Every other participant** gets a `ReadEvent` with `read: false`
 
 The `createdAt` of these initial events equals the message's `createdAt`.
+
+```typescript
+const readEvents: ReadEvent[] = foundChat.participants.map((participantId) => ({
+  userId: participantId,
+  messageId: message.id,
+  read: participantId === user.id,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+}));
+```
+
+---
+
+### `read` field on `MessageDTO`
+
+`MessageDTO` includes a `read` field resolved from the corresponding `ReadEvent`. It is used on the frontend to highlight unread messages within an open chat:
+
+```typescript
+type MessageDTO = Message & {
+  senderName: string | null;
+  status: MessageStatusEnum;
+  read: boolean; // resolved from ReadEvent
+};
+```
+
+It is resolved in `GET /chats/:chatId/messages` by finding the `ReadEvent` matching the message:
+
+```typescript
+const foundReadEvent = db.readEvents.find(
+  (readEvent) => readEvent.messageId === msg.id,
+);
+
+return {
+  ...msg,
+  status: MessageStatusEnum.SENT,
+  read: foundReadEvent.read,
+  senderName: `${foundSender.firstName} ${foundSender.lastName}`,
+};
+```
 
 ---
 
@@ -99,8 +139,6 @@ const chatUnreadEvents = userUnreadEvents.filter((unreadEvent) => {
 ```
 
 **Step 3 — Count**: `chatUnreadEvents.length` → this is the `unreadMessages` value.
-
-> Note: deduplication is no longer needed since each participant has exactly one `ReadEvent` per message.
 
 ---
 
@@ -140,6 +178,9 @@ Christopher Reynolds sent two messages that James Walker hasn't read yet:
 | `d4e5f6g7-...-002` | `8e7d6c5b-...` | Christopher Reynolds | true  | 08:12     | 08:12     | Christopher Reynolds sent and read his new message for James Walker           |
 | `d4e5f6g7-...-002` | `2a1e4d9f-...` | James Walker         | false | 08:12     | 08:12     | James Walker has just received new message from Christopher Reynolds (UNREAD) |
 
+Filtering by `userId: James Walker` and `read: false` gives 2 events across all chats.
+Then narrowing down to `chatId: 3425c4ce-...` (Christopher Reynolds chat) gives 2 events.
+
 **Result: `unreadMessages = 2`** for James Walker in this chat.
 
 ---
@@ -148,16 +189,19 @@ Christopher Reynolds sent two messages that James Walker hasn't read yet:
 
 Two messages were sent — one by Olivia Brown, one by Daniel Harris. James Walker hasn't read either:
 
-| messageId (short) | userId (short) | user          | read  | createdAt | updatedAt | action                                                                    |
-| ----------------- | -------------- | ------------- | ----- | --------- | --------- | ------------------------------------------------------------------------- |
-| `b9956344-...`    | `b5e2d3c4-...` | Olivia Brown  | true  | 08:15     | 08:15     | Olivia Brown sent and read her message                                    |
-| `b9956344-...`    | `a4d1c2b3-...` | Emma Wilson   | true  | 08:15     | 08:16     | Emma Wilson has just received message from Olivia Brown and the read it   |
-| `b9956344-...`    | `2a1e4d9f-...` | James Walker  | false | 08:15     | 08:15     | James Walker has just received message from Olivia Brown (UNREAD)         |
-| `b9956344-...`    | `c9f0b5a3-...` | Daniel Harris | true  | 08:15     | 08:17     | Daniel Harris has just received message from Olivia Brown and the read it |
-| `38fdc2c6-...`    | `c9f0b5a3-...` | Daniel Harris | true  | 08:20     | 08:20     | Daniel Harris sent and read his message                                   |
-| `38fdc2c6-...`    | `a4d1c2b3-...` | Emma Wilson   | true  | 08:20     | 08:20     | Emma Wilson has just received message from Daniel Harris and the read it  |
-| `38fdc2c6-...`    | `2a1e4d9f-...` | James Walker  | false | 08:20     | 08:20     | James Walker has just received message from Daniel Harris (UNREAD)        |
-| `38fdc2c6-...`    | `b5e2d3c4-...` | Olivia Brown  | true  | 08:20     | 08:20     | Olivia Brown has just received message from Daniel Harris and the read it |
+| messageId (short) | userId (short) | user          | read  | createdAt | updatedAt | action                                                                     |
+| ----------------- | -------------- | ------------- | ----- | --------- | --------- | -------------------------------------------------------------------------- |
+| `b9956344-...`    | `b5e2d3c4-...` | Olivia Brown  | true  | 08:15     | 08:15     | Olivia Brown sent and read her message                                     |
+| `b9956344-...`    | `a4d1c2b3-...` | Emma Wilson   | true  | 08:15     | 08:16     | Emma Wilson has just received message from Olivia Brown and then read it   |
+| `b9956344-...`    | `2a1e4d9f-...` | James Walker  | false | 08:15     | 08:15     | James Walker has just received message from Olivia Brown (UNREAD)          |
+| `b9956344-...`    | `c9f0b5a3-...` | Daniel Harris | true  | 08:15     | 08:17     | Daniel Harris has just received message from Olivia Brown and then read it |
+| `38fdc2c6-...`    | `c9f0b5a3-...` | Daniel Harris | true  | 08:20     | 08:20     | Daniel Harris sent and read his message                                    |
+| `38fdc2c6-...`    | `a4d1c2b3-...` | Emma Wilson   | true  | 08:20     | 08:20     | Emma Wilson has just received message from Daniel Harris and then read it  |
+| `38fdc2c6-...`    | `2a1e4d9f-...` | James Walker  | false | 08:20     | 08:20     | James Walker has just received message from Daniel Harris (UNREAD)         |
+| `38fdc2c6-...`    | `b5e2d3c4-...` | Olivia Brown  | true  | 08:20     | 08:20     | Olivia Brown has just received message from Daniel Harris and then read it |
+
+Filtering by `userId: James Walker` and `read: false` gives 2 events across all chats.
+Then narrowing down to `chatId: b41ccd75-...` (Plans & Hangouts chat) gives 2 events.
 
 **Result: `unreadMessages = 2`** for James Walker in this chat.
 
@@ -174,6 +218,12 @@ One message was sent by Emma Wilson. Ryan Mitchell and Christopher Reynolds have
 | `3b7e1f9a-...`    | `f1a2b3c4-...` | Ryan Mitchell        | false | 09:30     | 09:30     | Ryan Mitchell has just received message from Emma Wilson (UNREAD)        |
 | `3b7e1f9a-...`    | `8e7d6c5b-...` | Christopher Reynolds | false | 09:30     | 09:30     | Christopher Reynolds has just received message from Emma Wilson (UNREAD) |
 
+Filtering by `userId: Ryan Mitchell` and `read: false` gives 1 event across all chats.
+Then narrowing down to `chatId: 9f3a7b2e-...` (Travel chat) gives 1 event.
+
 **Result: `unreadMessages = 1`** for Ryan Mitchell in this chat.
+
+Filtering by `userId: Christopher Reynolds` and `read: false` gives 1 event across all chats.
+Then narrowing down to `chatId: 9f3a7b2e-...` (Travel chat) gives 1 event.
 
 **Result: `unreadMessages = 1`** for Christopher Reynolds in this chat.
