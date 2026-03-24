@@ -92,6 +92,7 @@ export enum MessageStatusEnum {
 export type MessageDTO = Message & {
   senderName: string | null;
   status: MessageStatusEnum;
+  read: boolean;
 };
 
 export type Log = {
@@ -114,18 +115,10 @@ export type DB = {
   logs: Log[];
 };
 
-// TODO: Remove later
-/**
- * ReadEvent should be created in amount of N-participants in the current chat
- */
-
 export type ReadEvent = {
-  // TODO: Remove later
-  // id: string; // Do I need id here
   userId: string;
   messageId: string;
   read: boolean;
-  // TODO: Remove later
-  createdAt: string; // Should be as created of corresponded message
+  createdAt: string;
   updatedAt: string;
 };
