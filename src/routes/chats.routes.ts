@@ -95,8 +95,13 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
  * including resolved sender name and message status
  */
 chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
-  const { params } = req;
+  const { user, params } = req;
   const { chatId } = params;
+
+  if (!user) {
+    res.status(400).send({ errors: ["User is not attached"] });
+    return;
+  }
 
   const messages: MessageDTO[] = db.messages
     .filter((msg) => msg.chatId === chatId)
@@ -108,7 +113,8 @@ chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
       }
 
       const foundReadEvent = db.readEvents.find(
-        (readEvent) => readEvent.messageId === msg.id,
+        (readEvent) =>
+          readEvent.messageId === msg.id && readEvent.userId === user.id,
       );
 
       if (!foundReadEvent) {

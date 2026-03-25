@@ -42,4 +42,11 @@ export const CHAT_EVENTS = {
   START_TYPING_BROADCAST: "chat:start_typing_broadcast",
   // Server → Client(s): Broadcast stop typing to chat participants
   STOP_TYPING_BROADCAST: "chat:stop_typing_broadcast",
+
+  /**
+   * Read message events
+   */
+
+  // Client → Server: User read unread message
+  MARK_AS_READ: "chat:mark_as_read",
 } as const;
