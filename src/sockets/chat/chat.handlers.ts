@@ -4,6 +4,7 @@ import { getDirectInterlocutorSocketIds, handleEvent } from "./chat.helpers";
 import type { ChatSocket } from "./chat.types";
 import { disconnectHandler } from "./handlers/disconnect.handler";
 import { errorHandler } from "./handlers/error.handler";
+import { markMessageAsReadHandler } from "./handlers/mark-message-as-read.handler";
 import { sendMessageHandler } from "./handlers/send-message.handler";
 import { startTypingDispatchHandler } from "./handlers/start-typing-dispatch.handler";
 import { stopTypingDispatchHandler } from "./handlers/stop-typing-dispatch.handler";
@@ -67,6 +68,8 @@ export function registerChatHandlers(socket: ChatSocket) {
     CHAT_EVENTS.STOP_TYPING_DISPATCH,
     stopTypingDispatchHandler({ userId: user.id, socket }),
   );
+
+  socket.on(CHAT_EVENTS.MARK_AS_READ, markMessageAsReadHandler(db));
 
   socket.on("disconnect", disconnectHandler({ db, user, socket }));
 }
