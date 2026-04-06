@@ -81,31 +81,61 @@ const readEvents: ReadEvent[] = foundChat.participants.map((participantId) => ({
 
 ---
 
-### `read` field on `MessageDTO`
+### Message Status
 
-`MessageDTO` includes a `read` field resolved from the corresponding `ReadEvent`. It is used on the frontend to highlight unread messages within an open chat:
+A message can have one of the following statuses:
+
+| Status    | Meaning                                                     |
+| --------- | ----------------------------------------------------------- |
+| `SENDING` | Optimistic — message is being sent to the server            |
+| `SENT`    | Server confirmed delivery, not all participants read it yet |
+| `READ`    | All chat participants have read the message                 |
+| `ERROR`   | Message failed to send                                      |
+
+The status is resolved in `GET /chats/:chatId/messages` on the backend by checking whether every `ReadEvent` for a given message has `read: true`:
 
 ```typescript
-type MessageDTO = Message & {
-  senderName: string | null;
-  status: MessageStatusEnum;
-  read: boolean; // resolved from ReadEvent
-};
+// True only if all chat participants (sender + recipients) have read this message
+// Used to resolve message status: READ if everyone read it, SENT otherwise
+const isReadMessage = db.readEvents
+  .filter((readEvent) => readEvent.messageId === msg.id)
+  .every((readEventByMessage) => readEventByMessage.read);
 ```
 
-It is resolved in `GET /chats/:chatId/messages` by finding the `ReadEvent` matching the message:
+---
+
+### `reads` field on `MessageDTO`
+
+Each `MessageDTO` includes a `reads` array resolved from `ReadEvent` records. Its contents depend on message ownership:
+
+- **Own messages** — contains read events for all other participants (excludes the sender), used to display who has read the message
+- **Others' messages** — contains only the current user's read event, used to determine whether the current user has read it
+
+This is resolved in `GET /chats/:chatId/messages` on the backend:
 
 ```typescript
-const foundReadEvent = db.readEvents.find(
-  (readEvent) => readEvent.messageId === msg.id,
-);
-
-return {
-  ...msg,
-  status: MessageStatusEnum.SENT,
-  read: foundReadEvent.read,
-  senderName: `${foundSender.firstName} ${foundSender.lastName}`,
-};
+/**
+ * Resolve read events based on message ownership:
+ * - Own messages: return read events for all other participants (excludes sender)
+ *   to display who has read the message
+ * - Others' messages: return only the current user's read event
+ *   to display whether the current user has read it
+ */
+const messageReadReceipts = db.readEvents
+  .filter((readEvent) => {
+    const isAuthorMessage = msg.senderId === user.id;
+    return (
+      readEvent.messageId === msg.id &&
+      (isAuthorMessage
+        ? readEvent.userId !== msg.senderId
+        : readEvent.userId === user.id)
+    );
+  })
+  .map((readEvent) => ({
+    userId: readEvent.userId,
+    userName: `${user.firstName} ${user.lastName}`,
+    read: readEvent.read,
+  }));
 ```
 
 ---
@@ -230,23 +260,69 @@ Then narrowing down to `chatId: 9f3a7b2e-...` (Travel chat) gives 1 event.
 
 ---
 
+## Read Receipts
+
+Read receipts track whether participants have seen a message. The behavior differs between direct and group chats — in a direct chat a single recipient determines the read state, while in a group chat the message is only fully read once every participant has seen it.
+
 ---
 
-## Marking Messages as Read
+### Direct Chat (2 participants)
+
+1. Author sends a message — their own `ReadEvent` is immediately `read: true`, the recipient's is `read: false`
+2. The message appears as **unread** for the recipient (highlighted bubble + indicator dot)
+3. When the recipient scrolls the message into view, the client emits `chat:message_was_read`
+4. The server updates the recipient's `ReadEvent` to `read: true`
+5. The server notifies the author via `chat:notify_author_message_was_read`
+6. The author's message status changes from **SENT** (single checkmark) to **READ** (eye icon) — indicating the other person has read it
+
+---
+
+### Group Chat (3+ participants)
+
+1. Author sends a message — their own `ReadEvent` is `read: true`, all other participants get `read: false`
+2. The message is **unread** for everyone who hasn't scrolled past it
+3. As each participant views the message, `chat:message_was_read` is emitted and their `ReadEvent` is set to `read: true`
+4. The author's message status changes to **READ** only when **all** participants have read it
+5. The author can click the **"Seen"** button on their message to open a read receipt menu showing each participant's read status:
+
+```
+Read by 2 of 3
+─────────────────────
+Emma Wilson      ✉ (read)
+James Walker     ✉ (unread)
+```
+
+---
+
+### Visual Indicators
+
+| Element            | Condition                            | Applies to |
+| ------------------ | ------------------------------------ | ---------- |
+| Highlighted bubble | `reads` contains current user unread | Incoming   |
+| Indicator dot      | Same as above                        | Incoming   |
+| Clock icon         | `status: SENDING`                    | Outgoing   |
+| Checkmark icon     | `status: SENT`                       | Outgoing   |
+| Eye icon           | `status: READ`                       | Outgoing   |
+| "Seen" button      | Group chat, own message              | Outgoing   |
+| Read receipt menu  | Group chat, own message, on click    | Outgoing   |
+
+---
+
+## Automatic Read Detection
 
 ### Overview
 
-When a user views unread messages in an open chat, the client automatically detects visibility and emits a `chat:mark_as_read` event to the server. The server then mutates the corresponding `ReadEvent` records, and the client updates its local state optimistically.
+When a user views unread messages in an open chat, the client automatically detects visibility via the Intersection Observer API and emits `chat:message_was_read` to the server. The server updates the corresponding `ReadEvent` records and notifies the message author(s). The client updates local state optimistically without waiting for the server round-trip.
 
 ---
 
 ### Frontend — Detecting Visible Messages
 
-The client uses the [Intersection Observer API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) to track which unread messages are visible in the viewport. Only messages that belong to other participants are observed — the user's own messages are excluded:
+Only unread messages from other participants are observed — the user's own messages are excluded:
 
 ```tsx
 <div
-  {...(!message.isMine && {
+  {...(isNotMineUnreadMessage && {
     ref: hook.observer.setMessageNodeRef(message.id),
   })}
   data-message-id={message.id}
@@ -264,7 +340,7 @@ const handleMarkAsRead = () => {
 
   // 1. Update local state optimistically
   // 2. Emit to server
-  socket?.emit(CHAT_EVENTS.MARK_AS_READ, messageIds);
+  socket?.emit(CHAT_EVENTS.MESSAGE_WAS_READ, { readerId: userId, messageIds });
 };
 ```
 
@@ -272,26 +348,26 @@ const handleMarkAsRead = () => {
 
 ### Frontend — Optimistic State Update
 
-Before emitting to the server, the client updates its local state immediately so the UI reflects the change without waiting for a server round-trip:
+Before emitting to the server, the client updates its local state immediately:
 
 ```typescript
-// Mark messages as read
+// Mark the current user's read entry as read inside each message's reads array
 const updatedMessages = state.messages.map((msg) => {
-  if (messageIdsSet.has(msg.id) && !msg.read) {
-    return { ...msg, read: true };
+  if (
+    messageIdsSet.has(msg.id) &&
+    msg.reads.some((r) => r.userId === userId && !r.read)
+  ) {
+    return {
+      ...msg,
+      reads: msg.reads.map((msgRead) =>
+        msgRead.userId === userId ? { ...msgRead, read: true } : msgRead,
+      ),
+    };
   }
   return msg;
 });
 
 // Decrement unreadMessages counter per chat
-const chatUnreadMessagesCounterMap = messageToMarkAsRead.reduce(
-  (acc: Record<string, number>, itm) => {
-    acc[itm.chatId] = (acc[itm.chatId] || 0) + 1;
-    return acc;
-  },
-  {},
-);
-
 const updatedChats = state.chats?.map((chat) => ({
   ...chat,
   unreadMessages: Math.max(
@@ -301,76 +377,75 @@ const updatedChats = state.chats?.map((chat) => ({
 }));
 ```
 
-Two things are updated at once: the `read` flag on each message, and the `unreadMessages` counter on the corresponding chat in the sidebar.
-
 ---
 
-### Frontend — Visual Indicators
+### Socket Events
 
-Unread messages are visually distinguished in two ways:
-
-```tsx
-// 1. The message bubble gets an unread style class
-className={`${styles.message} ${
-  !message.read && !message.isMine ? styles.unreadMessage : ""
-}`}
-
-// 2. A small indicator dot is rendered inside the bubble
-{!message.read && !message.isMine && (
-  <span className={styles.unreadIndicator} />
-)}
-```
-
-Both are removed once `read` is flipped to `true` in local state.
-
----
-
-### Socket Event
-
-| Direction       | Event               | Payload                  |
-| --------------- | ------------------- | ------------------------ |
-| Client → Server | `chat:mark_as_read` | `string[]` (message IDs) |
+| Direction       | Event                                 | Payload                                      |
+| --------------- | ------------------------------------- | -------------------------------------------- |
+| Client → Server | `chat:message_was_read`               | `{ readerId: string, messageIds: string[] }` |
+| Server → Client | `chat:notify_author_message_was_read` | `{ readerId: string, messageIds: string[] }` |
 
 ---
 
 ### Backend — Handler
 
-The server listens for `chat:mark_as_read` and mutates the matching `ReadEvent` records in the database:
+The server listens for `chat:message_was_read`, updates the DB, then notifies each message author:
 
 ```typescript
-export const markMessageAsReadHandler = (db: DB) => (messageIds: string[]) => {
-  db.readEvents = db.readEvents.map((readEvent) => {
-    if (messageIds.includes(readEvent.messageId)) {
-      return {
-        ...readEvent,
-        read: true,
-        updatedAt: new Date().toISOString(),
-      };
-    }
-    return readEvent;
+// 1. Update read status in the DB for the reader
+db.readEvents = db.readEvents.map((readEvent) => {
+  if (
+    messageIds.includes(readEvent.messageId) &&
+    readEvent.userId === readerId
+  ) {
+    return { ...readEvent, read: true, updatedAt: new Date().toISOString() };
+  }
+  return readEvent;
+});
+
+// 2. Group messages by author and emit one event per author
+for (const notification of authorNotifications) {
+  socket
+    .to(notification.authorSocketId)
+    .emit(CHAT_EVENTS.NOTIFY_AUTHOR_MESSAGE_WAS_READ, {
+      readerId,
+      messageIds: notification.messageIds,
+    });
+}
+```
+
+---
+
+### Frontend — Receiving Read Receipt (Author Side)
+
+When the author receives `chat:notify_author_message_was_read`, they update the `reads` array of the relevant messages and recompute the message status:
+
+```typescript
+const onNotifyAuthorMessageWasRead = (payload: ReadReceiptPayload) => {
+  const { readerId, messageIds } = payload;
+
+  useStore.setState((state) => {
+    const updatedMessages = state.messages?.map((message) => {
+      if (messageIds.includes(message.id)) {
+        const updatedReads = message.reads.map((msgRead) =>
+          msgRead.userId === readerId ? { ...msgRead, read: true } : msgRead,
+        );
+
+        const isReadMessage = updatedReads.every((r) => r.read);
+
+        return {
+          ...message,
+          reads: updatedReads,
+          status: isReadMessage ? MessageStatusEnum.READ : message.status,
+        };
+      }
+      return message;
+    });
+
+    return { messages: updatedMessages };
   });
 };
 ```
 
-The handler updates **all** `ReadEvent` records whose `messageId` is in the incoming array — setting `read: true` and refreshing `updatedAt`. No acknowledgment is sent back to the client since the UI has already been updated optimistically.
-
----
-
-### `read` field on `MessageDTO`
-
-When messages are fetched via `GET /chats/:chatId/messages`, each message includes a `read` field resolved from the `ReadEvent` scoped to the **authenticated user**:
-
-```typescript
-const foundReadEvent = db.readEvents.find(
-  (readEvent) => readEvent.messageId === msg.id && readEvent.userId === user.id,
-);
-
-return {
-  ...msg,
-  status: MessageStatusEnum.SENT,
-  read: foundReadEvent.read,
-  senderName: `${foundSender.firstName} ${foundSender.lastName}`,
-};
-```
-
-This ensures each user sees their own read state — not another participant's.
+The message status transitions to `READ` only when every participant's `read` entry is `true` — matching the Teams behaviour where the checkmark upgrades to an eye icon only after all recipients have read the message.

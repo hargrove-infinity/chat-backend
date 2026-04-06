@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../../../_mock/db";
 import {
+  type Message,
   type MessageDTO,
   MessageStatusEnum,
   type ReadEvent,
@@ -25,21 +26,25 @@ export const sendMessageHandler = (args: SendMessageHandlerArgs) => () => {
     throw new Error("User socket id is not set");
   }
 
-  const message: MessageDTO = {
+  const messageModel: Message = {
     id: uuidv4(),
     chatId: chatId,
     senderId: user.id,
-    senderName: `${user.firstName} ${user.lastName}`,
     content: content,
-    status: MessageStatusEnum.SENT,
-    read: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
 
+  const messageDto: MessageDTO = {
+    ...messageModel,
+    senderName: `${user.firstName} ${user.lastName}`,
+    status: MessageStatusEnum.SENT,
+    reads: [],
+  };
+
   const prevCount = db.messages.length;
 
-  const res = db.messages.push(message);
+  const res = db.messages.push(messageModel);
 
   if (res === prevCount) {
     throw new Error("Message is not stored in DB");
@@ -60,7 +65,7 @@ export const sendMessageHandler = (args: SendMessageHandlerArgs) => () => {
   const readEvents: ReadEvent[] = foundChat.participants.map(
     (participantId) => ({
       userId: participantId,
-      messageId: message.id,
+      messageId: messageDto.id,
       read: participantId === user.id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -69,7 +74,33 @@ export const sendMessageHandler = (args: SendMessageHandlerArgs) => () => {
 
   db.readEvents.push(...readEvents);
 
-  acknowledge({ ok: true, tempId: tempId, message });
+  // TODO: make one function
+  // chats.routes - getMessagesByChat contains similar code
+  const messageReadReceipts = db.readEvents
+    .filter(
+      (readEvent) =>
+        readEvent.messageId === messageDto.id &&
+        readEvent.userId !== messageDto.senderId,
+    )
+    .map((readEvent) => {
+      const user = db.users.find((u) => u.id === readEvent.userId);
 
-  socket.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, message);
+      if (!user) {
+        throw new Error("User is not found");
+      }
+
+      return {
+        userId: readEvent.userId,
+        userName: `${user.firstName} ${user.lastName}`,
+        read: readEvent.read,
+      };
+    });
+
+  acknowledge({
+    ok: true,
+    tempId: tempId,
+    message: { ...messageDto, reads: messageReadReceipts },
+  });
+
+  socket.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, messageDto);
 };
