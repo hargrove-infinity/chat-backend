@@ -112,19 +112,48 @@ chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
         throw new Error("Sender is not found");
       }
 
-      const foundReadEvent = db.readEvents.find(
-        (readEvent) =>
-          readEvent.messageId === msg.id && readEvent.userId === user.id,
-      );
+      /**
+       * Resolve read events based on message ownership:
+       * - Own messages: return read events for all other participants (excludes sender)
+       *   to display who has read the message
+       * - Others' messages: return only the current user's read event
+       *   to display whether the current user has read it
+       */
+      const messageReadReceipts = db.readEvents
+        .filter((readEvent) => {
+          const isAuthorMessage = msg.senderId === user.id;
 
-      if (!foundReadEvent) {
-        throw new Error("Read event is not found");
-      }
+          return (
+            readEvent.messageId === msg.id &&
+            (isAuthorMessage
+              ? readEvent.userId !== msg.senderId
+              : readEvent.userId === user.id)
+          );
+        })
+        .map((readEvent) => {
+          const user = db.users.find((u) => u.id === readEvent.userId);
+
+          if (!user) {
+            throw new Error("User is not found");
+          }
+
+          return {
+            userId: readEvent.userId,
+            userName: `${user.firstName} ${user.lastName}`,
+            read: readEvent.read,
+          };
+        });
+
+      // True only if all chat participants (sender + recipients) have read this message
+      // Used to resolve message status: READ if everyone read it, SENT otherwise
+      const isReadMessage = db.readEvents
+        .filter((readEvent) => readEvent.messageId === msg.id)
+        .every((readEventByMessage) => readEventByMessage.read);
 
       return {
         ...msg,
-        status: MessageStatusEnum.SENT,
-        read: foundReadEvent.read,
+        status: isReadMessage ? MessageStatusEnum.READ : MessageStatusEnum.SENT,
+        reads: messageReadReceipts,
         senderName: `${foundSender.firstName} ${foundSender.lastName}`,
       };
     });

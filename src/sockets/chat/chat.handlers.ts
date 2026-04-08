@@ -4,7 +4,7 @@ import { getDirectInterlocutorSocketIds, handleEvent } from "./chat.helpers";
 import type { ChatSocket } from "./chat.types";
 import { disconnectHandler } from "./handlers/disconnect.handler";
 import { errorHandler } from "./handlers/error.handler";
-import { markMessageAsReadHandler } from "./handlers/mark-message-as-read.handler";
+import { messageWasReadHandler } from "./handlers/message-was-read.handler";
 import { sendMessageHandler } from "./handlers/send-message.handler";
 import { startTypingDispatchHandler } from "./handlers/start-typing-dispatch.handler";
 import { stopTypingDispatchHandler } from "./handlers/stop-typing-dispatch.handler";
@@ -17,6 +17,8 @@ export function registerChatHandlers(socket: ChatSocket) {
    */
   socket.emit(CONNECTION_EVENTS.CONNECTED);
 
+  // TODO
+  // extract logic into separate function
   const user = db.users.find((user) => user.socketId === socket.id);
 
   if (!user) {
@@ -31,6 +33,8 @@ export function registerChatHandlers(socket: ChatSocket) {
     socket.join(chatIds);
   }
 
+  // TODO
+  // similar code in the disconnectHandler - make one function
   const interlocutorSocketIds = getDirectInterlocutorSocketIds({
     db,
     userId: user.id,
@@ -69,7 +73,10 @@ export function registerChatHandlers(socket: ChatSocket) {
     stopTypingDispatchHandler({ userId: user.id, socket }),
   );
 
-  socket.on(CHAT_EVENTS.MARK_AS_READ, markMessageAsReadHandler(db));
+  socket.on(
+    CHAT_EVENTS.MESSAGE_WAS_READ,
+    messageWasReadHandler({ db, socket }),
+  );
 
   socket.on("disconnect", disconnectHandler({ db, user, socket }));
 }
