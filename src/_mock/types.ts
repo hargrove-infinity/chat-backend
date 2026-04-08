@@ -84,15 +84,22 @@ export type Message = {
 };
 
 export enum MessageStatusEnum {
+  /** Message is being sent to server */
   SENDING = "SENDING",
+  /** Message successfully delivered to server */
   SENT = "SENT",
+  /** Message read by all participants in a chat */
+  READ = "READ",
+  /** Message failed to send */
   ERROR = "ERROR",
 }
+
+type MessageReads = { userId: string; userName: string; read: boolean };
 
 export type MessageDTO = Message & {
   senderName: string | null;
   status: MessageStatusEnum;
-  read: boolean;
+  reads: MessageReads[]; // all reads of message except sender because sender already read it
 };
 
 export type Log = {

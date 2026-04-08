@@ -47,6 +47,8 @@ export const CHAT_EVENTS = {
    * Read message events
    */
 
-  // Client → Server: User read unread message
-  MARK_AS_READ: "chat:mark_as_read",
+  // Client → Server: Reader reads message(s) (sent when the user views unread messages)
+  MESSAGE_WAS_READ: "chat:message_was_read",
+  // Server → Client(s) (to the author(s)): Notifies the message author(s) that their message was read by the interlocutor
+  NOTIFY_AUTHOR_MESSAGE_WAS_READ: "chat:notify_author_message_was_read",
 } as const;
