@@ -118,10 +118,19 @@ export function processMessageReadReceipt(args: {
   });
 
   // Keep only authors who are currently online (have a socketId)
-  const onlineAuthorSocketMessages = authorSocketMessages.filter(
-    (item): item is { authorSocketId: string; messageId: string } =>
-      typeof item.authorSocketId === "string" && item.authorSocketId.length > 0,
-  );
+  // flatMap is used instead of filter because filter alone cannot
+  // narrow the type of authorSocketId from string | null to string
+  const onlineAuthorSocketMessages = authorSocketMessages.flatMap((item) => {
+    if (
+      typeof item.authorSocketId === "string" &&
+      item.authorSocketId.length > 0
+    ) {
+      return [
+        { authorSocketId: item.authorSocketId, messageId: item.messageId },
+      ];
+    }
+    return [];
+  });
 
   // ─────────────────────────────────────────────────────────────
   // 3. Group messages by author so we emit only one event per author
