@@ -44,9 +44,6 @@ export const messageTable = pgTable("messages", {
   chatId: uuid("chat_id")
     .notNull()
     //?
-    // 2. Should chatId have a .unique() constraint?
-    .unique()
-    //?
     // 3. When a referenced row is deleted,
     // what factors should I use to decide between
     // CASCADE, SET NULL, RESTRICT, and NO ACTION — and which fits best
@@ -56,9 +53,6 @@ export const messageTable = pgTable("messages", {
   // 4. What's the best column name — user_id, author_id, or sender_id or else?
   senderId: uuid("sender_id")
     .notNull()
-    //?
-    // 5. Should chatId have a .unique() constraint?
-    .unique()
     //?
     // 6. When a referenced row is deleted,
     // what factors should I use to decide between
