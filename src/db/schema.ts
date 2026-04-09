@@ -43,22 +43,12 @@ export const messageTable = pgTable("messages", {
   id: uuid("id").primaryKey().defaultRandom(),
   chatId: uuid("chat_id")
     .notNull()
-    //?
-    // 3. When a referenced row is deleted,
-    // what factors should I use to decide between
-    // CASCADE, SET NULL, RESTRICT, and NO ACTION — and which fits best
-    // for each parent-child relationship in this schema?
     .references(() => chatTable.id, { onDelete: "cascade" }),
   //?
   // 4. What's the best column name — user_id, author_id, or sender_id or else?
-  senderId: uuid("sender_id")
-    .notNull()
-    //?
-    // 6. When a referenced row is deleted,
-    // what factors should I use to decide between
-    // CASCADE, SET NULL, RESTRICT, and NO ACTION — and which fits best
-    // for each parent-child relationship in this schema?
-    .references(() => userTable.id, { onDelete: "cascade" }),
+  senderId: uuid("sender_id").references(() => userTable.id, {
+    onDelete: "set null",
+  }),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
@@ -90,17 +80,9 @@ export const readEventTable = pgTable(
 export const logTable = pgTable("logs", {
   id: uuid("id").primaryKey().defaultRandom(),
   socketId: text("socket_id"),
-  userId: uuid("user_id")
-    .notNull()
-    //?
-    // 9. Should userId have a .unique() constraint?
-    .unique()
-    //?
-    // 10. When a referenced row is deleted,
-    // what factors should I use to decide between
-    // CASCADE, SET NULL, RESTRICT, and NO ACTION — and which fits best
-    // for each parent-child relationship in this schema?
-    .references(() => userTable.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").references(() => userTable.id, {
+    onDelete: "set null",
+  }),
   event: text("event").notNull(),
   message: text("message"),
   name: text("name"),
