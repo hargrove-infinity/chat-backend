@@ -79,6 +79,8 @@ const readEvents: ReadEvent[] = foundChat.participants.map((participantId) => ({
 }));
 ```
 
+When another participant reads the message, the corresponding ReadEvent is updated — its read field is set to true and updatedAt is refreshed.
+
 ---
 
 ### Message Status
