@@ -51,10 +51,8 @@ export const messageTable = pgTable("messages", {
     .$onUpdate(() => new Date()),
 });
 
-//?
-// 7. Is read_events a good table name, or is there a more expressive alternative?
-export const readEventTable = pgTable(
-  "read_events",
+export const messageStatusTable = pgTable(
+  "message_status",
   {
     userId: uuid("user_id")
       .notNull()
@@ -102,7 +100,7 @@ export const chatParticipantsTable = pgTable(
 export const userRelations = relations(userTable, ({ many }) => ({
   chatParticipants: many(chatParticipantsTable),
   messages: many(messageTable),
-  readEvents: many(readEventTable),
+  messageStatuses: many(messageStatusTable),
   logs: many(logTable),
 }));
 
@@ -126,7 +124,7 @@ export const chatParticipantsRelations = relations(
 );
 
 export const messageRelations = relations(messageTable, ({ one, many }) => ({
-  readEvents: many(readEventTable),
+  messageStatuses: many(messageStatusTable),
   sender: one(userTable, {
     fields: [messageTable.userId],
     references: [userTable.id],
@@ -137,16 +135,19 @@ export const messageRelations = relations(messageTable, ({ one, many }) => ({
   }),
 }));
 
-export const readEventRelations = relations(readEventTable, ({ one }) => ({
-  user: one(userTable, {
-    fields: [readEventTable.userId],
-    references: [userTable.id],
+export const messageStatusRelations = relations(
+  messageStatusTable,
+  ({ one }) => ({
+    user: one(userTable, {
+      fields: [messageStatusTable.userId],
+      references: [userTable.id],
+    }),
+    message: one(messageTable, {
+      fields: [messageStatusTable.messageId],
+      references: [messageTable.id],
+    }),
   }),
-  message: one(messageTable, {
-    fields: [readEventTable.messageId],
-    references: [messageTable.id],
-  }),
-}));
+);
 
 export const logRelations = relations(logTable, ({ one }) => ({
   user: one(userTable, {
