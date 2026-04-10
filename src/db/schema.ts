@@ -38,8 +38,6 @@ export const chatTable = pgTable("chats", {
 });
 
 export const messageTable = pgTable("messages", {
-  //?
-  // 1. Can/should I use a composite index on [chatId, senderId] instead of a standalone id primary key?
   id: uuid("id").primaryKey().defaultRandom(),
   chatId: uuid("chat_id")
     .notNull()
