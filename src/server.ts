@@ -7,7 +7,7 @@ import { checkConnection } from "./db";
 import { logger } from "./logger";
 import { initSockets } from "./sockets";
 
-async function startServer() {
+async function bootstrap() {
   await checkConnection();
 
   const app = createApp();
@@ -34,11 +34,13 @@ async function startServer() {
   });
 }
 
-(async () => {
+async function main() {
   try {
-    await startServer();
+    await bootstrap();
   } catch (error) {
     logger.error({ error }, "Server failed to start");
     process.exit(1);
   }
-})();
+}
+
+main();
