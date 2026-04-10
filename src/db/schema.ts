@@ -1,4 +1,3 @@
-//? import { unique } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -65,12 +64,7 @@ export const readEventTable = pgTable(
       .notNull()
       .$onUpdate(() => new Date()),
   },
-  //?
-  // 8. What's the practical difference between
-  // primaryKey({ columns: [userId, messageId] }) and
-  // unique().on(userId, messageId) — when should I prefer one over the other?
   (table) => [primaryKey({ columns: [table.userId, table.messageId] })],
-  //? (table) => [unique().on(table.userId, table.messageId)],
 );
 
 export const logTable = pgTable("logs", {
