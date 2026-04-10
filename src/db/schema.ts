@@ -56,8 +56,12 @@ export const messageTable = pgTable("messages", {
 export const readEventTable = pgTable(
   "read_events",
   {
-    userId: uuid("user_id").notNull(),
-    messageId: uuid("message_id").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => userTable.id, { onDelete: "cascade" }),
+    messageId: uuid("message_id")
+      .notNull()
+      .references(() => messageTable.id, { onDelete: "cascade" }),
     read: boolean("read").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
