@@ -44,7 +44,7 @@ export const messageTable = pgTable("messages", {
     .references(() => chatTable.id, { onDelete: "cascade" }),
   //?
   // 4. What's the best column name — user_id, author_id, or sender_id or else?
-  senderId: uuid("sender_id").references(() => userTable.id, {
+  userId: uuid("user_id").references(() => userTable.id, {
     onDelete: "set null",
   }),
   content: text("content").notNull(),
@@ -132,7 +132,7 @@ export const chatParticipantsRelations = relations(
 export const messageRelations = relations(messageTable, ({ one, many }) => ({
   readEvents: many(readEventTable),
   sender: one(userTable, {
-    fields: [messageTable.senderId],
+    fields: [messageTable.userId],
     references: [userTable.id],
   }),
   chat: one(chatTable, {
