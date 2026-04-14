@@ -18,14 +18,8 @@ async function findFirst(
   const [data, error] = await asyncTryCatch<User | undefined>(res);
 
   if (error) {
-    let errorMessage = "Unknown error";
-
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-
     logger.error(
-      { error: errorMessage },
+      { error: error.message },
       "Error during getting first user from database",
     );
 
