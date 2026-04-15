@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "drizzle-generate": "drizzle-kit generate",
-    "drizzle-migrate": "drizzle-kit migrate",
+    "drizzle-generate": "drizzle-kit generate --config=./drizzle.config.ts",
+    "drizzle-migrate": "drizzle-kit migrate --config=./drizzle.config.ts",
     "build:run": "tsc && node dist/server.js",
     "dev": "npx onchange -i -k \"src/**/*.ts\" -- sh -c \"biome check src && npm run --silent build:run\""
   },
