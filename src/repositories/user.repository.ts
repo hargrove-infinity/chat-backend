@@ -1,21 +1,27 @@
-import type { InferSelectModel } from "drizzle-orm";
+import type { AnyColumn, InferSelectModel } from "drizzle-orm";
 import { db } from "../db";
 import type { userTable } from "../db/schema";
 import { logger } from "../logger";
 import { asyncTryCatch } from "../util/asyncTryCatch";
-
-type FindFirstArgs = NonNullable<
-  Parameters<typeof db.query.userTable.findFirst>[0]
->;
+import { buildConditions, type Filters } from "./helpers.repository";
 
 type User = InferSelectModel<typeof userTable>;
 
+type ExtractColumns<T> = {
+  [K in keyof T]: T[K] extends AnyColumn ? T[K] : never;
+};
+
+type UserColumns = ExtractColumns<typeof userTable>;
+
 async function findFirst(
-  args?: FindFirstArgs,
+  filters?: Filters<UserColumns>,
 ): Promise<[User | null, null] | [null, Error]> {
-  const res = db.query.userTable.findFirst(args);
   logger.info("Getting first user from database...");
-  const [data, error] = await asyncTryCatch<User | undefined>(res);
+  const res = db.query.userTable.findFirst({
+    where: (user) => buildConditions(user, filters),
+  });
+
+  const [data, error] = await asyncTryCatch(res);
 
   if (error) {
     logger.error(

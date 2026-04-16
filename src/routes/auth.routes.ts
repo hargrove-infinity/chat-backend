@@ -1,10 +1,7 @@
-// TODO: uncomment
-// import { eq } from "drizzle-orm";
 import { Router } from "express";
 import { db } from "../_mock/db";
 import { paths } from "../common/paths";
 // TODO: uncomment
-// import { userTable } from "../db/schema";
 // import { userRepository } from "../repositories/user.repository";
 
 export const authRoutes = Router();
@@ -27,7 +24,7 @@ authRoutes.post(paths.auth.login, async (req, res) => {
 
   // TODO: uncomment
   // const [user, error] = await userRepository.findFirst({
-  //   where: eq(userTable.email, email),
+  //   email: { eq: "mail@mail.com" },
   // });
 
   // if (error) {
