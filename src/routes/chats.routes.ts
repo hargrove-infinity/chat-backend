@@ -96,6 +96,7 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
  */
 chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
   const { user, params } = req;
+  // TODO: add validation for chatId
   const { chatId } = params;
 
   if (!user) {
