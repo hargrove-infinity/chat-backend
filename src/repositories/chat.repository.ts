@@ -1,10 +1,15 @@
+import { and, desc, eq } from "drizzle-orm";
 import type { ChatDTO } from "../_mock/types";
 import { db } from "../db";
-import { chatParticipantsTable } from "../db/schema";
+import {
+  chatParticipantsTable,
+  messageStatusTable,
+  messageTable,
+} from "../db/schema";
 
 async function findManyByUserId(userId: string) {
   const chatParticipants = await db.query.chatParticipantsTable.findMany({
-    where: (chatParticipants, { eq }) => eq(chatParticipants.userId, userId),
+    where: eq(chatParticipantsTable.userId, userId),
     with: {
       user: {
         columns: { id: true, socketId: true },
@@ -13,12 +18,8 @@ async function findManyByUserId(userId: string) {
         columns: { id: true, name: true, type: true },
         with: {
           messages: {
-            where: (messages, { eq }) => {
-              return eq(messages.chatId, chatParticipantsTable.chatId);
-            },
-            orderBy: (messages, { desc }) => {
-              return [desc(messages.createdAt)];
-            },
+            where: eq(messageTable.chatId, chatParticipantsTable.chatId),
+            orderBy: [desc(messageTable.createdAt)],
             columns: { content: true },
             limit: 1,
           },
@@ -30,9 +31,7 @@ async function findManyByUserId(userId: string) {
   const chatParticipantsExtendedPromises = chatParticipants.map(
     async (chatParticipant) => {
       const participants = await db.query.chatParticipantsTable.findMany({
-        where: (chatParticipants, { eq }) => {
-          return eq(chatParticipants.chatId, chatParticipant.chatId);
-        },
+        where: eq(chatParticipantsTable.chatId, chatParticipant.chatId),
         with: {
           user: { columns: { id: true, firstName: true, lastName: true } },
         },
@@ -47,12 +46,10 @@ async function findManyByUserId(userId: string) {
   );
 
   const userUnreadEvents = await db.query.messageStatusTable.findMany({
-    where: (messageStatus, { and, eq }) => {
-      return and(
-        eq(messageStatus.userId, userId),
-        eq(messageStatus.read, false),
-      );
-    },
+    where: and(
+      eq(messageStatusTable.userId, userId),
+      eq(messageStatusTable.read, false),
+    ),
     with: {
       message: {
         columns: { id: true, content: true },
