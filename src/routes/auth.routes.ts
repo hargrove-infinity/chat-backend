@@ -1,8 +1,6 @@
 import { Router } from "express";
 import { db } from "../_mock/db";
 import { paths } from "../common/paths";
-// TODO: uncomment
-// import { userRepository } from "../repositories/user.repository";
 
 export const authRoutes = Router();
 
@@ -21,27 +19,6 @@ authRoutes.post(paths.auth.login, async (req, res) => {
     res.status(400).send({ errors: ["Wrong credentials"] });
     return;
   }
-
-  // TODO: uncomment
-  // const [user, error] = await userRepository.findFirst({
-  //   email: { eq: "mail@mail.com" },
-  // });
-
-  // if (error) {
-  //   res.status(500).send({ errors: ["Internal server error"] });
-  //   return;
-  // }
-
-  // if (!user) {
-  //   res.status(400).send({ errors: ["Wrong credentials"] });
-  //   return;
-  // }
-
-  // // TODO: replace with bcrypt method
-  // if (user.password !== password) {
-  //   res.status(400).send({ errors: ["Wrong credentials"] });
-  //   return;
-  // }
 
   const { password: _, ...rest } = user;
 
