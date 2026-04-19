@@ -18,7 +18,7 @@ export type User = {
 
 export type Chat = {
   id: string;
-  type: "direct" | "group";
+  type: "DIRECT" | "GROUP";
   /**
    * Group chats: stored name
    * Direct chats: null (resolved on BE to participant's name in ChatDTO)
@@ -32,7 +32,7 @@ export type Chat = {
 
 type Participant = { id: string; name: string; isTyping: boolean };
 
-export type ChatDTO = Omit<Chat, "participants"> & {
+export type ChatDTO = Omit<Chat, "participants" | "createdAt" | "updatedAt"> & {
   /**
    * Resolved name for display
    * Group chats: stored name from Chat

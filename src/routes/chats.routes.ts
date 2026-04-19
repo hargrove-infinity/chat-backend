@@ -25,23 +25,27 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
   const chats: ChatDTO[] = db.chats
     .filter((chat) => chat.participants.includes(user.id))
     .map((chat) => {
+      const { createdAt, updatedAt, ...mainChatData } = chat;
+
       const lastMessage = db.messages
-        .filter((msg) => msg.chatId === chat.id)
+        .filter((msg) => msg.chatId === mainChatData.id)
         .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))[0];
 
-      const extendedParticipants = chat.participants.map((participantId) => {
-        const foundUser = db.users.find((u) => u.id === participantId);
+      const extendedParticipants = mainChatData.participants.map(
+        (participantId) => {
+          const foundUser = db.users.find((u) => u.id === participantId);
 
-        if (!foundUser) {
-          throw new Error("User is not found");
-        }
+          if (!foundUser) {
+            throw new Error("User is not found");
+          }
 
-        return {
-          id: participantId,
-          name: `${foundUser.firstName} ${foundUser.lastName}`,
-          isTyping: false,
-        };
-      });
+          return {
+            id: participantId,
+            name: `${foundUser.firstName} ${foundUser.lastName}`,
+            isTyping: false,
+          };
+        },
+      );
 
       // 1. Filter readEvents array by userId and status: unread
       const userUnreadEvents = db.readEvents.filter(
@@ -58,16 +62,16 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
           throw new Error("Unread message is not found");
         }
 
-        return unreadMessage.chatId === chat.id;
+        return unreadMessage.chatId === mainChatData.id;
       });
 
-      if (chat.type === "direct" && !chat.name) {
+      if (mainChatData.type === "DIRECT" && !mainChatData.name) {
         const interlocutor = db.users.find(
-          (u) => u.id !== user.id && chat.participants.includes(u.id),
+          (u) => u.id !== user.id && mainChatData.participants.includes(u.id),
         );
 
         return {
-          ...chat,
+          ...mainChatData,
           name: interlocutor
             ? `${interlocutor.firstName} ${interlocutor.lastName}`
             : null,
@@ -79,7 +83,7 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
       }
 
       return {
-        ...chat,
+        ...mainChatData,
         lastMessage: lastMessage?.content ?? null,
         isOnline: false,
         participants: extendedParticipants,
