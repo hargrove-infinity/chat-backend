@@ -73,7 +73,7 @@ async function findManyByUserId(userId: string) {
     chatParticipantsExtendedWithUnreadCounterPromises,
   );
 
-  const chatsDto: ChatDTO[] = chatParticipantsExtendedWithUnreadCounter.map(
+  const chatDtos: ChatDTO[] = chatParticipantsExtendedWithUnreadCounter.map(
     (chat) => {
       const interlocutor = chat.chatData.participants.find(
         (participant) => participant.user.id !== chat.chatData.user.id,
@@ -110,7 +110,7 @@ async function findManyByUserId(userId: string) {
     },
   );
 
-  return chatsDto;
+  return chatDtos;
 }
 
 export const chatRepository = {
