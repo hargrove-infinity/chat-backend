@@ -8,6 +8,8 @@ import {
 } from "../db/schema";
 
 async function findManyByUserId(userId: string) {
+  // Fetch all chats the user participates in, along with the last message
+  // and all participants for each chat
   const rawChats = await db.query.chatParticipantsTable.findMany({
     where: eq(chatParticipantsTable.userId, userId),
     columns: { userId: false, chatId: false },
@@ -39,6 +41,7 @@ async function findManyByUserId(userId: string) {
     },
   });
 
+  // Fetch all unread message statuses for the user across all chats
   const userUnreadEvents = await db.query.messageStatusTable.findMany({
     where: and(
       eq(messageStatusTable.userId, userId),
@@ -51,13 +54,16 @@ async function findManyByUserId(userId: string) {
     },
   });
 
+  // Build a lookup map of unread message count per chat id
   const unreadCountByChatId: Record<string, number> = {};
 
+  // Count unread messages per chat
   for (const status of userUnreadEvents) {
     const chatId = status.message.chat.id;
     unreadCountByChatId[chatId] = (unreadCountByChatId[chatId] ?? 0) + 1;
   }
 
+  // Transform raw DB data into ChatDTO shape expected by the frontend
   const chatDtos: ChatDTO[] = rawChats.map((rawChat) => {
     const participants = rawChat.chat.chatParticipants.map((participant) => {
       return {
