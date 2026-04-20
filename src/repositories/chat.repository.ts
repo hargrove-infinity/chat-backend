@@ -58,8 +58,8 @@ async function findManyByUserId(userId: string) {
     },
   });
 
-  const chatParticipantsExtendedWithUnreadCounterPromises =
-    chatParticipantsExtended.map(async (chatData) => {
+  const chatParticipantsExtendedWithUnreadCounter =
+    chatParticipantsExtended.map((chatData) => {
       const unreadMessagesByChat = userUnreadEvents.filter(
         (userUnreadEvent) => {
           return userUnreadEvent.message.chat.id === chatData.chat.id;
@@ -68,10 +68,6 @@ async function findManyByUserId(userId: string) {
 
       return { chatData, unreadMessages: unreadMessagesByChat.length };
     });
-
-  const chatParticipantsExtendedWithUnreadCounter = await Promise.all(
-    chatParticipantsExtendedWithUnreadCounterPromises,
-  );
 
   const chatDtos: ChatDTO[] = chatParticipantsExtendedWithUnreadCounter.map(
     (chat) => {
