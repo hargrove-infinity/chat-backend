@@ -52,7 +52,6 @@ async function findManyByUserId(userId: string) {
     ),
     with: {
       message: {
-        columns: { id: true, content: true },
         with: { chat: { columns: { id: true } } },
       },
     },
