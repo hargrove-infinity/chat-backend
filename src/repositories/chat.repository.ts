@@ -14,7 +14,7 @@ async function findManyByUserId(userId: string) {
       columns: { userId: false, chatId: false },
       with: {
         user: {
-          columns: { id: true, socketId: true },
+          columns: { id: true },
         },
         chat: {
           columns: { id: true, name: true, type: true },
@@ -29,7 +29,12 @@ async function findManyByUserId(userId: string) {
               columns: { userId: false, chatId: false },
               with: {
                 user: {
-                  columns: { id: true, firstName: true, lastName: true },
+                  columns: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    socketId: true,
+                  },
                 },
               },
             },
@@ -59,21 +64,6 @@ async function findManyByUserId(userId: string) {
 
   const chatDtos: ChatDTO[] = chatParticipantsExtended.map(
     (chatParticipant) => {
-      const interlocutor = chatParticipant.chat.chatParticipants.find(
-        (participant) => participant.user.id !== chatParticipant.user.id,
-      );
-
-      if (!interlocutor) {
-        throw new Error("Interlocutor was not found");
-      }
-
-      const chatDirectName = `${interlocutor.user.firstName} ${interlocutor.user.lastName}`;
-
-      const chatName =
-        chatParticipant.chat.type === "DIRECT"
-          ? chatDirectName
-          : chatParticipant.chat.name;
-
       const participants = chatParticipant.chat.chatParticipants.map(
         (participant) => {
           return {
@@ -84,15 +74,33 @@ async function findManyByUserId(userId: string) {
         },
       );
 
-      return {
+      const defaultChatData = {
         id: chatParticipant.chat.id,
         type: chatParticipant.chat.type,
-        name: chatName,
+        name: chatParticipant.chat.name,
         participants: participants,
         lastMessage: chatParticipant.chat.messages[0]?.content ?? null,
-        isOnline: !!chatParticipant.user.socketId,
+        isOnline: false,
         unreadMessages: unreadCountByChatId[chatParticipant.chat.id] ?? 0,
       };
+
+      if (chatParticipant.chat.type === "DIRECT") {
+        const interlocutor = chatParticipant.chat.chatParticipants.find(
+          (participant) => participant.user.id !== chatParticipant.user.id,
+        );
+
+        if (!interlocutor) {
+          throw new Error("Interlocutor was not found");
+        }
+
+        return {
+          ...defaultChatData,
+          name: `${interlocutor.user.firstName} ${interlocutor.user.lastName}`,
+          isOnline: !!interlocutor.user.socketId,
+        };
+      }
+
+      return defaultChatData;
     },
   );
 
