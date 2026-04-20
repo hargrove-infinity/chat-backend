@@ -17,7 +17,6 @@ async function findManyByUserId(userId: string) {
         columns: { id: true, name: true, type: true },
         with: {
           messages: {
-            where: eq(messageTable.chatId, chatParticipantsTable.chatId),
             orderBy: [desc(messageTable.createdAt)],
             columns: { content: true },
             limit: 1,
