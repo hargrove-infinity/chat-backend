@@ -8,42 +8,35 @@ import {
 } from "../db/schema";
 
 async function findManyByUserId(userId: string) {
-  const chatParticipants = await db.query.chatParticipantsTable.findMany({
-    where: eq(chatParticipantsTable.userId, userId),
-    with: {
-      user: {
-        columns: { id: true, socketId: true },
-      },
-      chat: {
-        columns: { id: true, name: true, type: true },
-        with: {
-          messages: {
-            where: eq(messageTable.chatId, chatParticipantsTable.chatId),
-            orderBy: [desc(messageTable.createdAt)],
-            columns: { content: true },
-            limit: 1,
+  const chatParticipantsExtended =
+    await db.query.chatParticipantsTable.findMany({
+      where: eq(chatParticipantsTable.userId, userId),
+      columns: { userId: false, chatId: false },
+      with: {
+        user: {
+          columns: { id: true, socketId: true },
+        },
+        chat: {
+          columns: { id: true, name: true, type: true },
+          with: {
+            messages: {
+              where: eq(messageTable.chatId, chatParticipantsTable.chatId),
+              orderBy: [desc(messageTable.createdAt)],
+              columns: { content: true },
+              limit: 1,
+            },
+            chatParticipants: {
+              columns: { userId: false, chatId: false },
+              with: {
+                user: {
+                  columns: { id: true, firstName: true, lastName: true },
+                },
+              },
+            },
           },
         },
       },
-    },
-  });
-
-  const chatParticipantsExtendedPromises = chatParticipants.map(
-    async (chatParticipant) => {
-      const participants = await db.query.chatParticipantsTable.findMany({
-        where: eq(chatParticipantsTable.chatId, chatParticipant.chatId),
-        with: {
-          user: { columns: { id: true, firstName: true, lastName: true } },
-        },
-      });
-
-      return { ...chatParticipant, participants };
-    },
-  );
-
-  const chatParticipantsExtended = await Promise.all(
-    chatParticipantsExtendedPromises,
-  );
+    });
 
   const userUnreadEvents = await db.query.messageStatusTable.findMany({
     where: and(
@@ -64,38 +57,44 @@ async function findManyByUserId(userId: string) {
     unreadCountByChatId[chatId] = (unreadCountByChatId[chatId] ?? 0) + 1;
   }
 
-  const chatDtos: ChatDTO[] = chatParticipantsExtended.map((chat) => {
-    const interlocutor = chat.participants.find(
-      (participant) => participant.user.id !== chat.user.id,
-    );
+  const chatDtos: ChatDTO[] = chatParticipantsExtended.map(
+    (chatParticipant) => {
+      const interlocutor = chatParticipant.chat.chatParticipants.find(
+        (participant) => participant.user.id !== chatParticipant.user.id,
+      );
 
-    if (!interlocutor) {
-      throw new Error("Interlocutor was not found");
-    }
+      if (!interlocutor) {
+        throw new Error("Interlocutor was not found");
+      }
 
-    const chatDirectName = `${interlocutor.user.firstName} ${interlocutor.user.lastName}`;
+      const chatDirectName = `${interlocutor.user.firstName} ${interlocutor.user.lastName}`;
 
-    const chatName =
-      chat.chat.type === "DIRECT" ? chatDirectName : chat.chat.name;
+      const chatName =
+        chatParticipant.chat.type === "DIRECT"
+          ? chatDirectName
+          : chatParticipant.chat.name;
 
-    const participants = chat.participants.map((participant) => {
+      const participants = chatParticipant.chat.chatParticipants.map(
+        (participant) => {
+          return {
+            id: participant.user.id,
+            name: `${participant.user.firstName} ${participant.user.lastName}`,
+            isTyping: false,
+          };
+        },
+      );
+
       return {
-        id: participant.user.id,
-        name: `${participant.user.firstName} ${participant.user.lastName}`,
-        isTyping: false,
+        id: chatParticipant.chat.id,
+        type: chatParticipant.chat.type,
+        name: chatName,
+        participants: participants,
+        lastMessage: chatParticipant.chat.messages[0]?.content ?? null,
+        isOnline: !!chatParticipant.user.socketId,
+        unreadMessages: unreadCountByChatId[chatParticipant.chat.id] ?? 0,
       };
-    });
-
-    return {
-      id: chat.chat.id,
-      type: chat.chat.type,
-      name: chatName,
-      participants: participants,
-      lastMessage: chat.chat.messages[0]?.content ?? null,
-      isOnline: !!chat.user.socketId,
-      unreadMessages: unreadCountByChatId[chat.chat.id] ?? 0,
-    };
-  });
+    },
+  );
 
   return chatDtos;
 }
