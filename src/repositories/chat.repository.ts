@@ -58,53 +58,45 @@ async function findManyByUserId(userId: string) {
     },
   });
 
-  const chatParticipantsExtendedWithUnreadCounter =
-    chatParticipantsExtended.map((chatData) => {
-      const unreadMessagesByChat = userUnreadEvents.filter(
-        (userUnreadEvent) => {
-          return userUnreadEvent.message.chat.id === chatData.chat.id;
-        },
-      );
+  const unreadCountByChatId: Record<string, number> = {};
 
-      return { chatData, unreadMessages: unreadMessagesByChat.length };
+  for (const status of userUnreadEvents) {
+    const chatId = status.message.chat.id;
+    unreadCountByChatId[chatId] = (unreadCountByChatId[chatId] ?? 0) + 1;
+  }
+
+  const chatDtos: ChatDTO[] = chatParticipantsExtended.map((chat) => {
+    const interlocutor = chat.participants.find(
+      (participant) => participant.user.id !== chat.user.id,
+    );
+
+    if (!interlocutor) {
+      throw new Error("Interlocutor was not found");
+    }
+
+    const chatDirectName = `${interlocutor.user.firstName} ${interlocutor.user.lastName}`;
+
+    const chatName =
+      chat.chat.type === "DIRECT" ? chatDirectName : chat.chat.name;
+
+    const participants = chat.participants.map((participant) => {
+      return {
+        id: participant.user.id,
+        name: `${participant.user.firstName} ${participant.user.lastName}`,
+        isTyping: false,
+      };
     });
 
-  const chatDtos: ChatDTO[] = chatParticipantsExtendedWithUnreadCounter.map(
-    (chat) => {
-      const interlocutor = chat.chatData.participants.find(
-        (participant) => participant.user.id !== chat.chatData.user.id,
-      );
-
-      if (!interlocutor) {
-        throw new Error("Interlocutor was not found");
-      }
-
-      const chatDirectName = `${interlocutor.user.firstName} ${interlocutor.user.lastName}`;
-
-      const chatName =
-        chat.chatData.chat.type === "DIRECT"
-          ? chatDirectName
-          : chat.chatData.chat.name;
-
-      const participants = chat.chatData.participants.map((participant) => {
-        return {
-          id: participant.user.id,
-          name: `${participant.user.firstName} ${participant.user.lastName}`,
-          isTyping: false,
-        };
-      });
-
-      return {
-        id: chat.chatData.chat.id,
-        type: chat.chatData.chat.type,
-        name: chatName,
-        participants: participants,
-        lastMessage: chat.chatData.chat.messages[0]?.content ?? null,
-        isOnline: !!chat.chatData.user.socketId,
-        unreadMessages: chat.unreadMessages,
-      };
-    },
-  );
+    return {
+      id: chat.chat.id,
+      type: chat.chat.type,
+      name: chatName,
+      participants: participants,
+      lastMessage: chat.chat.messages[0]?.content ?? null,
+      isOnline: !!chat.user.socketId,
+      unreadMessages: unreadCountByChatId[chat.chat.id] ?? 0,
+    };
+  });
 
   return chatDtos;
 }
