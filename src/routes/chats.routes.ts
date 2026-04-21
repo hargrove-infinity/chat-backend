@@ -22,6 +22,12 @@ chatsRoutes.get(paths.chats.list, authMiddleware, (req, res) => {
     return;
   }
 
+  // TODO: remove later
+  // I'm planning to use chatRepository.findManyByUserId() here
+  // Currently, body of this route does is not wrapped in try/catch - I think it's mistake
+  // Take into account I might wrap body of this route in try/catch
+  // const chatDtos = await chatRepository.findManyByUserId(user.id);
+
   const chats: ChatDTO[] = db.chats
     .filter((chat) => chat.participants.includes(user.id))
     .map((chat) => {
