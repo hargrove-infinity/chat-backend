@@ -97,7 +97,7 @@ export function processMessageReadReceipt(args: {
       if (!message) {
         throw new Error(`Message not found: ${messageId}`);
       }
-      return { authorId: message.senderId, messageId };
+      return { authorId: message.userId, messageId };
     })
     .filter(
       (item, index, self) =>

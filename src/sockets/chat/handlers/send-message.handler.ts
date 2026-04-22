@@ -29,7 +29,7 @@ export const sendMessageHandler = (args: SendMessageHandlerArgs) => () => {
   const messageModel: Message = {
     id: uuidv4(),
     chatId: chatId,
-    senderId: user.id,
+    userId: user.id,
     content: content,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -80,7 +80,7 @@ export const sendMessageHandler = (args: SendMessageHandlerArgs) => () => {
     .filter(
       (readEvent) =>
         readEvent.messageId === messageDto.id &&
-        readEvent.userId !== messageDto.senderId,
+        readEvent.userId !== messageDto.userId,
     )
     .map((readEvent) => {
       const user = db.users.find((u) => u.id === readEvent.userId);

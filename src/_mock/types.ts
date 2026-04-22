@@ -77,7 +77,7 @@ export type ChatDTO = Omit<Chat, "participants"> & {
 export type Message = {
   id: string;
   chatId: string;
-  senderId: string;
+  userId: string | null;
   content: string;
   createdAt: string;
   updatedAt: string;

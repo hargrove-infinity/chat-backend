@@ -106,7 +106,7 @@ chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
   const messages: MessageDTO[] = db.messages
     .filter((msg) => msg.chatId === chatId)
     .map((msg) => {
-      const foundSender = db.users.find((user) => user.id === msg.senderId);
+      const foundSender = db.users.find((user) => user.id === msg.userId);
 
       if (!foundSender) {
         throw new Error("Sender is not found");
@@ -121,12 +121,12 @@ chatsRoutes.get(paths.chats.messagesByChatId, authMiddleware, (req, res) => {
        */
       const messageReadReceipts = db.readEvents
         .filter((readEvent) => {
-          const isAuthorMessage = msg.senderId === user.id;
+          const isAuthorMessage = msg.userId === user.id;
 
           return (
             readEvent.messageId === msg.id &&
             (isAuthorMessage
-              ? readEvent.userId !== msg.senderId
+              ? readEvent.userId !== msg.userId
               : readEvent.userId === user.id)
           );
         })

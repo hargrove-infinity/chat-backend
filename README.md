@@ -125,11 +125,11 @@ This is resolved in `GET /chats/:chatId/messages` on the backend:
  */
 const messageReadReceipts = db.readEvents
   .filter((readEvent) => {
-    const isAuthorMessage = msg.senderId === user.id;
+    const isAuthorMessage = msg.userId === user.id;
     return (
       readEvent.messageId === msg.id &&
       (isAuthorMessage
-        ? readEvent.userId !== msg.senderId
+        ? readEvent.userId !== msg.userId
         : readEvent.userId === user.id)
     );
   })
