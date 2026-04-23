@@ -50,10 +50,9 @@ async function findManyByChatId({
       ...restMessages,
       reads: messageReadReceipts,
       status: isReadMessage ? MessageStatusEnum.READ : MessageStatusEnum.SENT,
-      senderName:
-        sender?.firstName && sender?.lastName
-          ? `${sender.firstName} ${sender.lastName}`
-          : "Deleted user",
+      senderName: sender
+        ? `${sender.firstName} ${sender.lastName}`
+        : "Deleted user",
     };
   });
 
