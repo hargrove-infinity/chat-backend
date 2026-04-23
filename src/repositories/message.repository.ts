@@ -26,10 +26,10 @@ async function findManyByChatId({
   const messageDtos = rawMessages.map((msg) => {
     const { messageStatuses, sender, ...restMessages } = msg;
 
+    const isAuthorMessage = msg.userId === userId;
+
     const messageReadReceipts = msg.messageStatuses
       .filter((messageStatus) => {
-        const isAuthorMessage = msg.userId === userId;
-
         return isAuthorMessage
           ? messageStatus.userId !== msg.userId
           : messageStatus.userId === userId;
