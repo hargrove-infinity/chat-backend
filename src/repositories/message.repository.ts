@@ -42,8 +42,9 @@ async function findManyByChatId({
         };
       });
 
-    const isReadMessage = msg.messageStatuses.every(
-      (messageStatus) => messageStatus.read,
+    const isReadMessage = !!(
+      msg.messageStatuses.length &&
+      msg.messageStatuses.every((messageStatus) => messageStatus.read)
     );
 
     return {
