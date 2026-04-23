@@ -1,3 +1,4 @@
+// TODO: apply $inferSelect
 export type User = {
   id: string;
   /**
@@ -16,9 +17,10 @@ export type User = {
   updatedAt: string;
 };
 
+// TODO: apply $inferSelect
 export type Chat = {
   id: string;
-  type: "direct" | "group";
+  type: "DIRECT" | "GROUP";
   /**
    * Group chats: stored name
    * Direct chats: null (resolved on BE to participant's name in ChatDTO)
@@ -32,7 +34,7 @@ export type Chat = {
 
 type Participant = { id: string; name: string; isTyping: boolean };
 
-export type ChatDTO = Omit<Chat, "participants"> & {
+export type ChatDTO = Omit<Chat, "participants" | "createdAt" | "updatedAt"> & {
   /**
    * Resolved name for display
    * Group chats: stored name from Chat
@@ -74,6 +76,7 @@ export type ChatDTO = Omit<Chat, "participants"> & {
   unreadMessages: number;
 };
 
+// TODO: apply $inferSelect
 export type Message = {
   id: string;
   chatId: string;
@@ -102,6 +105,7 @@ export type MessageDTO = Message & {
   reads: MessageReads[]; // all reads of message except sender because sender already read it
 };
 
+// TODO: apply $inferSelect
 export type Log = {
   id: string;
   socketId: string | null;
@@ -122,6 +126,7 @@ export type DB = {
   logs: Log[];
 };
 
+// TODO: apply $inferSelect
 export type ReadEvent = {
   userId: string;
   messageId: string;

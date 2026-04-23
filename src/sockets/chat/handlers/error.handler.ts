@@ -1,3 +1,4 @@
+// TODO: replace crypto.randomUUID
 import { v4 as uuidv4 } from "uuid";
 import type { DB, User } from "../../../_mock/types";
 import { CHAT_NAMESPACE } from "../../../common/socket";
