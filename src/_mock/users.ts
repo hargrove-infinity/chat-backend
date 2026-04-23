@@ -64,8 +64,8 @@ export const mockedUsers: User[] = [
     firstName: "Emma",
     lastName: "Wilson",
     isAdmin: false,
-    createdAt: "2024-01-09T10:00:00Z",
-    updatedAt: "2024-01-09T10:00:00Z",
+    createdAt: "2024-01-06T10:00:00Z",
+    updatedAt: "2024-01-06T10:00:00Z",
   },
   {
     id: "b5e2d3c4-2222-4fbb-8e02-123456789002",
@@ -75,7 +75,7 @@ export const mockedUsers: User[] = [
     firstName: "Olivia",
     lastName: "Brown",
     isAdmin: false,
-    createdAt: "2024-01-10T10:00:00Z",
-    updatedAt: "2024-01-10T10:00:00Z",
+    createdAt: "2024-01-07T10:00:00Z",
+    updatedAt: "2024-01-07T10:00:00Z",
   },
 ];

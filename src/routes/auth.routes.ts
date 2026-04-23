@@ -11,16 +11,17 @@ export const authRoutes = Router();
 authRoutes.post(paths.auth.login, async (req, res) => {
   const { email, password } = req.body;
 
-  const foundUser = db.users.find(
+  const user = db.users.find(
     (user) => user.email === email && user.password === password,
   );
 
-  if (!foundUser) {
+  if (!user) {
     res.status(400).send({ errors: ["Wrong credentials"] });
     return;
   }
 
-  const { password: _, ...rest } = foundUser;
+  const { password: _, ...rest } = user;
+
   const encoded = Buffer.from(JSON.stringify(rest)).toString("base64");
 
   res.send({ payload: encoded });

@@ -181,7 +181,7 @@ const chatUnreadEvents = userUnreadEvents.filter((unreadEvent) => {
 ```json
 {
   "id": "3425c4ce-b2c6-441d-b1bb-ea95d05bc535",
-  "type": "direct",
+  "type": "DIRECT",
   "name": "Christopher Reynolds",
   "lastMessage": "It's about the plan for this week, nothing urgent though 🙂",
   "isOnline": false,

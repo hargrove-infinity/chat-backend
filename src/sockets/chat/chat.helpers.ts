@@ -19,7 +19,7 @@ export function getDirectInterlocutorSocketIds(args: {
     db.chats
       // Select only direct chats where the current user is a participant
       .filter(
-        (chat) => chat.participants.includes(userId) && chat.type === "direct",
+        (chat) => chat.participants.includes(userId) && chat.type === "DIRECT",
       )
       // For each chat, extract interlocutors (all participants except current user)
       .flatMap((chat) =>
