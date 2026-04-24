@@ -4,7 +4,7 @@ export const mockedMessages: Message[] = [
   {
     id: "f5101770-72ec-4dd9-a2fe-01fe8cdd090a",
     chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
-    senderId: "a4d1c2b3-1111-4eaa-9f01-123456789001",
+    userId: "a4d1c2b3-1111-4eaa-9f01-123456789001",
     content: "Anyone up for a BBQ this weekend?",
     createdAt: "2024-04-01T19:44:01.388Z",
     updatedAt: "2024-04-01T19:44:01.388Z",
@@ -12,7 +12,7 @@ export const mockedMessages: Message[] = [
   {
     id: "24342dd2-8638-4b3d-9484-719e0027e0bc",
     chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
-    senderId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    userId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
     content: "I’m in! Saturday works best for me.",
     createdAt: "2024-04-01T19:44:13.944Z",
     updatedAt: "2024-04-01T19:44:13.944Z",
@@ -20,7 +20,7 @@ export const mockedMessages: Message[] = [
   {
     id: "90dcf250-47e7-4b65-be1c-a9eabd12cc70",
     chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
-    senderId: "a4d1c2b3-1111-4eaa-9f01-123456789001",
+    userId: "a4d1c2b3-1111-4eaa-9f01-123456789001",
     content: "Saturday sounds good. I can bring drinks 🍹",
     createdAt: "2024-04-01T19:44:23.360Z",
     updatedAt: "2024-04-01T19:44:23.360Z",
@@ -28,7 +28,7 @@ export const mockedMessages: Message[] = [
   {
     id: "e931f34a-a7a4-4896-ab56-c2d85db2f267",
     chatId: "b41ccd75-b6cd-488c-9307-9c68108c553b",
-    senderId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    userId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
     content: "Perfect. I’ll handle the grill.",
     createdAt: "2024-04-01T19:44:33.626Z",
     updatedAt: "2024-04-01T19:44:33.626Z",
@@ -36,7 +36,7 @@ export const mockedMessages: Message[] = [
   {
     id: "4d9692d4-b0c0-4280-869c-200b8c971fb0",
     chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
-    senderId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    userId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
     content: "Hey! Did you watch the new season of Stranger Things?",
     createdAt: "2024-04-02T18:31:44.457Z",
     updatedAt: "2024-04-02T18:31:44.457Z",
@@ -44,7 +44,7 @@ export const mockedMessages: Message[] = [
   {
     id: "2aa99a3e-5d62-4705-bf2e-217a0ac7c7f9",
     chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
-    senderId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
+    userId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
     content: "Not yet! Planning to binge it this weekend.",
     createdAt: "2024-04-02T18:31:58.227Z",
     updatedAt: "2024-04-02T18:31:58.228Z",
@@ -52,7 +52,7 @@ export const mockedMessages: Message[] = [
   {
     id: "0a3bb9b4-a214-4d46-b67f-4e2eab5c775a",
     chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
-    senderId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    userId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
     content: "Oh man, the first episode is insane! You’re gonna love it.",
     createdAt: "2024-04-02T18:32:10.569Z",
     updatedAt: "2024-04-02T18:32:10.569Z",
@@ -60,7 +60,7 @@ export const mockedMessages: Message[] = [
   {
     id: "907348e3-5a44-46fc-ade9-7eec64095e69",
     chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
-    senderId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
+    userId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
     content: "Excited! Don’t spoil anything though 😅",
     createdAt: "2024-04-02T18:32:22.512Z",
     updatedAt: "2024-04-02T18:32:22.512Z",
@@ -68,7 +68,7 @@ export const mockedMessages: Message[] = [
   {
     id: "5b1688b8-2609-4c2d-9211-fe46daaedfc1",
     chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
-    senderId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    userId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
     content: "Promise, no spoilers. But the Upside Down scenes are next level!",
     createdAt: "2024-04-02T18:32:33.626Z",
     updatedAt: "2024-04-02T18:32:33.626Z",
@@ -76,7 +76,7 @@ export const mockedMessages: Message[] = [
   {
     id: "51a273c9-883f-472a-a2b6-1dd108d6813a",
     chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
-    senderId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
+    userId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
     content: "Sounds awesome. I need popcorn and snacks ready.",
     createdAt: "2024-04-02T18:32:46.882Z",
     updatedAt: "2024-04-02T18:32:46.882Z",
@@ -84,7 +84,7 @@ export const mockedMessages: Message[] = [
   {
     id: "52f9e941-e1ae-47ed-900e-ec5f723a0bc7",
     chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
-    senderId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    userId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
     content: "Haha yes! Don’t forget soda. It makes it more cinematic.",
     createdAt: "2024-04-02T18:33:10.999Z",
     updatedAt: "2024-04-02T18:33:10.999Z",
@@ -92,7 +92,7 @@ export const mockedMessages: Message[] = [
   {
     id: "0692a0c1-d66c-4a1e-bf28-c55e6c385f2b",
     chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
-    senderId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
+    userId: "2a1e4d9f-9e5b-4b7e-8b2f-6d3c1a9f0e21",
     content: "Absolutely 😎. Want to do a watch-along call this weekend?",
     createdAt: "2024-04-02T18:33:21.315Z",
     updatedAt: "2024-04-02T18:33:21.315Z",
@@ -100,7 +100,7 @@ export const mockedMessages: Message[] = [
   {
     id: "45871566-bc7c-466e-a66b-30174e132a2b",
     chatId: "b52d9b55-67ee-4796-8884-8355f1a4c02c",
-    senderId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
+    userId: "c9f0b5a3-3e8a-4a2f-9d6e-8a1b2f3c4d32",
     content: "Totally, that would be fun! Let’s set a time.",
     createdAt: "2024-04-02T18:33:54.463Z",
     updatedAt: "2024-04-02T18:33:54.463Z",
