@@ -13,7 +13,7 @@ async function findFirstByEmail(email: string) {
 async function findAuthorSocketMessageGroups(messageIds: string[]) {
   const data = await db
     .select({
-      authorSocketId: userTable.socketId,
+      authorSocketId: sql<string>`${userTable.socketId}`,
       messageIds: sql<string[]>`array_agg(${messageTable.id})`,
     })
     .from(messageTable)
