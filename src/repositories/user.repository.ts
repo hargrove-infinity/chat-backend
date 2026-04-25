@@ -14,7 +14,7 @@ async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
   const rawDirectChatIds = await db
     .select({ chatId: chatTable.id })
     .from(chatParticipantsTable)
-    .leftJoin(chatTable, eq(chatParticipantsTable.chatId, chatTable.id))
+    .innerJoin(chatTable, eq(chatParticipantsTable.chatId, chatTable.id))
     .where(
       and(
         eq(chatParticipantsTable.userId, userId),
