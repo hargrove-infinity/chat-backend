@@ -22,12 +22,7 @@ async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
       ),
     );
 
-  const directChatIds = rawDirectChatIds.flatMap((item) => {
-    if (typeof item.chatId === "string" && item.chatId.length > 0) {
-      return item.chatId;
-    }
-    return [];
-  });
+  const directChatIds = rawDirectChatIds.map((item) => item.chatId);
 
   const rawUserDirectChatIds = await db.query.chatParticipantsTable.findMany({
     where: and(
