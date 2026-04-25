@@ -8,7 +8,7 @@ async function updateMessagesAsRead(payload: ReadReceiptPayload) {
 
   const data = await db
     .update(messageStatusTable)
-    .set({ read: false })
+    .set({ read: true })
     .where(
       and(
         inArray(messageStatusTable.messageId, messageIds),
