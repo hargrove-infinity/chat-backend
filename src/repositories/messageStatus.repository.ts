@@ -13,6 +13,7 @@ async function updateMessagesAsRead(payload: ReadReceiptPayload) {
       and(
         inArray(messageStatusTable.messageId, messageIds),
         eq(messageStatusTable.userId, readerId),
+        eq(messageStatusTable.read, false),
       ),
     );
 
