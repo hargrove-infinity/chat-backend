@@ -28,19 +28,17 @@ async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
 
   const directChatIds = rawDirectChatIds.map((item) => item.chatId);
 
-  const rawUserDirectChatIds = await db.query.chatParticipantsTable.findMany({
-    where: and(
-      inArray(chatParticipantsTable.chatId, directChatIds),
-      ne(chatParticipantsTable.userId, userId),
-    ),
-  });
-
-  const userIds = rawUserDirectChatIds.map((item) => item.userId);
-
-  const rawUserSocketIds = await db.query.userTable.findMany({
-    where: and(inArray(userTable.id, userIds), isNotNull(userTable.socketId)),
-    columns: { socketId: true },
-  });
+  const rawUserSocketIds = await db
+    .select({ socketId: userTable.socketId })
+    .from(chatParticipantsTable)
+    .innerJoin(userTable, eq(userTable.id, chatParticipantsTable.userId))
+    .where(
+      and(
+        inArray(chatParticipantsTable.chatId, directChatIds),
+        ne(chatParticipantsTable.userId, userId),
+        isNotNull(userTable.socketId),
+      ),
+    );
 
   const userSocketIds = rawUserSocketIds.flatMap((item) => {
     if (typeof item.socketId === "string" && item.socketId.length > 0) {
