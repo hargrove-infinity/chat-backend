@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { type InferInsertModel, relations } from "drizzle-orm";
 import {
   boolean,
   pgEnum,
@@ -155,3 +155,6 @@ export const logRelations = relations(logTable, ({ one }) => ({
     references: [userTable.id],
   }),
 }));
+
+// Types
+export type NewMessage = typeof messageTable.$inferInsert;

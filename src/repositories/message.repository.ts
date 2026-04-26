@@ -1,7 +1,12 @@
 import { eq } from "drizzle-orm";
 import { MessageStatusEnum } from "../_mock/types";
 import { db } from "../db";
-import { messageTable } from "../db/schema";
+import { messageTable, type NewMessage } from "../db/schema";
+
+async function create(messageModel: NewMessage) {
+  const res = await db.insert(messageTable).values(messageModel);
+  return res;
+}
 
 async function findManyByChatId({
   userId,
@@ -61,5 +66,6 @@ async function findManyByChatId({
 }
 
 export const messageRepository = {
+  create,
   findManyByChatId,
 } as const;
