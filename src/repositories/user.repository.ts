@@ -1,6 +1,11 @@
-import { and, eq, inArray, isNotNull, ne } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "../db";
-import { chatParticipantsTable, chatTable, userTable } from "../db/schema";
+import {
+  chatParticipantsTable,
+  chatTable,
+  messageTable,
+  userTable,
+} from "../db/schema";
 
 async function findFirstByEmail(email: string) {
   const user = await db.query.userTable.findFirst({
@@ -8,6 +13,22 @@ async function findFirstByEmail(email: string) {
   });
 
   return user;
+}
+
+async function findAuthorSocketMessageGroups(messageIds: string[]) {
+  const data = await db
+    .select({
+      authorSocketId: sql<string>`${userTable.socketId}`,
+      messageIds: sql<string[]>`array_agg(${messageTable.id})`,
+    })
+    .from(messageTable)
+    .innerJoin(userTable, eq(userTable.id, messageTable.userId))
+    .where(
+      and(inArray(messageTable.id, messageIds), isNotNull(userTable.socketId)),
+    )
+    .groupBy(userTable.socketId);
+
+  return data;
 }
 
 async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
@@ -52,5 +73,6 @@ async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
 
 export const userRepository = {
   findFirstByEmail,
+  findAuthorSocketMessageGroups,
   findOnlineDirectInterlocutorsSocketIds,
 } as const;
