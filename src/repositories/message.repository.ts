@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { MessageStatusEnum } from "../_mock/types";
 import { db } from "../db";
 import {
@@ -33,11 +33,35 @@ async function createWithStatuses(messageModel: NewMessage) {
       updatedAt: createdMessage.updatedAt,
     }));
 
-    const messageStatusesCreateResult = await tx
+    await tx
       .insert(messageStatusTable)
-      .values(messageStatusesInsert);
+      .values(messageStatusesInsert)
+      .returning();
 
-    return messageStatusesCreateResult;
+    if (!createdMessage.userId) {
+      throw new Error("Message has no userId");
+    }
+
+    const messageStatusesWithUserExceptAuthorMessage =
+      await tx.query.messageStatusTable.findMany({
+        where: and(
+          eq(messageStatusTable.messageId, createdMessage.id),
+          ne(messageStatusTable.userId, createdMessage.userId),
+        ),
+        columns: { userId: true, read: true },
+        with: {
+          user: { columns: { firstName: true, lastName: true } },
+        },
+      });
+
+    const messageStatusesFormatted =
+      messageStatusesWithUserExceptAuthorMessage.map((item) => ({
+        userId: item.userId,
+        userName: `${item.user.firstName} ${item.user.lastName}`,
+        read: item.read,
+      }));
+
+    return messageStatusesFormatted;
   });
 
   return res;
