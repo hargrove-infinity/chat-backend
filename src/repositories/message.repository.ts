@@ -1,10 +1,45 @@
 import { eq } from "drizzle-orm";
 import { MessageStatusEnum } from "../_mock/types";
 import { db } from "../db";
-import { messageTable, type NewMessage } from "../db/schema";
+import {
+  chatParticipantsTable,
+  messageStatusTable,
+  messageTable,
+  type NewMessage,
+} from "../db/schema";
 
-async function create(messageModel: NewMessage) {
-  const res = await db.insert(messageTable).values(messageModel);
+async function createWithStatuses(messageModel: NewMessage) {
+  const res = await db.transaction(async (tx) => {
+    const [createdMessage] = await tx
+      .insert(messageTable)
+      .values(messageModel)
+      .returning();
+
+    if (!createdMessage) {
+      throw new Error("Failed to create message");
+    }
+
+    const foundChatParticipants = await tx.query.chatParticipantsTable.findMany(
+      {
+        where: eq(chatParticipantsTable.chatId, messageModel.chatId),
+      },
+    );
+
+    const messageStatusesInsert = foundChatParticipants.map(({ userId }) => ({
+      userId,
+      messageId: createdMessage.id,
+      read: userId === createdMessage.userId,
+      createdAt: createdMessage.createdAt,
+      updatedAt: createdMessage.updatedAt,
+    }));
+
+    const messageStatusesCreateResult = await tx
+      .insert(messageStatusTable)
+      .values(messageStatusesInsert);
+
+    return messageStatusesCreateResult;
+  });
+
   return res;
 }
 
@@ -66,6 +101,6 @@ async function findManyByChatId({
 }
 
 export const messageRepository = {
-  create,
+  createWithStatuses,
   findManyByChatId,
 } as const;
