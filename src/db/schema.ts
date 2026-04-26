@@ -1,4 +1,4 @@
-import { type InferInsertModel, relations } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
   boolean,
   pgEnum,
