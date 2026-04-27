@@ -6,7 +6,6 @@ import {
   messageStatusTable,
   messageTable,
   type NewMessage,
-  userTable,
 } from "../db/schema";
 
 async function createWithStatuses(messageModel: NewMessage) {
@@ -49,13 +48,12 @@ async function createWithStatuses(messageModel: NewMessage) {
         };
       });
 
-    const user = await db.query.userTable.findFirst({
-      where: eq(userTable.id, createdMessage.userId),
-      columns: { firstName: true, lastName: true },
-    });
+    const participant = participants.find(
+      (participant) => participant.userId === createdMessage.userId,
+    );
 
-    if (!user) {
-      throw new Error("User is not found");
+    if (!participant) {
+      throw new Error("Participant is not found");
     }
 
     return {
@@ -65,7 +63,7 @@ async function createWithStatuses(messageModel: NewMessage) {
       content: createdMessage.content,
       createdAt: createdMessage.createdAt,
       updatedAt: createdMessage.updatedAt,
-      senderName: `${user.firstName} ${user.lastName}`,
+      senderName: `${participant.user.firstName} ${participant.user.lastName}`,
       status: MessageStatusEnum.SENT,
       reads,
     };
