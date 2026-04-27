@@ -6,6 +6,7 @@ import {
   messageStatusTable,
   messageTable,
   type NewMessage,
+  userTable,
 } from "../db/schema";
 
 async function createWithStatuses(messageModel: NewMessage) {
@@ -58,7 +59,26 @@ async function createWithStatuses(messageModel: NewMessage) {
         read: item.read,
       }));
 
-    return messageStatusesFormatted;
+    const user = await db.query.userTable.findFirst({
+      where: eq(userTable, createdMessage.id),
+      columns: { firstName: true, lastName: true },
+    });
+
+    if (!user) {
+      throw new Error("User is not found");
+    }
+
+    return {
+      id: createdMessage.id,
+      chatId: createdMessage.chatId,
+      userId: createdMessage.userId,
+      content: createdMessage.content,
+      createdAt: createdMessage.createdAt,
+      updatedAt: createdMessage.updatedAt,
+      senderName: `${user.firstName} ${user.lastName}`,
+      status: MessageStatusEnum.SENT,
+      reads: messageStatusesFormatted,
+    };
   });
 
   return res;
