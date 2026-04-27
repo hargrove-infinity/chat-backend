@@ -1,4 +1,4 @@
-import { and, eq, ne } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { MessageStatusEnum } from "../_mock/types";
 import { db } from "../db";
 import {
@@ -20,13 +20,12 @@ async function createWithStatuses(messageModel: NewMessage) {
       throw new Error("Failed to create message");
     }
 
-    const foundChatParticipants = await tx.query.chatParticipantsTable.findMany(
-      {
-        where: eq(chatParticipantsTable.chatId, messageModel.chatId),
-      },
-    );
+    const participants = await tx.query.chatParticipantsTable.findMany({
+      where: eq(chatParticipantsTable.chatId, messageModel.chatId),
+      with: { user: { columns: { firstName: true, lastName: true } } },
+    });
 
-    const messageStatusesInsert = foundChatParticipants.map(({ userId }) => ({
+    const messageStatusesInsert = participants.map(({ userId }) => ({
       userId,
       messageId: createdMessage.id,
       read: userId === createdMessage.userId,
@@ -38,24 +37,17 @@ async function createWithStatuses(messageModel: NewMessage) {
       throw new Error("Message has no userId");
     }
 
-    const messageStatusesWithUserExceptAuthorMessage =
-      await tx.query.messageStatusTable.findMany({
-        where: and(
-          eq(messageStatusTable.messageId, createdMessage.id),
-          ne(messageStatusTable.userId, createdMessage.userId),
-        ),
-        columns: { userId: true, read: true },
-        with: {
-          user: { columns: { firstName: true, lastName: true } },
-        },
+    const reads = participants
+      .filter((participant) => {
+        return participant.userId !== createdMessage.userId;
+      })
+      .map((participant) => {
+        return {
+          userId: participant.userId,
+          userName: `${participant.user.firstName} ${participant.user.lastName}`,
+          read: false,
+        };
       });
-
-    const messageStatusesFormatted =
-      messageStatusesWithUserExceptAuthorMessage.map((item) => ({
-        userId: item.userId,
-        userName: `${item.user.firstName} ${item.user.lastName}`,
-        read: item.read,
-      }));
 
     const user = await db.query.userTable.findFirst({
       where: eq(userTable, createdMessage.id),
@@ -75,7 +67,7 @@ async function createWithStatuses(messageModel: NewMessage) {
       updatedAt: createdMessage.updatedAt,
       senderName: `${user.firstName} ${user.lastName}`,
       status: MessageStatusEnum.SENT,
-      reads: messageStatusesFormatted,
+      reads,
     };
   });
 
