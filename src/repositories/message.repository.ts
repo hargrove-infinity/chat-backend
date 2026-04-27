@@ -33,10 +33,7 @@ async function createWithStatuses(messageModel: NewMessage) {
       updatedAt: createdMessage.updatedAt,
     }));
 
-    await tx
-      .insert(messageStatusTable)
-      .values(messageStatusesInsert)
-      .returning();
+    await tx.insert(messageStatusTable).values(messageStatusesInsert);
 
     if (!createdMessage.userId) {
       throw new Error("Message has no userId");
