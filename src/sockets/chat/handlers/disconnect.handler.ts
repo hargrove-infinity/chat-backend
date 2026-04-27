@@ -8,6 +8,7 @@ type DisconnectHandlerArgs = { db: DB; user: User; socket: ChatSocket };
 export const disconnectHandler = (args: DisconnectHandlerArgs) => () => {
   const { db, user, socket } = args;
 
+  // TODO: set socketId = null in database
   user.socketId = null;
 
   const interlocutorSocketIds = getDirectInterlocutorSocketIds({

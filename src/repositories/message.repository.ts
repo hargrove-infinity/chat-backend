@@ -1,7 +1,76 @@
 import { eq } from "drizzle-orm";
 import { MessageStatusEnum } from "../_mock/types";
 import { db } from "../db";
-import { messageTable } from "../db/schema";
+import {
+  chatParticipantsTable,
+  messageStatusTable,
+  messageTable,
+  type NewMessage,
+} from "../db/schema";
+
+async function createWithStatuses(messageModel: NewMessage) {
+  const res = await db.transaction(async (tx) => {
+    const [createdMessage] = await tx
+      .insert(messageTable)
+      .values(messageModel)
+      .returning();
+
+    if (!createdMessage) {
+      throw new Error("Failed to create message");
+    }
+
+    const participants = await tx.query.chatParticipantsTable.findMany({
+      where: eq(chatParticipantsTable.chatId, messageModel.chatId),
+      with: { user: { columns: { firstName: true, lastName: true } } },
+    });
+
+    const messageStatusesInsert = participants.map(({ userId }) => ({
+      userId,
+      messageId: createdMessage.id,
+      read: userId === createdMessage.userId,
+    }));
+
+    await tx.insert(messageStatusTable).values(messageStatusesInsert);
+
+    if (!createdMessage.userId) {
+      throw new Error("Message has no userId");
+    }
+
+    const reads = participants
+      .filter((participant) => {
+        return participant.userId !== createdMessage.userId;
+      })
+      .map((participant) => {
+        return {
+          userId: participant.userId,
+          userName: `${participant.user.firstName} ${participant.user.lastName}`,
+          read: false,
+        };
+      });
+
+    const participant = participants.find(
+      (participant) => participant.userId === createdMessage.userId,
+    );
+
+    if (!participant) {
+      throw new Error("Participant is not found");
+    }
+
+    return {
+      id: createdMessage.id,
+      chatId: createdMessage.chatId,
+      userId: createdMessage.userId,
+      content: createdMessage.content,
+      createdAt: createdMessage.createdAt,
+      updatedAt: createdMessage.updatedAt,
+      senderName: `${participant.user.firstName} ${participant.user.lastName}`,
+      status: MessageStatusEnum.SENT,
+      reads,
+    };
+  });
+
+  return res;
+}
 
 async function findManyByChatId({
   userId,
@@ -61,5 +130,6 @@ async function findManyByChatId({
 }
 
 export const messageRepository = {
+  createWithStatuses,
   findManyByChatId,
 } as const;
