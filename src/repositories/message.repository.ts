@@ -50,7 +50,7 @@ async function createWithStatuses(messageModel: NewMessage) {
       });
 
     const user = await db.query.userTable.findFirst({
-      where: eq(userTable, createdMessage.userId),
+      where: eq(userTable.id, createdMessage.userId),
       columns: { firstName: true, lastName: true },
     });
 
