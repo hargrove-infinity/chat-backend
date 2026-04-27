@@ -155,3 +155,6 @@ export const logRelations = relations(logTable, ({ one }) => ({
     references: [userTable.id],
   }),
 }));
+
+// Types
+export type NewMessage = typeof messageTable.$inferInsert;
