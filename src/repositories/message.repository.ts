@@ -30,8 +30,6 @@ async function createWithStatuses(messageModel: NewMessage) {
       userId,
       messageId: createdMessage.id,
       read: userId === createdMessage.userId,
-      createdAt: createdMessage.createdAt,
-      updatedAt: createdMessage.updatedAt,
     }));
 
     await tx.insert(messageStatusTable).values(messageStatusesInsert);
