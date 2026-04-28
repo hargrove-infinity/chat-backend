@@ -58,14 +58,6 @@ async function updateBy(args: UpdateByArgs) {
   return user;
 }
 
-async function findFirstByEmail(email: string) {
-  const user = await db.query.userTable.findFirst({
-    where: eq(userTable.email, email),
-  });
-
-  return user;
-}
-
 async function findAuthorSocketMessageGroups(messageIds: string[]) {
   const data = await db
     .select({
@@ -125,7 +117,6 @@ async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
 export const userRepository = {
   findFirstBy,
   updateBy,
-  findFirstByEmail,
   findAuthorSocketMessageGroups,
   findOnlineDirectInterlocutorsSocketIds,
 } as const;
