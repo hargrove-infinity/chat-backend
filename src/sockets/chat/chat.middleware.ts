@@ -25,6 +25,7 @@ export function chatMiddleware(
   const user = db.users.find((u) => u.id === decoded.id);
 
   if (user) {
+    // TODO: set socketId = socket.id in database
     user.socketId = socket.id;
   }
 
