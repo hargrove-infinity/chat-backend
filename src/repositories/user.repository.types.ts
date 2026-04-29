@@ -1,5 +1,8 @@
-import { db } from "../db";
+import type { userTable } from "../db/schema";
 
-type UserFindFirst = typeof db.query.userTable.findFirst;
-type UserFindFirstConfig = Parameters<UserFindFirst>[0];
-export type UserWhere = NonNullable<UserFindFirstConfig>['where'];
+export type User = typeof userTable.$inferSelect;
+export type UserInsert = typeof userTable.$inferInsert;
+
+export type UserFilter = Partial<User>;
+export type UserPatch = Partial<UserInsert>;
+export type UserKey = keyof User

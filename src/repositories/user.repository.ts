@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, ne, sql, type SQL } from "drizzle-orm";
 import { db } from "../db";
 import {
   chatParticipantsTable,
@@ -6,25 +6,28 @@ import {
   messageTable,
   userTable,
 } from "../db/schema";
-import { UserWhere } from "./user.repository.types";
+import type { UserFilter, UserKey, UserPatch } from "./user.repository.types";
 
-async function findFirst (where: UserWhere) {
-  const user = await db.query.userTable.findFirst({
-    where,
-  });
-  return user;
+function buildWhere(where: UserFilter): SQL | undefined {
+  const conds: SQL[] = [];
+  const keys = Object.keys(where) as UserKey[]
+  for (const key of keys) {
+    const value = where[key];
+    if (value === undefined) continue;
+    conds.push(eq(userTable[key], value as never));
+  }
+  return conds.length ? and(...conds) : undefined;
 }
 
-async function updateBy(args: {
-  where: UserWhere;
-  set: Partial<typeof userTable.$inferSelect>;
-}) {
-  const { set, where } = args;
+async function findFirst(where: UserFilter) {
+  return db.query.userTable.findFirst({ where: buildWhere(where) });
+}
 
+async function updateBy(args: { where: UserFilter; set: UserPatch }) {
   const [user] = await db
     .update(userTable)
-    .set(set)
-    .where(where)
+    .set(args.set)
+    .where(buildWhere(args.where))
     .returning();
 
   return user;
@@ -88,6 +91,7 @@ async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
 
 export const userRepository = {
   findFirst,
+  updateBy,
   findAuthorSocketMessageGroups,
   findOnlineDirectInterlocutorsSocketIds,
 } as const;
