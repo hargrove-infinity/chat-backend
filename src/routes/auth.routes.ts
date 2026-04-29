@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { db } from "../_mock/db";
 import { paths } from "../common/paths";
+import { userRepository } from "../repositories/user.repository";
+import { and, eq } from "drizzle-orm";
+import { userTable } from "../db/schema";
 
 export const authRoutes = Router();
 
@@ -12,8 +15,15 @@ authRoutes.post(paths.auth.login, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = db.users.find(
-      (user) => user.email === email && user.password === password,
+    // const user = db.users.find(
+    //   (user) => user.email === email && user.password === password,
+    // );
+
+    const user = await userRepository.findFirst(
+      and(
+        eq(userTable.email, email),
+        eq(userTable.password, password)
+      )
     );
 
     if (!user) {

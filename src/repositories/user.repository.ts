@@ -6,53 +6,25 @@ import {
   messageTable,
   userTable,
 } from "../db/schema";
-import type { UpdateByArgs, UserColumnValueMap } from "./user.repository.types";
-import { isUserColumnEntry } from "./user.repository.utils";
+import { UserWhere } from "./user.repository.types";
 
-async function findFirstBy(args: UserColumnValueMap) {
-  const entry = Object.entries(args)[0];
-
-  if (!entry || !isUserColumnEntry(entry)) {
-    throw new Error(
-      "userRepository.findFirstBy requires at least one search field",
-    );
-  }
-
-  const [column, value] = entry;
-
+async function findFirst (where: UserWhere) {
   const user = await db.query.userTable.findFirst({
-    where: eq(userTable[column], value),
+    where,
   });
-
   return user;
 }
 
-async function updateBy(args: UpdateByArgs) {
+async function updateBy(args: {
+  where: UserWhere;
+  set: Partial<typeof userTable.$inferSelect>;
+}) {
   const { set, where } = args;
-
-  const setEntry = Object.entries(set)[0];
-
-  if (!setEntry || !isUserColumnEntry(setEntry)) {
-    throw new Error(
-      "userRepository.updateBy set entry requires at least one search field",
-    );
-  }
-
-  const whereEntry = Object.entries(where)[0];
-
-  if (!whereEntry || !isUserColumnEntry(whereEntry)) {
-    throw new Error(
-      "userRepository.updateBy where entry requires at least one search field",
-    );
-  }
-
-  const [setColumn, setValue] = setEntry;
-  const [whereColumn, whereValue] = whereEntry;
 
   const [user] = await db
     .update(userTable)
-    .set({ [setColumn]: setValue })
-    .where(eq(userTable[whereColumn], whereValue))
+    .set(set)
+    .where(where)
     .returning();
 
   return user;
@@ -115,8 +87,7 @@ async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
 }
 
 export const userRepository = {
-  findFirstBy,
-  updateBy,
+  findFirst,
   findAuthorSocketMessageGroups,
   findOnlineDirectInterlocutorsSocketIds,
 } as const;

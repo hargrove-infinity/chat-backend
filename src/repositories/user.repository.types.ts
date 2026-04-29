@@ -1,22 +1,5 @@
-import type { userTable } from "../db/schema";
+import { db } from "../db";
 
-type UserTableColumns = typeof userTable._.columns;
-
-export type UserTableColumnNames = keyof UserTableColumns;
-
-type ColMeta<K extends UserTableColumnNames> = UserTableColumns[K]["_"];
-type ColData<K extends UserTableColumnNames> = ColMeta<K>["data"];
-type ColNotNull<K extends UserTableColumnNames> = ColMeta<K>["notNull"];
-
-export type UserColumnValueMap = Partial<{
-  [K in UserTableColumnNames]: ColNotNull<K> extends true
-    ? ColData<K>
-    : ColData<K> | null;
-}>;
-
-export type AnyColData = ColData<UserTableColumnNames>;
-
-export type UpdateByArgs = {
-  set: UserColumnValueMap;
-  where: UserColumnValueMap;
-};
+type UserFindFirst = typeof db.query.userTable.findFirst;
+type UserFindFirstConfig = Parameters<UserFindFirst>[0];
+export type UserWhere = NonNullable<UserFindFirstConfig>['where'];
