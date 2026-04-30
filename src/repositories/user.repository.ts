@@ -6,53 +6,21 @@ import {
   messageTable,
   userTable,
 } from "../db/schema";
-import type { UpdateByArgs, UserColumnValueMap } from "./user.repository.types";
-import { isUserColumnEntry } from "./user.repository.utils";
+import type {
+  UserFilterFields,
+  UserUpdateByArgs,
+} from "./user.repository.types";
+import { buildWhereClause } from "./user.repository.utils";
 
-async function findFirstBy(args: UserColumnValueMap) {
-  const entry = Object.entries(args)[0];
-
-  if (!entry || !isUserColumnEntry(entry)) {
-    throw new Error(
-      "userRepository.findFirstBy requires at least one search field",
-    );
-  }
-
-  const [column, value] = entry;
-
-  const user = await db.query.userTable.findFirst({
-    where: eq(userTable[column], value),
-  });
-
-  return user;
+async function findFirstBy(where: UserFilterFields) {
+  return db.query.userTable.findFirst({ where: buildWhereClause(where) });
 }
 
-async function updateBy(args: UpdateByArgs) {
-  const { set, where } = args;
-
-  const setEntry = Object.entries(set)[0];
-
-  if (!setEntry || !isUserColumnEntry(setEntry)) {
-    throw new Error(
-      "userRepository.updateBy set entry requires at least one search field",
-    );
-  }
-
-  const whereEntry = Object.entries(where)[0];
-
-  if (!whereEntry || !isUserColumnEntry(whereEntry)) {
-    throw new Error(
-      "userRepository.updateBy where entry requires at least one search field",
-    );
-  }
-
-  const [setColumn, setValue] = setEntry;
-  const [whereColumn, whereValue] = whereEntry;
-
+async function updateBy(args: UserUpdateByArgs) {
   const [user] = await db
     .update(userTable)
-    .set({ [setColumn]: setValue })
-    .where(eq(userTable[whereColumn], whereValue))
+    .set(args.set)
+    .where(buildWhereClause(args.where))
     .returning();
 
   return user;
