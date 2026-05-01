@@ -157,6 +157,7 @@ export const logRelations = relations(logTable, ({ one }) => ({
 }));
 
 // Types
+export type NewLog = typeof logTable.$inferInsert;
 export type NewMessage = typeof messageTable.$inferInsert;
 
 export type Message = typeof messageTable.$inferSelect;
