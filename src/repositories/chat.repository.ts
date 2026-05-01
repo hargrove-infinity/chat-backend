@@ -1,7 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
-import type { ChatDTO } from "../_mock/types";
 import { db } from "../db";
 import {
+  type ChatDTO,
   chatParticipantsTable,
   messageStatusTable,
   messageTable,

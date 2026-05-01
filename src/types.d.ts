@@ -1,9 +1,9 @@
-import type { User } from "./_mock/types";
+import type { UserSelect } from "./db/schema";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: Omit<User, "password">;
+      user?: Omit<UserSelect, "password">;
     }
   }
 }

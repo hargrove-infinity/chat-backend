@@ -1,6 +1,7 @@
-import { db } from "../../_mock/db";
 import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
-import { getDirectInterlocutorSocketIds, handleEvent } from "./chat.helpers";
+import { chatParticipantsRepository } from "../../repositories/chatParticipants.repository";
+import { userRepository } from "../../repositories/user.repository";
+import { handleEvent } from "./chat.helpers";
 import type { ChatSocket } from "./chat.types";
 import { disconnectHandler } from "./handlers/disconnect.handler";
 import { errorHandler } from "./handlers/error.handler";
@@ -9,7 +10,7 @@ import { sendMessageHandler } from "./handlers/send-message.handler";
 import { startTypingDispatchHandler } from "./handlers/start-typing-dispatch.handler";
 import { stopTypingDispatchHandler } from "./handlers/stop-typing-dispatch.handler";
 
-export function registerChatHandlers(socket: ChatSocket) {
+export async function registerChatHandlers(socket: ChatSocket) {
   /**
    * Emit immediately to initialize the offset on the client side.
    * Required for connection state recovery.
@@ -19,15 +20,13 @@ export function registerChatHandlers(socket: ChatSocket) {
 
   // TODO
   // extract logic into separate function
-  const user = db.users.find((user) => user.socketId === socket.id);
+  const user = await userRepository.findFirstBy({ socketId: socket.id });
 
   if (!user) {
     throw new Error("User is missing");
   }
 
-  const chatIds = db.chats
-    .filter((chat) => chat.participants.includes(user.id))
-    .map((chat) => chat.id);
+  const chatIds = await chatParticipantsRepository.findManyByUserId(user.id);
 
   if (chatIds.length) {
     socket.join(chatIds);
@@ -35,16 +34,14 @@ export function registerChatHandlers(socket: ChatSocket) {
 
   // TODO
   // similar code in the disconnectHandler - make one function
-  const interlocutorSocketIds = getDirectInterlocutorSocketIds({
-    db,
-    userId: user.id,
-  });
+  const interlocutorSocketIds =
+    await userRepository.findOnlineDirectInterlocutorsSocketIds(user.id);
 
   if (interlocutorSocketIds.length) {
     socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
   }
 
-  socket.on("error", errorHandler({ db, user, socket }));
+  socket.on("error", errorHandler({ userId: user.id, socket }));
 
   socket.on(CHAT_EVENTS.SEND_MESSAGE, (payload, acknowledge) => {
     const { chatId, content, tempId } = payload;
@@ -53,7 +50,8 @@ export function registerChatHandlers(socket: ChatSocket) {
       ackData: { tempId },
       acknowledge,
       operation: sendMessageHandler({
-        user,
+        userId: user.id,
+        userSocketId: user.socketId,
         chatId,
         content,
         tempId,
@@ -73,10 +71,7 @@ export function registerChatHandlers(socket: ChatSocket) {
     stopTypingDispatchHandler({ userId: user.id, socket }),
   );
 
-  socket.on(
-    CHAT_EVENTS.MESSAGE_WAS_READ,
-    messageWasReadHandler({ db, socket }),
-  );
+  socket.on(CHAT_EVENTS.MESSAGE_WAS_READ, messageWasReadHandler(socket));
 
-  socket.on("disconnect", disconnectHandler({ db, user, socket }));
+  socket.on("disconnect", disconnectHandler({ userId: user.id, socket }));
 }

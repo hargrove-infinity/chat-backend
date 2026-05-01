@@ -1,22 +1,24 @@
-import type { DB, User } from "../../../_mock/types";
 import { CONNECTION_EVENTS } from "../../../common/socket";
-import { getDirectInterlocutorSocketIds } from "../chat.helpers";
+import { userRepository } from "../../../repositories/user.repository";
 import type { ChatSocket } from "../chat.types";
 
-type DisconnectHandlerArgs = { db: DB; user: User; socket: ChatSocket };
+type DisconnectHandlerArgs = {
+  userId: string;
+  socket: ChatSocket;
+};
 
-export const disconnectHandler = (args: DisconnectHandlerArgs) => () => {
-  const { db, user, socket } = args;
+export const disconnectHandler = (args: DisconnectHandlerArgs) => async () => {
+  const { userId, socket } = args;
 
-  // TODO: set socketId = null in database
-  user.socketId = null;
-
-  const interlocutorSocketIds = getDirectInterlocutorSocketIds({
-    db,
-    userId: user.id,
+  await userRepository.updateBy({
+    where: { id: userId },
+    set: { socketId: null },
   });
 
+  const interlocutorSocketIds =
+    await userRepository.findOnlineDirectInterlocutorsSocketIds(userId);
+
   if (interlocutorSocketIds.length) {
-    socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.OFFLINE, user.id);
+    socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.OFFLINE, userId);
   }
 };

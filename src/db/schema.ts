@@ -157,10 +157,17 @@ export const logRelations = relations(logTable, ({ one }) => ({
 }));
 
 // Types
-export type NewLog = typeof logTable.$inferInsert;
-export type NewMessage = typeof messageTable.$inferInsert;
+export type UserSelect = typeof userTable.$inferSelect;
 
-export type Message = typeof messageTable.$inferSelect;
+export type UserInsert = typeof userTable.$inferInsert;
+
+export type ChatSelect = typeof chatTable.$inferSelect;
+
+export type MessageSelect = typeof messageTable.$inferSelect;
+
+export type MessageInsert = typeof messageTable.$inferInsert;
+
+export type LogInsert = typeof logTable.$inferInsert;
 
 export enum MessageStatusEnum {
   /** Message is being sent to server */
@@ -175,17 +182,18 @@ export enum MessageStatusEnum {
 
 type MessageReads = { userId: string; userName: string; read: boolean };
 
-export type MessageDTO = Message & {
+export type MessageDTO = MessageSelect & {
   senderName: string | null;
   status: MessageStatusEnum;
   reads: MessageReads[]; // all reads of message except sender because sender already read it
 };
 
-export type Chat = typeof chatTable.$inferSelect;
-
 type Participant = { id: string; name: string; isTyping: boolean };
 
-export type ChatDTO = Omit<Chat, "participants" | "createdAt" | "updatedAt"> & {
+export type ChatDTO = Omit<
+  ChatSelect,
+  "participants" | "createdAt" | "updatedAt"
+> & {
   /**
    * Resolved name for display
    * Group chats: stored name from Chat
@@ -209,7 +217,6 @@ export type ChatDTO = Omit<Chat, "participants" | "createdAt" | "updatedAt"> & {
 
   /**
    * Enhanced participant information with enriched details
-   * Transforms Chat's participant IDs (string[]) into full participant objects
    * Each participant includes:
    * - id: User's unique identifier
    * - name: User's full name (firstName + lastName), null if user not found
@@ -219,10 +226,9 @@ export type ChatDTO = Omit<Chat, "participants" | "createdAt" | "updatedAt"> & {
 
   /**
    * Count of unread messages for the authenticated user in this chat.
-   * Computed by filtering ReadEvents for this user+chat with status "unread",
-   * then deduplicating by messageId (keeping the latest event per message)
-   * to account for toggled read/unread states.
-   * Each remaining event represents one distinct unread message.
+   * Computed by querying messageStatusTable for entries where userId matches
+   * the authenticated user and read = false, then counting those belonging
+   * to this chat via the message → chat relation.
    */
   unreadMessages: number;
 };
