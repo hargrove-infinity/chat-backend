@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db } from "../_mock/db";
 import { paths } from "../common/paths";
+import { userRepository } from "../repositories/user.repository";
 
 export const authRoutes = Router();
 
@@ -12,9 +12,7 @@ authRoutes.post(paths.auth.login, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = db.users.find(
-      (user) => user.email === email && user.password === password,
-    );
+    const user = await userRepository.findFirstBy({ email, password });
 
     if (!user) {
       res.status(400).send({ errors: ["Wrong credentials"] });

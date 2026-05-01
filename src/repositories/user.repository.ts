@@ -6,11 +6,22 @@ import {
   messageTable,
   userTable,
 } from "../db/schema";
+import type {
+  UserFilterFields,
+  UserUpdateByArgs,
+} from "./user.repository.types";
+import { buildWhereClause } from "./user.repository.utils";
 
-async function findFirstByEmail(email: string) {
-  const user = await db.query.userTable.findFirst({
-    where: eq(userTable.email, email),
-  });
+async function findFirstBy(where: UserFilterFields) {
+  return db.query.userTable.findFirst({ where: buildWhereClause(where) });
+}
+
+async function updateBy(args: UserUpdateByArgs) {
+  const [user] = await db
+    .update(userTable)
+    .set(args.set)
+    .where(buildWhereClause(args.where))
+    .returning();
 
   return user;
 }
@@ -72,7 +83,8 @@ async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
 }
 
 export const userRepository = {
-  findFirstByEmail,
+  findFirstBy,
+  updateBy,
   findAuthorSocketMessageGroups,
   findOnlineDirectInterlocutorsSocketIds,
 } as const;

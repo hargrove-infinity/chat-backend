@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { logger } from "../logger";
 import type {
   ValidateArgs,
   ValidateReturn,
@@ -12,6 +13,7 @@ export function validate<T>({
     const result = schema.safeParse(req[key]);
 
     if (!result.success) {
+      logger.error({ error: result.error.issues }, "Validation failed");
       res.status(400).send({ errors: result.error.issues });
       return;
     }
