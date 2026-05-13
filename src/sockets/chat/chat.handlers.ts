@@ -51,7 +51,6 @@ export async function registerChatHandlers(socket: ChatSocket) {
       acknowledge,
       operation: sendMessageHandler({
         userId: user.id,
-        userSocketId: user.socketId,
         chatId,
         content,
         tempId,
