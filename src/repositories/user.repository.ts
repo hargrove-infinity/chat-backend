@@ -6,6 +6,7 @@ import {
   messageTable,
   userTable,
 } from "../db/schema";
+import { logger } from "../logger";
 import type {
   UserFilterFields,
   UserUpdateByArgs,
@@ -27,19 +28,31 @@ async function updateBy(args: UserUpdateByArgs) {
 }
 
 async function findAuthorSocketMessageGroups(messageIds: string[]) {
-  const data = await db
-    .select({
-      authorSocketId: sql<string>`${userTable.socketId}`,
-      messageIds: sql<string[]>`array_agg(${messageTable.id})`,
-    })
-    .from(messageTable)
-    .innerJoin(userTable, eq(userTable.id, messageTable.userId))
-    .where(
-      and(inArray(messageTable.id, messageIds), isNotNull(userTable.socketId)),
-    )
-    .groupBy(userTable.socketId);
+  // TODO: remove try/catch later; tmp changes
+  try {
+    const data = await db
+      .select({
+        authorSocketId: sql<string>`${userTable.socketId}`,
+        messageIds: sql<string[]>`array_agg(${messageTable.id})`,
+      })
+      .from(messageTable)
+      .innerJoin(userTable, eq(userTable.id, messageTable.userId))
+      .where(
+        and(
+          inArray(messageTable.id, messageIds),
+          isNotNull(userTable.socketId),
+        ),
+      )
+      .groupBy(userTable.socketId);
 
-  return data;
+    // TODO: remove logger; tmp changes
+    logger.info({ dbData: data });
+
+    return data;
+  } catch (error) {
+    // TODO: remove logger; tmp changes
+    logger.info({ error: error });
+  }
 }
 
 async function findOnlineDirectInterlocutorsSocketIds(userId: string) {

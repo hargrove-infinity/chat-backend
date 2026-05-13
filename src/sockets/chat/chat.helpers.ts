@@ -1,3 +1,4 @@
+import { logger } from "../../logger";
 import { messageStatusRepository } from "../../repositories/messageStatus.repository";
 import { userRepository } from "../../repositories/user.repository";
 import type { ReadReceiptPayload } from "./chat.types";
@@ -29,11 +30,14 @@ export async function processMessageReadReceipt(
   // Joins messageTable → userTable, filters to the given messageIds,
   // excludes offline authors (socketId IS NULL), and groups by socketId
   // so each online author appears once with all their read messageIds aggregated
-  const data = await userRepository.findAuthorSocketMessageGroups(
-    payload.messageIds,
-  );
+  // TODO: remove later; tmp changes
+  const data = await userRepository.findAuthorSocketMessageGroups([]);
 
-  const authorNotifications = data.map((itm) => ({
+  // TODO: remove logger; tmp changes
+  logger.info({ AuthorSocketMessageGroups: data });
+
+  // TODO: return to the previous state later; tmp changes
+  const authorNotifications = [...(data || [])].map((itm) => ({
     ...itm,
     readerId: payload.readerId,
   }));
