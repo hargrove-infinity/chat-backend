@@ -1,8 +1,9 @@
 import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
+import { logger } from "../../logger";
 import { chatParticipantsRepository } from "../../repositories/chatParticipants.repository";
 import { userRepository } from "../../repositories/user.repository";
 import { handleEvent } from "./chat.helpers";
-import type { ChatSocket } from "./chat.types";
+import type { ChatSocket, ReadReceiptPayload } from "./chat.types";
 import { disconnectHandler } from "./handlers/disconnect.handler";
 import { errorHandler } from "./handlers/error.handler";
 import { messageWasReadHandler } from "./handlers/message-was-read.handler";
@@ -41,7 +42,14 @@ export async function registerChatHandlers(socket: ChatSocket) {
     socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
   }
 
-  socket.on("error", errorHandler({ userId: user.id, socket }));
+  socket.on("error", async (error: Error) => {
+    try {
+      const handler = errorHandler({ userId: user.id, socket });
+      await handler(error);
+    } catch (error) {
+      logger.error(error, "error handler failed");
+    }
+  });
 
   socket.on(CHAT_EVENTS.SEND_MESSAGE, (payload, acknowledge) => {
     const { chatId, content, tempId } = payload;
@@ -70,7 +78,24 @@ export async function registerChatHandlers(socket: ChatSocket) {
     stopTypingDispatchHandler({ userId: user.id, socket }),
   );
 
-  socket.on(CHAT_EVENTS.MESSAGE_WAS_READ, messageWasReadHandler(socket));
+  socket.on(
+    CHAT_EVENTS.MESSAGE_WAS_READ,
+    async (payload: ReadReceiptPayload) => {
+      try {
+        const handler = messageWasReadHandler(socket);
+        await handler(payload);
+      } catch (error) {
+        logger.error(error, "message was read handler failed");
+      }
+    },
+  );
 
-  socket.on("disconnect", disconnectHandler({ userId: user.id, socket }));
+  socket.on("disconnect", async () => {
+    try {
+      const handler = disconnectHandler({ userId: user.id, socket });
+      await handler();
+    } catch (error) {
+      logger.error(error, "disconnect handler failed");
+    }
+  });
 }
