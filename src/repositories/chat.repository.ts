@@ -1,11 +1,11 @@
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "../db";
 import {
-  type ChatDTO,
   chatParticipantsTable,
   messageStatusTable,
   messageTable,
 } from "../db/schema";
+import type { ChatDTO } from "../db/types";
 
 async function findManyByUserId(userId: string) {
   // Fetch all chats the user participates in, along with the last message

@@ -1,5 +1,6 @@
 import { db } from "../db";
-import { type LogInsert, logTable } from "../db/schema";
+import { logTable } from "../db/schema";
+import type { LogInsert } from "../db/types";
 
 async function create(logModels: LogInsert[]) {
   const createdLogs = await db.insert(logTable).values(logModels).returning();

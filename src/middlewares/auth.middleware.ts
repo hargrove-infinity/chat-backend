@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import type { UserSelect } from "../db/schema";
+import type { UserSelect } from "../db/types";
 
 /**
  * Middleware that validates the auth token from request headers,

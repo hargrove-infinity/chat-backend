@@ -1,6 +1,6 @@
 import type { Namespace, Socket } from "socket.io";
 import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
-import type { MessageDTO } from "../../db/schema";
+import type { MessageDTO } from "../../db/types";
 
 /* ====================== PAYLOAD TYPES ====================== */
 

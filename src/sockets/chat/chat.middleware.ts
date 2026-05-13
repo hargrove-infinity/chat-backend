@@ -1,6 +1,6 @@
 import type { ExtendedError, Socket } from "socket.io";
 import { CHAT_NAMESPACE } from "../../common/socket";
-import type { UserSelect } from "../../db/schema";
+import type { UserSelect } from "../../db/types";
 import { userRepository } from "../../repositories/user.repository";
 
 /**

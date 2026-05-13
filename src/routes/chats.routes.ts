@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { paths } from "../common/paths";
-import type { ChatDTO, MessageDTO } from "../db/schema";
+import type { ChatDTO, MessageDTO } from "../db/types";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { chatRepository } from "../repositories/chat.repository";
 import { messageRepository } from "../repositories/message.repository";

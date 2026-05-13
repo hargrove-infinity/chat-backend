@@ -1,4 +1,4 @@
-import type { UserInsert, UserSelect } from "../db/schema";
+import type { UserInsert, UserSelect } from "../db/types";
 
 export type UserFilterFields = Partial<UserSelect>;
 export type UserPatchFields = Partial<UserInsert>;

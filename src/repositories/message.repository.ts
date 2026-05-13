@@ -2,11 +2,10 @@ import { eq } from "drizzle-orm";
 import { db } from "../db";
 import {
   chatParticipantsTable,
-  type MessageInsert,
-  MessageStatusEnum,
   messageStatusTable,
   messageTable,
 } from "../db/schema";
+import { type MessageInsert, MessageStatusEnum } from "../db/types";
 
 async function createWithStatuses(messageModel: MessageInsert) {
   const res = await db.transaction(async (tx) => {
