@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import type { User } from "../_mock/types";
+import type { UserSelect } from "../db/types";
 
 /**
  * Middleware that validates the auth token from request headers,
@@ -17,7 +17,7 @@ export async function authMiddleware(
     return;
   }
 
-  const decoded: Omit<User, "password"> = JSON.parse(atob(authorization));
+  const decoded: Omit<UserSelect, "password"> = JSON.parse(atob(authorization));
   req.user = decoded;
 
   next();

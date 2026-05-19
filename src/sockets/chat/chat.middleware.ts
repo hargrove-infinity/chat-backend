@@ -1,7 +1,6 @@
 import type { ExtendedError, Socket } from "socket.io";
-import { db } from "../../_mock/db";
-import type { User } from "../../_mock/types";
 import { CHAT_NAMESPACE } from "../../common/socket";
+import type { UserSelect } from "../../db/types";
 import { userRepository } from "../../repositories/user.repository";
 
 /**
@@ -21,14 +20,11 @@ export async function chatMiddleware(
     return next(err);
   }
 
-  const decoded: Omit<User, "password"> = JSON.parse(atob(token));
+  const decoded: Omit<UserSelect, "password"> = JSON.parse(atob(token));
 
-  const user = db.users.find((u) => u.id === decoded.id);
+  const user = await userRepository.findFirstBy({ id: decoded.id });
 
   if (user) {
-    // TODO: set socketId = socket.id in database
-    user.socketId = socket.id;
-
     await userRepository.updateBy({
       where: { id: user.id },
       set: { socketId: socket.id },

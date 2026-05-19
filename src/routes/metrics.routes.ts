@@ -1,10 +1,8 @@
 import { type Request, type Response, Router } from "express";
-// TODO: replace crypto.randomUUID
-import { v4 as uuidv4 } from "uuid";
-import { db } from "../_mock/db";
 import { paths } from "../common/paths";
 import { parsePlainTextJson } from "../middlewares/parse-plain-text-json.middleware";
 import { validate } from "../middlewares/validation.middleware";
+import { logRepository } from "../repositories/log.repository";
 import { type LogArrayInput, logArraySchema } from "../validation/metrics";
 
 export const metricsRouter = Router();
@@ -18,12 +16,19 @@ metricsRouter.post(
   parsePlainTextJson,
   validate({ schema: logArraySchema }),
   async (req: Request<object, object, LogArrayInput>, res: Response) => {
-    const { body } = req;
+    try {
+      const { body } = req;
 
-    const logsWithIds = body.map((log) => ({ ...log, id: uuidv4() }));
+      await logRepository.create(body);
 
-    db.logs = [...db.logs, ...logsWithIds];
-
-    res.send({ payload: {} });
+      res.send({ payload: {} });
+    } catch (error) {
+      // TODO: change later
+      if (error instanceof Error) {
+        res.status(500).send({ errors: [error.message] });
+        return;
+      }
+      res.status(500).send({ errors: ["Unknown error"] });
+    }
   },
 );

@@ -8,7 +8,7 @@ const logSchema = z.object({
   name: z.string().nullable(),
   namespace: z.string().nullable(),
   source: z.string().nullable(),
-  timestamp: z.iso.datetime(),
+  timestamp: z.coerce.date(),
 });
 
 export const logArraySchema = z.array(logSchema);

@@ -1,6 +1,6 @@
 import type { Namespace, Socket } from "socket.io";
-import type { MessageDTO } from "../../_mock/types";
 import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
+import type { MessageDTO } from "../../db/types";
 
 /* ====================== PAYLOAD TYPES ====================== */
 

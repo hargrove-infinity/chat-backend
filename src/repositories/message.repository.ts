@@ -1,14 +1,13 @@
 import { eq } from "drizzle-orm";
-import { MessageStatusEnum } from "../_mock/types";
 import { db } from "../db";
 import {
   chatParticipantsTable,
   messageStatusTable,
   messageTable,
-  type NewMessage,
 } from "../db/schema";
+import { type MessageInsert, MessageStatusEnum } from "../db/types";
 
-async function createWithStatuses(messageModel: NewMessage) {
+async function createWithStatuses(messageModel: MessageInsert) {
   const res = await db.transaction(async (tx) => {
     const [createdMessage] = await tx
       .insert(messageTable)

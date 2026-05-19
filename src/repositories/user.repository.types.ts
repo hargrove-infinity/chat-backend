@@ -1,7 +1,4 @@
-import type { userTable } from "../db/schema";
-
-export type UserSelect = typeof userTable.$inferSelect;
-export type UserInsert = typeof userTable.$inferInsert;
+import type { UserInsert, UserSelect } from "../db/types";
 
 export type UserFilterFields = Partial<UserSelect>;
 export type UserPatchFields = Partial<UserInsert>;
