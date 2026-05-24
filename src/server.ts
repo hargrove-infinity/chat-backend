@@ -3,12 +3,17 @@ import { Server } from "socket.io";
 
 import { createApp } from "./app";
 import { envVariables } from "./common/env.config";
-import { checkConnection } from "./db";
+import { checkDatabaseConnection } from "./db";
 import { logger } from "./logger";
+import { checkRedisConnection } from "./redis";
 import { initSockets } from "./sockets";
 
 async function bootstrap() {
-  await checkConnection();
+  // TODO: define order of check/connection: DB, Redis or Redis, DB
+
+  await checkRedisConnection();
+
+  await checkDatabaseConnection();
 
   const app = createApp();
 

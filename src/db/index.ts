@@ -9,8 +9,9 @@ const pool = new Pool({ connectionString: envVariables.databaseUrl });
 
 export const db = drizzle(pool, { schema });
 
-export async function checkConnection() {
+export async function checkDatabaseConnection() {
   try {
+    logger.info("Checking database connection...");
     await db.execute(sql`SELECT 1`);
     logger.info("Database connection successful");
   } catch (error) {
