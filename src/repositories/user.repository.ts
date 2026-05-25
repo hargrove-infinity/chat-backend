@@ -26,6 +26,7 @@ async function updateBy(args: UserUpdateByArgs) {
   return user;
 }
 
+// TODO: remove later
 async function findAuthorSocketMessageGroups(messageIds: string[]) {
   const data = await db
     .select({
@@ -41,6 +42,21 @@ async function findAuthorSocketMessageGroups(messageIds: string[]) {
 
   return data;
 }
+
+// TODO: uncomment later
+// async function findAuthorUserMessageGroups(messageIds: string[]) {
+//   const data = await db
+//     .select({
+//       authorUserId: userTable.id,
+//       messageIds: sql<string[]>`array_agg(${messageTable.id})`,
+//     })
+//     .from(messageTable)
+//     .innerJoin(userTable, eq(userTable.id, messageTable.userId))
+//     .where(inArray(messageTable.id, messageIds))
+//     .groupBy(userTable.id);
+
+//   return data;
+// }
 
 async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
   const rawDirectChatIds = await db
@@ -86,5 +102,7 @@ export const userRepository = {
   findFirstBy,
   updateBy,
   findAuthorSocketMessageGroups,
+  // TODO: uncomment later
+  // findAuthorUserMessageGroups,
   findOnlineDirectInterlocutorsSocketIds,
 } as const;

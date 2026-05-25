@@ -39,6 +39,29 @@ export async function processMessageReadReceipt(
   }));
 
   return authorNotifications;
+
+  // TODO: uncomment later
+  // const authorGroups = await userRepository.findAuthorUserMessageGroups(
+  //   payload.messageIds,
+  // );
+
+  // const userIds = authorGroups.map((group) => group.authorUserId);
+  // const socketIds = await presenceService.getSocketIds(userIds);
+
+  // const onlineAuthorGroups = authorGroups
+  //   .map((group, index) => ({
+  //     authorSocketId: socketIds[index],
+  //     messageIds: group.messageIds,
+  //   }))
+  //   .filter(
+  //     (group): group is { authorSocketId: string; messageIds: string[] } =>
+  //       group.authorSocketId !== null,
+  //   );
+
+  // return onlineAuthorGroups.map((group) => ({
+  //   ...group,
+  //   readerId: payload.readerId,
+  // }));
 }
 
 type ErrorAck = { ok: false; error: string };
