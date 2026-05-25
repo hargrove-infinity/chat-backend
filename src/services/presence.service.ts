@@ -7,14 +7,7 @@ async function setPresence({
   userId: string;
   socketId: string;
 }) {
-  // TODO: Is ot ok to set both userId → socketId and socketId → userId
   await redis.hset(userId, { socketId });
-  // TODO: Some prefixes like - `presence:socket:${socketId}`
-  /**
-   * await redis.hset(`presence:socket:${socketId}`, {
-   *   userId,
-   * });
-   */
   await redis.hset(socketId, { userId });
 }
 

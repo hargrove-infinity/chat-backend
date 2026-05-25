@@ -9,8 +9,6 @@ import { checkRedisConnection } from "./redis";
 import { initSockets } from "./sockets";
 
 async function bootstrap() {
-  // TODO: define order of check/connection: DB, Redis or Redis, DB
-
   await checkRedisConnection();
 
   await checkDatabaseConnection();

@@ -36,7 +36,6 @@ export async function processMessageReadReceipt(
 
   const onlineAuthorGroups = authorGroups
     .map((group, index) => ({
-      // TODO: another approach rather that index
       authorSocketId: socketIds[index],
       messageIds: group.messageIds,
     }))
