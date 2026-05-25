@@ -5,7 +5,6 @@ import {
   messageStatusTable,
   messageTable,
 } from "../db/schema";
-import type { ChatDTO } from "../db/types";
 
 async function findManyByUserId(userId: string) {
   // Fetch all chats the user participates in, along with the last message
@@ -31,8 +30,6 @@ async function findManyByUserId(userId: string) {
                   id: true,
                   firstName: true,
                   lastName: true,
-                  // TODO: remove later
-                  socketId: true,
                 },
               },
             },
@@ -64,8 +61,7 @@ async function findManyByUserId(userId: string) {
     unreadCountByChatId[chatId] = (unreadCountByChatId[chatId] ?? 0) + 1;
   }
 
-  // Transform raw DB data into ChatDTO shape expected by the frontend
-  const chatDtos: ChatDTO[] = rawChats.map((rawChat) => {
+  const enrichedChats = rawChats.map((rawChat) => {
     const participants = rawChat.chat.chatParticipants.map((participant) => {
       return {
         id: participant.user.id,
@@ -96,15 +92,13 @@ async function findManyByUserId(userId: string) {
       return {
         ...defaultChatData,
         name: `${interlocutor.user.firstName} ${interlocutor.user.lastName}`,
-        // TODO: remove later
-        isOnline: !!interlocutor.user.socketId,
       };
     }
 
     return defaultChatData;
   });
 
-  return chatDtos;
+  return enrichedChats;
 }
 
 export const chatRepository = {

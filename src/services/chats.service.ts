@@ -17,6 +17,7 @@ async function findManyByUserId(userId: string) {
   const socketIds = await presenceService.getSocketIds(interlocutorIds);
 
   const onlineUserIds = new Set(
+    // TODO: another approach rather that index
     interlocutorIds.filter((_, index) => socketIds[index] !== null),
   );
 

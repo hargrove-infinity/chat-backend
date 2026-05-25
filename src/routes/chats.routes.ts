@@ -2,8 +2,8 @@ import { Router } from "express";
 import { paths } from "../common/paths";
 import type { ChatDTO, MessageDTO } from "../db/types";
 import { authMiddleware } from "../middlewares/auth.middleware";
-import { chatRepository } from "../repositories/chat.repository";
 import { messageRepository } from "../repositories/message.repository";
+import { chatsService } from "../services/chats.service";
 
 export const chatsRoutes = Router();
 
@@ -20,7 +20,7 @@ chatsRoutes.get(paths.chats.list, authMiddleware, async (req, res) => {
       return;
     }
 
-    const chats: ChatDTO[] = await chatRepository.findManyByUserId(user.id);
+    const chats: ChatDTO[] = await chatsService.findManyByUserId(user.id);
 
     res.send({ payload: chats });
   } catch (error) {

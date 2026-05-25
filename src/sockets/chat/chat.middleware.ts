@@ -2,6 +2,7 @@ import type { ExtendedError, Socket } from "socket.io";
 import { CHAT_NAMESPACE } from "../../common/socket";
 import type { UserSelect } from "../../db/types";
 import { userRepository } from "../../repositories/user.repository";
+import { presenceService } from "../../services/presence.service";
 
 /**
  * Middleware that validates chat user socket connections,
@@ -25,14 +26,7 @@ export async function chatMiddleware(
   const user = await userRepository.findFirstBy({ id: decoded.id });
 
   if (user) {
-    // TODO: remove later
-    await userRepository.updateBy({
-      where: { id: user.id },
-      set: { socketId: socket.id },
-    });
-
-    // TODO: uncomment later
-    // await presenceService.setPresence({ userId: user.id, socketId: socket.id });
+    await presenceService.setPresence({ userId: user.id, socketId: socket.id });
   }
 
   next();
