@@ -21,7 +21,11 @@ export async function registerChatHandlers(socket: ChatSocket) {
 
   // TODO
   // extract logic into separate function
+  // TODO: remove later
   const user = await userRepository.findFirstBy({ socketId: socket.id });
+
+  // TODO: uncomment later
+  // const userId = await presenceService.getUserId(socket.id);
 
   if (!user) {
     throw new Error("User is missing");

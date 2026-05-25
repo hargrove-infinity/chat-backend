@@ -10,10 +10,14 @@ type DisconnectHandlerArgs = {
 export const disconnectHandler = (args: DisconnectHandlerArgs) => async () => {
   const { userId, socket } = args;
 
+  // TODO: remove later
   await userRepository.updateBy({
     where: { id: userId },
     set: { socketId: null },
   });
+
+  // TODO: uncomment later
+  // await presenceService.deletePresence(userId);
 
   const interlocutorSocketIds =
     await userRepository.findOnlineDirectInterlocutorsSocketIds(userId);

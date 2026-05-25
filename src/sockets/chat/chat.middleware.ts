@@ -25,10 +25,14 @@ export async function chatMiddleware(
   const user = await userRepository.findFirstBy({ id: decoded.id });
 
   if (user) {
+    // TODO: remove later
     await userRepository.updateBy({
       where: { id: user.id },
       set: { socketId: socket.id },
     });
+
+    // TODO: uncomment later
+    // await presenceService.setPresence({ userId: user.id, socketId: socket.id });
   }
 
   next();
