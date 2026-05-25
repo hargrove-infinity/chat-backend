@@ -11,10 +11,6 @@ async function setPresence({
   await redis.hset(socketId, { userId });
 }
 
-async function getSocketId(userId: string) {
-  return redis.hget(userId, "socketId");
-}
-
 async function getSocketIds(userIds: string[]) {
   if (userIds.length === 0) return [];
 
@@ -44,7 +40,7 @@ async function getUserId(socketId: string) {
 }
 
 async function deletePresence(userId: string) {
-  const socketId = await getSocketId(userId);
+  const socketId = await redis.hget(userId, "socketId");
   await redis.hdel(userId, "socketId");
   if (socketId) {
     await redis.hdel(socketId, "userId");
@@ -53,7 +49,6 @@ async function deletePresence(userId: string) {
 
 export const presenceService = {
   setPresence,
-  getSocketId,
   getSocketIds,
   getUserId,
   deletePresence,
