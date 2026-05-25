@@ -31,6 +31,7 @@ async function findManyByUserId(userId: string) {
                   id: true,
                   firstName: true,
                   lastName: true,
+                  // TODO: remove later
                   socketId: true,
                 },
               },
@@ -95,6 +96,7 @@ async function findManyByUserId(userId: string) {
       return {
         ...defaultChatData,
         name: `${interlocutor.user.firstName} ${interlocutor.user.lastName}`,
+        // TODO: remove later
         isOnline: !!interlocutor.user.socketId,
       };
     }
