@@ -58,6 +58,7 @@ async function findAuthorSocketMessageGroups(messageIds: string[]) {
 //   return data;
 // }
 
+// TODO: remove later
 async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
   const rawDirectChatIds = await db
     .select({ chatId: chatTable.id })
@@ -98,6 +99,39 @@ async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
   return userSocketIds;
 }
 
+// TODO: uncomment later
+// async function findDirectInterlocutorIds(userId: string) {
+//   const rawDirectChatIds = await db
+//     .select({ chatId: chatTable.id })
+//     .from(chatParticipantsTable)
+//     .innerJoin(chatTable, eq(chatParticipantsTable.chatId, chatTable.id))
+//     .where(
+//       and(
+//         eq(chatParticipantsTable.userId, userId),
+//         eq(chatTable.type, "DIRECT"),
+//       ),
+//     );
+
+//   if (rawDirectChatIds.length === 0) {
+//     return [];
+//   }
+
+//   const directChatIds = rawDirectChatIds.map((item) => item.chatId);
+
+//   const rawInterlocutors = await db
+//     .select({ userId: userTable.id })
+//     .from(chatParticipantsTable)
+//     .innerJoin(userTable, eq(userTable.id, chatParticipantsTable.userId))
+//     .where(
+//       and(
+//         inArray(chatParticipantsTable.chatId, directChatIds),
+//         ne(chatParticipantsTable.userId, userId),
+//       ),
+//     );
+
+//   return rawInterlocutors.map((item) => item.userId);
+// }
+
 export const userRepository = {
   findFirstBy,
   updateBy,
@@ -105,4 +139,6 @@ export const userRepository = {
   // TODO: uncomment later
   // findAuthorUserMessageGroups,
   findOnlineDirectInterlocutorsSocketIds,
+  // TODO: uncomment later
+  // findDirectInterlocutorIds,
 } as const;

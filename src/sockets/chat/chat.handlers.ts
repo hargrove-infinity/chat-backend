@@ -39,12 +39,31 @@ export async function registerChatHandlers(socket: ChatSocket) {
 
   // TODO
   // similar code in the disconnectHandler - make one function
+  // TODO: remove later
   const interlocutorSocketIds =
     await userRepository.findOnlineDirectInterlocutorsSocketIds(user.id);
 
   if (interlocutorSocketIds.length) {
     socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
   }
+
+  // TODO: uncomment later
+  // const interlocutorIds = await userRepository.findDirectInterlocutorIds(
+  //   user.id,
+  // );
+
+  // const interlocutorSocketIds =
+  //   await presenceService.getSocketIds(interlocutorIds);
+
+  // const onlineInterlocutorSocketIds = interlocutorSocketIds.filter(
+  //   (id): id is string => id !== null,
+  // );
+
+  // if (onlineInterlocutorSocketIds.length) {
+  //   socket
+  //     .to(onlineInterlocutorSocketIds)
+  //     .emit(CONNECTION_EVENTS.ONLINE, user.id);
+  // }
 
   socket.on("error", async (error: Error) => {
     try {
