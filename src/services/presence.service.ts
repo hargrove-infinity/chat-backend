@@ -7,8 +7,11 @@ async function setPresence({
   userId: string;
   socketId: string;
 }) {
-  await redis.hset(userId, { socketId });
-  await redis.hset(socketId, { userId });
+  await redis
+    .pipeline()
+    .hset(userId, { socketId })
+    .hset(socketId, { userId })
+    .exec();
 }
 
 async function getSocketIds(userIds: string[]) {
