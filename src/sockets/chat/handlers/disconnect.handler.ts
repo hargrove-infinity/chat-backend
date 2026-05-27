@@ -16,12 +16,8 @@ export const disconnectHandler = (args: DisconnectHandlerArgs) => async () => {
   const interlocutorIds =
     await userRepository.findDirectInterlocutorIds(userId);
 
-  const interlocutorSocketIds =
-    await presenceService.getSocketIds(interlocutorIds);
-
-  const onlineInterlocutorSocketIds = interlocutorSocketIds.filter(
-    (id) => id !== null,
-  );
+  const onlineInterlocutorSocketIds =
+    await presenceService.getSocketIdList(interlocutorIds);
 
   if (onlineInterlocutorSocketIds.length) {
     socket

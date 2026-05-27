@@ -14,11 +14,8 @@ async function findManyByUserId(userId: string) {
     })
     .filter((id): id is string => id !== undefined);
 
-  const socketIds = await presenceService.getSocketIds(interlocutorIds);
-
-  const onlineUserIds = new Set(
-    interlocutorIds.filter((_, index) => socketIds[index] !== null),
-  );
+  const onlineUserSocketIdMap =
+    await presenceService.getSocketIdMap(interlocutorIds);
 
   const chatsDtos = chats.map((chat) => {
     if (chat.type === "DIRECT") {
@@ -32,7 +29,7 @@ async function findManyByUserId(userId: string) {
 
       return {
         ...chat,
-        isOnline: onlineUserIds.has(interlocutor.id),
+        isOnline: !!onlineUserSocketIdMap[interlocutor.id],
       };
     }
 

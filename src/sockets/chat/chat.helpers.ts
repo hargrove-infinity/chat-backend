@@ -32,16 +32,16 @@ export async function processMessageReadReceipt(
 
   const userIds = authorGroups.map((group) => group.authorUserId);
 
-  const socketIds = await presenceService.getSocketIds(userIds);
+  const onlineUserSocketIdMap = await presenceService.getSocketIdMap(userIds);
 
   const onlineAuthorGroups = authorGroups
-    .map((group, index) => ({
-      authorSocketId: socketIds[index],
+    .map((group) => ({
+      authorSocketId: onlineUserSocketIdMap[group.authorUserId],
       messageIds: group.messageIds,
     }))
     .filter(
       (group): group is { authorSocketId: string; messageIds: string[] } =>
-        group.authorSocketId !== null,
+        typeof group.authorSocketId === "string",
     );
 
   return onlineAuthorGroups.map((group) => ({

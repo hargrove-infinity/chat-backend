@@ -1,58 +1,93 @@
 import { redis } from "../redis";
 
-async function setPresence({
-  userId,
-  socketId,
-}: {
-  userId: string;
-  socketId: string;
-}) {
+const keys = {
+  user: (userId: string) => `presence:user:${userId}`,
+  socket: (socketId: string) => `presence:socket:${socketId}`,
+};
+
+type SetPresenceArgs = { userId: string; socketId: string };
+
+async function setPresence(args: SetPresenceArgs): Promise<void> {
+  const { socketId, userId } = args;
+
   await redis
     .pipeline()
-    .hset(userId, { socketId })
-    .hset(socketId, { userId })
+    .set(keys.user(userId), socketId)
+    .set(keys.socket(socketId), userId)
     .exec();
 }
 
-async function getSocketIds(userIds: string[]) {
+async function getUserId(socketId: string): Promise<string | null> {
+  return await redis.get(keys.socket(socketId));
+}
+
+/**
+ * Returns only online users as { userId → socketId }.
+ * Offline users are simply absent from the map.
+ */
+async function getSocketIdMap(
+  userIds: string[],
+): Promise<Record<string, string>> {
+  if (userIds.length === 0) return {};
+
+  const entries = await Promise.all(
+    userIds.map(async (userId) => {
+      const socketId = await redis.get(keys.user(userId));
+      return { userId, socketId };
+    }),
+  );
+
+  const result: Record<string, string> = {};
+
+  for (const { userId, socketId } of entries) {
+    if (typeof socketId === "string") {
+      result[userId] = socketId;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Returns socket IDs of online users only, offline users are excluded.
+ */
+async function getSocketIdList(userIds: string[]): Promise<string[]> {
   if (userIds.length === 0) return [];
 
   const pipeline = redis.pipeline();
 
   for (const userId of userIds) {
-    pipeline.hget(userId, "socketId");
+    pipeline.get(keys.user(userId));
   }
 
-  const results = await pipeline.exec();
+  const results = (await pipeline.exec()) ?? [];
 
-  return (results ?? []).map(([error, value]) => {
-    if (error !== null) {
-      return null;
+  return results.reduce<string[]>((acc, [error, value]) => {
+    if (!error && typeof value === "string") {
+      acc.push(value);
     }
-
-    if (typeof value === "string") {
-      return value;
-    }
-
-    return null;
-  });
+    return acc;
+  }, []);
 }
 
-async function getUserId(socketId: string) {
-  return await redis.hget(socketId, "userId");
-}
+async function deletePresence(userId: string): Promise<void> {
+  const socketId = await redis.get(keys.user(userId));
 
-async function deletePresence(userId: string) {
-  const socketId = await redis.hget(userId, "socketId");
-  await redis.hdel(userId, "socketId");
   if (socketId) {
-    await redis.hdel(socketId, "userId");
+    await redis
+      .pipeline()
+      .del(keys.user(userId))
+      .del(keys.socket(socketId))
+      .exec();
+  } else {
+    await redis.del(keys.user(userId));
   }
 }
 
 export const presenceService = {
   setPresence,
-  getSocketIds,
+  getSocketIdMap,
+  getSocketIdList,
   getUserId,
   deletePresence,
 } as const;
