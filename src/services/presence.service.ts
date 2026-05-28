@@ -1,3 +1,4 @@
+import { logger } from "../logger";
 import { redis } from "../redis";
 
 const keys = {
@@ -9,12 +10,16 @@ type SetPresenceArgs = { userId: string; socketId: string };
 
 async function setPresence(args: SetPresenceArgs): Promise<void> {
   const { socketId, userId } = args;
+  logger.info(`[T1] setPresence userId: ${userId} → socketId: ${socketId}`);
+  logger.info(`[T1] setPresence socketId: ${socketId} → userId: ${userId}`);
 
   await redis
     .pipeline()
     .set(keys.user(userId), socketId)
     .set(keys.socket(socketId), userId)
     .exec();
+
+  logger.info(`[T1/T4] setPresence done`);
 }
 
 async function getUserId(socketId: string): Promise<string | null> {
@@ -74,7 +79,15 @@ async function getSocketIdList(userIds: string[]): Promise<string[]> {
 }
 
 async function deletePresence(userId: string): Promise<void> {
+  logger.info(`[T3] deletePresence started for userId: ${userId}`);
+
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
+  logger.info(
+    `[T6] deletePresence woke up, reading current socketId for userId: ${userId}`,
+  );
   const socketId = await redis.get(keys.user(userId));
+  logger.info(`[T7] got socketId: ${socketId}`);
 
   if (socketId) {
     await redis
@@ -82,6 +95,9 @@ async function deletePresence(userId: string): Promise<void> {
       .del(keys.user(userId))
       .del(keys.socket(socketId))
       .exec();
+    logger.info(
+      `[T8] deleted presence:user:${userId} and presence:socket:${socketId}`,
+    );
   } else {
     await redis.del(keys.user(userId));
   }

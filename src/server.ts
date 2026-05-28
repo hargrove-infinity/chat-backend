@@ -20,12 +20,8 @@ async function bootstrap() {
       origin: envVariables.frontendUrl,
       methods: ["GET", "POST"],
     },
-    pingInterval: 5000,
-    pingTimeout: 5000,
-    connectionStateRecovery: {
-      maxDisconnectionDuration: 120000,
-      skipMiddlewares: false,
-    },
+    pingInterval: 1000,
+    pingTimeout: 1000,
   });
 
   initSockets(io);
