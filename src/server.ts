@@ -9,7 +9,7 @@ import { checkRedisConnection } from "./redis";
 import { initSockets } from "./sockets";
 
 async function bootstrap() {
-  await Promise.all([checkRedisConnection(), await checkDatabaseConnection()]);
+  await Promise.all([checkRedisConnection(), checkDatabaseConnection()]);
 
   const app = createApp();
 
