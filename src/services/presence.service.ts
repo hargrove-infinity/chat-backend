@@ -30,22 +30,25 @@ async function getSocketIdMap(
 ): Promise<Record<string, string>> {
   if (userIds.length === 0) return {};
 
-  const entries = await Promise.all(
-    userIds.map(async (userId) => {
-      const socketId = await redis.get(keys.user(userId));
-      return { userId, socketId };
-    }),
-  );
+  const pipeline = redis.pipeline();
 
-  const result: Record<string, string> = {};
-
-  for (const { userId, socketId } of entries) {
-    if (typeof socketId === "string") {
-      result[userId] = socketId;
-    }
+  for (const userId of userIds) {
+    pipeline.get(keys.user(userId));
   }
 
-  return result;
+  const results = (await pipeline.exec()) ?? [];
+
+  const userSocketIdMap: Record<string, string> = {};
+
+  results.forEach(([error, value], i) => {
+    const userId = userIds[i];
+    if (!userId) return;
+    if (!error && typeof value === "string") {
+      userSocketIdMap[userId] = value;
+    }
+  });
+
+  return userSocketIdMap;
 }
 
 /**
