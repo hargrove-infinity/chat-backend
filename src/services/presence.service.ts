@@ -5,9 +5,9 @@ const keys = {
   socket: (socketId: string) => `presence:socket:${socketId}`,
 };
 
-type SetPresenceArgs = { userId: string; socketId: string };
+type HandlePresenceArgs = { userId: string; socketId: string };
 
-async function setPresence(args: SetPresenceArgs): Promise<void> {
+async function setPresence(args: HandlePresenceArgs): Promise<void> {
   const { socketId, userId } = args;
 
   await redis
@@ -73,18 +73,28 @@ async function getSocketIdList(userIds: string[]): Promise<string[]> {
   }, []);
 }
 
-async function deletePresence(userId: string): Promise<void> {
-  const socketId = await redis.get(keys.user(userId));
+async function deletePresence(args: HandlePresenceArgs): Promise<void> {
+  const { socketId, userId } = args;
 
-  if (socketId) {
-    await redis
-      .pipeline()
-      .del(keys.user(userId))
-      .del(keys.socket(socketId))
-      .exec();
-  } else {
-    await redis.del(keys.user(userId));
+  /**
+   * Due to delays (Redis latency, event loop lag, etc.), a new socket id may
+   * have already been written to Redis by the time this cleanup runs.
+   * When that happens, the socket id stored in Redis no longer matches
+   * the disconnecting socket id (`socketId` arg) — meaning a newer connection
+   * has taken over. Only delete the stale `socketId` — leave the new one untouched.
+   */
+  const currentSocketId = await redis.get(keys.user(userId));
+
+  if (currentSocketId !== socketId) {
+    await redis.del(keys.socket(socketId));
+    return;
   }
+
+  await redis
+    .pipeline()
+    .del(keys.user(userId))
+    .del(keys.socket(socketId))
+    .exec();
 }
 
 export const presenceService = {
