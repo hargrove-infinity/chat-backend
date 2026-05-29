@@ -6,9 +6,9 @@ const keys = {
   socket: (socketId: string) => `presence:socket:${socketId}`,
 };
 
-type SetPresenceArgs = { userId: string; socketId: string };
+type HandlePresenceArgs = { userId: string; socketId: string };
 
-async function setPresence(args: SetPresenceArgs): Promise<void> {
+async function setPresence(args: HandlePresenceArgs): Promise<void> {
   const { socketId, userId } = args;
   logger.info(`[T1] setPresence userId: ${userId} → socketId: ${socketId}`);
   logger.info(`[T1] setPresence socketId: ${socketId} → userId: ${userId}`);
@@ -78,7 +78,8 @@ async function getSocketIdList(userIds: string[]): Promise<string[]> {
   }, []);
 }
 
-async function deletePresence(userId: string): Promise<void> {
+async function deletePresence(args: HandlePresenceArgs): Promise<void> {
+  const { socketId, userId } = args;
   logger.info(`[T3] deletePresence started for userId: ${userId}`);
 
   await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -86,8 +87,16 @@ async function deletePresence(userId: string): Promise<void> {
   logger.info(
     `[T6] deletePresence woke up, reading current socketId for userId: ${userId}`,
   );
-  const socketId = await redis.get(keys.user(userId));
+
   logger.info(`[T7] got socketId: ${socketId}`);
+
+  const currentSocketId = await redis.get(keys.user(userId));
+
+  if (currentSocketId !== socketId) {
+    // A new connection has already taken over — only clean up the old socket key
+    await redis.del(keys.socket(socketId));
+    return;
+  }
 
   if (socketId) {
     await redis
