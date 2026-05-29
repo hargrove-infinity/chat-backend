@@ -1,8 +1,8 @@
 import { redis } from "../redis";
 
 const keys = {
-  user: (userId: string) => `presence:user:${userId}`,
-  socket: (socketId: string) => `presence:socket:${socketId}`,
+  userToSocket: (userId: string) => `presence:user:${userId}:socketId`,
+  socketToUser: (socketId: string) => `presence:socket:${socketId}:userId`,
 };
 
 type HandlePresenceArgs = { userId: string; socketId: string };
@@ -12,13 +12,13 @@ async function setPresence(args: HandlePresenceArgs): Promise<void> {
 
   await redis
     .pipeline()
-    .set(keys.user(userId), socketId)
-    .set(keys.socket(socketId), userId)
+    .set(keys.userToSocket(userId), socketId)
+    .set(keys.socketToUser(socketId), userId)
     .exec();
 }
 
 async function getUserId(socketId: string): Promise<string | null> {
-  return await redis.get(keys.socket(socketId));
+  return await redis.get(keys.socketToUser(socketId));
 }
 
 /**
@@ -33,7 +33,7 @@ async function getSocketIdMap(
   const pipeline = redis.pipeline();
 
   for (const userId of userIds) {
-    pipeline.get(keys.user(userId));
+    pipeline.get(keys.userToSocket(userId));
   }
 
   const results = (await pipeline.exec()) ?? [];
@@ -60,7 +60,7 @@ async function getSocketIdList(userIds: string[]): Promise<string[]> {
   const pipeline = redis.pipeline();
 
   for (const userId of userIds) {
-    pipeline.get(keys.user(userId));
+    pipeline.get(keys.userToSocket(userId));
   }
 
   const results = (await pipeline.exec()) ?? [];
@@ -83,17 +83,17 @@ async function deletePresence(args: HandlePresenceArgs): Promise<void> {
    * the disconnecting socket id (`socketId` arg) — meaning a newer connection
    * has taken over. Only delete the stale `socketId` — leave the new one untouched.
    */
-  const currentSocketId = await redis.get(keys.user(userId));
+  const currentSocketId = await redis.get(keys.userToSocket(userId));
 
   if (currentSocketId !== socketId) {
-    await redis.del(keys.socket(socketId));
+    await redis.del(keys.socketToUser(socketId));
     return;
   }
 
   await redis
     .pipeline()
-    .del(keys.user(userId))
-    .del(keys.socket(socketId))
+    .del(keys.userToSocket(userId))
+    .del(keys.socketToUser(socketId))
     .exec();
 }
 
