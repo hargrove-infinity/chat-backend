@@ -7,6 +7,9 @@ const keys = {
 
 type HandlePresenceArgs = { userId: string; socketId: string };
 
+/**
+ * Stores bidirectional mapping between userId and socketId in Redis.
+ */
 async function setPresence(args: HandlePresenceArgs): Promise<void> {
   const { socketId, userId } = args;
 
@@ -25,7 +28,7 @@ async function getUserId(socketId: string): Promise<string | null> {
  * Returns only online users as { userId → socketId }.
  * Offline users are simply absent from the map.
  */
-async function getSocketIdMap(
+async function getUserSocketMap(
   userIds: string[],
 ): Promise<Record<string, string>> {
   if (userIds.length === 0) return {};
@@ -73,6 +76,9 @@ async function getSocketIdList(userIds: string[]): Promise<string[]> {
   }, []);
 }
 
+/**
+ * Removes bidirectional mapping between userId and socketId in Redis.
+ */
 async function deletePresence(args: HandlePresenceArgs): Promise<void> {
   const { socketId, userId } = args;
 
@@ -99,7 +105,7 @@ async function deletePresence(args: HandlePresenceArgs): Promise<void> {
 
 export const presenceService = {
   setPresence,
-  getSocketIdMap,
+  getUserSocketMap,
   getSocketIdList,
   getUserId,
   deletePresence,

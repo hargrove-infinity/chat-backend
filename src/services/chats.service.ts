@@ -15,7 +15,7 @@ async function findManyByUserId(userId: string) {
     .filter((id): id is string => id !== undefined);
 
   const onlineUserSocketIdMap =
-    await presenceService.getSocketIdMap(interlocutorIds);
+    await presenceService.getUserSocketMap(interlocutorIds);
 
   const chatsDtos = chats.map((chat) => {
     if (chat.type === "DIRECT") {

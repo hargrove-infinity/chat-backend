@@ -32,7 +32,7 @@ export async function processMessageReadReceipt(
 
   const userIds = authorGroups.map((group) => group.authorUserId);
 
-  const onlineUserSocketIdMap = await presenceService.getSocketIdMap(userIds);
+  const onlineUserSocketIdMap = await presenceService.getUserSocketMap(userIds);
 
   const onlineAuthorGroups = authorGroups
     .map((group) => ({
