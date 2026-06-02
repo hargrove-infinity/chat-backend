@@ -1,5 +1,6 @@
 import { messageStatusRepository } from "../../repositories/messageStatus.repository";
 import { userRepository } from "../../repositories/user.repository";
+import { presenceService } from "../../services/presence.service";
 import type { ReadReceiptPayload } from "./chat.types";
 
 /**
@@ -8,8 +9,7 @@ import type { ReadReceiptPayload } from "./chat.types";
  * This function:
  * 1. Marks the specified messages as read for the given reader in messageStatusTable
  *    (only rows where read = false, scoped to the reader's userId).
- * 2. Queries messages joined with their authors, grouping by authorSocketId —
- *    only authors who are currently online (socketId IS NOT NULL) are included.
+ * 2. Queries messages joined with their authors, grouping by authorId
  * 3. Returns one entry per online author, each containing the aggregated messageIds
  *    they authored and the readerId — ready to emit read receipt events.
  */
@@ -26,19 +26,28 @@ export async function processMessageReadReceipt(
   // where userId = readerId and read = false (skips already-read rows)
   await messageStatusRepository.updateMessagesAsRead(payload);
 
-  // Joins messageTable → userTable, filters to the given messageIds,
-  // excludes offline authors (socketId IS NULL), and groups by socketId
-  // so each online author appears once with all their read messageIds aggregated
-  const data = await userRepository.findAuthorSocketMessageGroups(
+  const authorGroups = await userRepository.findAuthorUserMessageGroups(
     payload.messageIds,
   );
 
-  const authorNotifications = data.map((itm) => ({
-    ...itm,
+  const userIds = authorGroups.map((group) => group.authorUserId);
+
+  const onlineUserSocketIdMap = await presenceService.getUserSocketMap(userIds);
+
+  const onlineAuthorGroups = authorGroups
+    .map((group) => ({
+      authorSocketId: onlineUserSocketIdMap[group.authorUserId],
+      messageIds: group.messageIds,
+    }))
+    .filter(
+      (group): group is { authorSocketId: string; messageIds: string[] } =>
+        typeof group.authorSocketId === "string",
+    );
+
+  return onlineAuthorGroups.map((group) => ({
+    ...group,
     readerId: payload.readerId,
   }));
-
-  return authorNotifications;
 }
 
 type ErrorAck = { ok: false; error: string };

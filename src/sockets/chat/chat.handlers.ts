@@ -2,6 +2,7 @@ import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
 import { logger } from "../../logger";
 import { chatParticipantsRepository } from "../../repositories/chatParticipants.repository";
 import { userRepository } from "../../repositories/user.repository";
+import { presenceService } from "../../services/presence.service";
 import { handleEvent } from "./chat.helpers";
 import type { ChatSocket, ReadReceiptPayload } from "./chat.types";
 import { disconnectHandler } from "./handlers/disconnect.handler";
@@ -19,32 +20,33 @@ export async function registerChatHandlers(socket: ChatSocket) {
    */
   socket.emit(CONNECTION_EVENTS.CONNECTED);
 
-  // TODO
-  // extract logic into separate function
-  const user = await userRepository.findFirstBy({ socketId: socket.id });
+  const userId = await presenceService.getUserId(socket.id);
 
-  if (!user) {
-    throw new Error("User is missing");
+  if (!userId) {
+    throw new Error("User id is missing");
   }
 
-  const chatIds = await chatParticipantsRepository.findManyByUserId(user.id);
+  const chatIds = await chatParticipantsRepository.findManyByUserId(userId);
 
   if (chatIds.length) {
     socket.join(chatIds);
   }
 
-  // TODO
-  // similar code in the disconnectHandler - make one function
-  const interlocutorSocketIds =
-    await userRepository.findOnlineDirectInterlocutorsSocketIds(user.id);
+  const interlocutorIds =
+    await userRepository.findDirectInterlocutorIds(userId);
 
-  if (interlocutorSocketIds.length) {
-    socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.ONLINE, user.id);
+  const onlineInterlocutorSocketIds =
+    await presenceService.getSocketIdList(interlocutorIds);
+
+  if (onlineInterlocutorSocketIds.length) {
+    socket
+      .to(onlineInterlocutorSocketIds)
+      .emit(CONNECTION_EVENTS.ONLINE, userId);
   }
 
   socket.on("error", async (error: Error) => {
     try {
-      const handler = errorHandler({ userId: user.id, socket });
+      const handler = errorHandler({ userId, socket });
       await handler(error);
     } catch (error) {
       logger.error(error, "error handler failed");
@@ -58,7 +60,7 @@ export async function registerChatHandlers(socket: ChatSocket) {
       ackData: { tempId },
       acknowledge,
       operation: sendMessageHandler({
-        userId: user.id,
+        userId,
         chatId,
         content,
         tempId,
@@ -70,12 +72,12 @@ export async function registerChatHandlers(socket: ChatSocket) {
 
   socket.on(
     CHAT_EVENTS.START_TYPING_DISPATCH,
-    startTypingDispatchHandler({ userId: user.id, socket }),
+    startTypingDispatchHandler({ userId, socket }),
   );
 
   socket.on(
     CHAT_EVENTS.STOP_TYPING_DISPATCH,
-    stopTypingDispatchHandler({ userId: user.id, socket }),
+    stopTypingDispatchHandler({ userId, socket }),
   );
 
   socket.on(
@@ -92,7 +94,7 @@ export async function registerChatHandlers(socket: ChatSocket) {
 
   socket.on("disconnect", async () => {
     try {
-      const handler = disconnectHandler({ userId: user.id, socket });
+      const handler = disconnectHandler({ userId, socket });
       await handler();
     } catch (error) {
       logger.error(error, "disconnect handler failed");

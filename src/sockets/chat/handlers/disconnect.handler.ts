@@ -1,5 +1,6 @@
 import { CONNECTION_EVENTS } from "../../../common/socket";
 import { userRepository } from "../../../repositories/user.repository";
+import { presenceService } from "../../../services/presence.service";
 import type { ChatSocket } from "../chat.types";
 
 type DisconnectHandlerArgs = {
@@ -10,15 +11,17 @@ type DisconnectHandlerArgs = {
 export const disconnectHandler = (args: DisconnectHandlerArgs) => async () => {
   const { userId, socket } = args;
 
-  await userRepository.updateBy({
-    where: { id: userId },
-    set: { socketId: null },
-  });
+  await presenceService.deletePresence({ userId, socketId: socket.id });
 
-  const interlocutorSocketIds =
-    await userRepository.findOnlineDirectInterlocutorsSocketIds(userId);
+  const interlocutorIds =
+    await userRepository.findDirectInterlocutorIds(userId);
 
-  if (interlocutorSocketIds.length) {
-    socket.to(interlocutorSocketIds).emit(CONNECTION_EVENTS.OFFLINE, userId);
+  const onlineInterlocutorSocketIds =
+    await presenceService.getSocketIdList(interlocutorIds);
+
+  if (onlineInterlocutorSocketIds.length) {
+    socket
+      .to(onlineInterlocutorSocketIds)
+      .emit(CONNECTION_EVENTS.OFFLINE, userId);
   }
 };

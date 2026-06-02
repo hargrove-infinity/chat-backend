@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
+import { and, eq, inArray, ne, sql } from "drizzle-orm";
 import { db } from "../db";
 import {
   chatParticipantsTable,
@@ -26,23 +26,21 @@ async function updateBy(args: UserUpdateByArgs) {
   return user;
 }
 
-async function findAuthorSocketMessageGroups(messageIds: string[]) {
+async function findAuthorUserMessageGroups(messageIds: string[]) {
   const data = await db
     .select({
-      authorSocketId: sql<string>`${userTable.socketId}`,
+      authorUserId: userTable.id,
       messageIds: sql<string[]>`array_agg(${messageTable.id})`,
     })
     .from(messageTable)
     .innerJoin(userTable, eq(userTable.id, messageTable.userId))
-    .where(
-      and(inArray(messageTable.id, messageIds), isNotNull(userTable.socketId)),
-    )
-    .groupBy(userTable.socketId);
+    .where(inArray(messageTable.id, messageIds))
+    .groupBy(userTable.id);
 
   return data;
 }
 
-async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
+async function findDirectInterlocutorIds(userId: string) {
   const rawDirectChatIds = await db
     .select({ chatId: chatTable.id })
     .from(chatParticipantsTable)
@@ -60,31 +58,23 @@ async function findOnlineDirectInterlocutorsSocketIds(userId: string) {
 
   const directChatIds = rawDirectChatIds.map((item) => item.chatId);
 
-  const rawUserSocketIds = await db
-    .select({ socketId: userTable.socketId })
+  const rawInterlocutors = await db
+    .select({ userId: userTable.id })
     .from(chatParticipantsTable)
     .innerJoin(userTable, eq(userTable.id, chatParticipantsTable.userId))
     .where(
       and(
         inArray(chatParticipantsTable.chatId, directChatIds),
         ne(chatParticipantsTable.userId, userId),
-        isNotNull(userTable.socketId),
       ),
     );
 
-  const userSocketIds = rawUserSocketIds.flatMap((item) => {
-    if (typeof item.socketId === "string" && item.socketId.length > 0) {
-      return item.socketId;
-    }
-    return [];
-  });
-
-  return userSocketIds;
+  return rawInterlocutors.map((item) => item.userId);
 }
 
 export const userRepository = {
   findFirstBy,
   updateBy,
-  findAuthorSocketMessageGroups,
-  findOnlineDirectInterlocutorsSocketIds,
+  findAuthorUserMessageGroups,
+  findDirectInterlocutorIds,
 } as const;
