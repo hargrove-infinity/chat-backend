@@ -14,7 +14,6 @@ export const chatType = pgEnum("chat_type", ["DIRECT", "GROUP"]);
 // Tables
 export const userTable = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
-  socketId: text("socket_id"),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   firstName: text("first_name").notNull(),
