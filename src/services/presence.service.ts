@@ -13,11 +13,22 @@ type HandlePresenceArgs = { userId: string; socketId: string };
 async function setPresence(args: HandlePresenceArgs): Promise<void> {
   const { socketId, userId } = args;
 
-  await redis
-    .pipeline()
+  const previousSocketId = await redis.get(keys.userToSocket(userId));
+
+  const pipeline = redis.pipeline();
+
+  // On server restart or reconnect, the client gets a new socket ID.
+  // The old socketToUser key is never cleaned up (no disconnect event fires
+  // when the server crashes), so we delete it here before writing the new one.
+  if (previousSocketId && previousSocketId !== socketId) {
+    pipeline.del(keys.socketToUser(previousSocketId));
+  }
+
+  pipeline
     .set(keys.userToSocket(userId), socketId)
-    .set(keys.socketToUser(socketId), userId)
-    .exec();
+    .set(keys.socketToUser(socketId), userId);
+
+  await pipeline.exec();
 }
 
 async function getUserId(socketId: string): Promise<string | null> {
