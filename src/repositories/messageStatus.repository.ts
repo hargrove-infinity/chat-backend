@@ -3,6 +3,20 @@ import { db } from "../db";
 import { messageStatusTable } from "../db/schema";
 import type { ReadReceiptPayload } from "../sockets/chat/chat.types";
 
+async function findUnreadByUserId(userId: string) {
+  return await db.query.messageStatusTable.findMany({
+    where: and(
+      eq(messageStatusTable.userId, userId),
+      eq(messageStatusTable.read, false),
+    ),
+    with: {
+      message: {
+        with: { chat: { columns: { id: true } } },
+      },
+    },
+  });
+}
+
 async function updateMessagesAsRead(payload: ReadReceiptPayload) {
   const { messageIds, readerId } = payload;
 
@@ -25,5 +39,6 @@ async function updateMessagesAsRead(payload: ReadReceiptPayload) {
 }
 
 export const messageStatusRepository = {
+  findUnreadByUserId,
   updateMessagesAsRead,
 } as const;
