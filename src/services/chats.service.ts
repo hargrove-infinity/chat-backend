@@ -1,10 +1,11 @@
 import type { ChatDTO } from "../db/types";
-import { chatRepository } from "../repositories/chat.repository";
+import { chatParticipantsRepository } from "../repositories/chatParticipants.repository";
 import { messageStatusRepository } from "../repositories/messageStatus.repository";
 import { presenceService } from "./presence.service";
 
 async function findManyByUserId(userId: string): Promise<ChatDTO[]> {
-  const rawChats = await chatRepository.findManyByUserId(userId);
+  const rawChats =
+    await chatParticipantsRepository.findChatSummariesByUserId(userId);
 
   const unreadStatuses =
     await messageStatusRepository.findUnreadByUserId(userId);
