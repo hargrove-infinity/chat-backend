@@ -7,6 +7,7 @@ import { type LogArrayInput, logArraySchema } from "../validation/metrics";
 
 export const metricsRouter = Router();
 
+// TODO: secure this endpoint
 /**
  * Receives an array of error logs from the client
  */
