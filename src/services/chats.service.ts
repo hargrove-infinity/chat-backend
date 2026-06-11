@@ -1,14 +1,35 @@
 import type { ChatDTO } from "../db/types";
+import { logger } from "../logger";
 import { chatParticipantsRepository } from "../repositories/chatParticipants.repository";
 import { messageStatusRepository } from "../repositories/messageStatus.repository";
 import { presenceService } from "./presence.service";
 
-async function findManyByUserId(userId: string): Promise<ChatDTO[]> {
-  const rawChats =
+async function findManyByUserId(
+  userId: string,
+): Promise<[ChatDTO[], null] | [null, Error]> {
+  const [rawChats, rawChatsError] =
     await chatParticipantsRepository.findChatSummariesByUserId(userId);
 
-  const unreadStatuses =
+  if (rawChatsError) {
+    logger.warn(
+      { error: rawChatsError.message, userId },
+      "Failed to fetch chat summaries in chats service",
+    );
+
+    return [null, new Error("Unknown error")];
+  }
+
+  const [unreadStatuses, unreadStatusesError] =
     await messageStatusRepository.findUnreadByUserId(userId);
+
+  if (unreadStatusesError) {
+    logger.warn(
+      { error: unreadStatusesError.message, userId },
+      "Failed to fetch unread statuses in chats service",
+    );
+
+    return [null, new Error("Unknown error")];
+  }
 
   // Build a lookup map of unread message count per chat id
   const unreadCountByChatId: Record<string, number> = {};
@@ -33,7 +54,7 @@ async function findManyByUserId(userId: string): Promise<ChatDTO[]> {
   const onlineUserSocketIdMap =
     await presenceService.getUserSocketMap(interlocutorIds);
 
-  return rawChats.map((rawChat) => {
+  const chatDtos = rawChats.map((rawChat) => {
     const participants = rawChat.chat.chatParticipants.map((p) => ({
       id: p.user.id,
       name: `${p.user.firstName} ${p.user.lastName}`,
@@ -68,6 +89,8 @@ async function findManyByUserId(userId: string): Promise<ChatDTO[]> {
 
     return baseChat;
   });
+
+  return [chatDtos, null];
 }
 
 export const chatsService = {
