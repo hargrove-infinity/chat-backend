@@ -1,10 +1,13 @@
-export async function asyncTryCatch<T, E = Error>(
+export async function asyncTryCatch<T>(
   promise: Promise<T>,
-): Promise<[T, null] | [null, E]> {
+): Promise<[T, null] | [null, Error]> {
   try {
     const data = await promise;
     return [data, null];
   } catch (error) {
-    return [null, error as E];
+    if (!(error instanceof Error)) {
+      throw new Error("Invalid Error");
+    }
+    return [null, error];
   }
 }
