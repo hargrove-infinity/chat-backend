@@ -54,41 +54,51 @@ async function findManyByUserId(
   const onlineUserSocketIdMap =
     await presenceService.getUserSocketMap(interlocutorIds);
 
-  const chatDtos = rawChats.map((rawChat) => {
-    const participants = rawChat.chat.chatParticipants.map((p) => ({
-      id: p.user.id,
-      name: `${p.user.firstName} ${p.user.lastName}`,
-      isTyping: false,
-    }));
+  let chatDtos: ChatDTO[];
 
-    const baseChat = {
-      id: rawChat.chat.id,
-      type: rawChat.chat.type,
-      name: rawChat.chat.name,
-      participants,
-      lastMessage: rawChat.chat.messages[0]?.content ?? null,
-      isOnline: false,
-      unreadMessages: unreadCountByChatId[rawChat.chat.id] ?? 0,
-    };
+  try {
+    chatDtos = rawChats.map((rawChat) => {
+      const participants = rawChat.chat.chatParticipants.map((p) => ({
+        id: p.user.id,
+        name: `${p.user.firstName} ${p.user.lastName}`,
+        isTyping: false,
+      }));
 
-    if (rawChat.chat.type === "DIRECT") {
-      const interlocutor = rawChat.chat.chatParticipants.find(
-        (p) => p.user.id !== rawChat.user.id,
-      );
+      const baseChat = {
+        id: rawChat.chat.id,
+        type: rawChat.chat.type,
+        name: rawChat.chat.name,
+        participants,
+        lastMessage: rawChat.chat.messages[0]?.content ?? null,
+        isOnline: false,
+        unreadMessages: unreadCountByChatId[rawChat.chat.id] ?? 0,
+      };
 
-      if (!interlocutor) {
-        throw new Error("Interlocutor was not found");
+      if (rawChat.chat.type === "DIRECT") {
+        const interlocutor = rawChat.chat.chatParticipants.find(
+          (p) => p.user.id !== rawChat.user.id,
+        );
+
+        if (!interlocutor) {
+          throw new Error("Interlocutor was not found");
+        }
+
+        return {
+          ...baseChat,
+          name: `${interlocutor.user.firstName} ${interlocutor.user.lastName}`,
+          isOnline: !!onlineUserSocketIdMap[interlocutor.user.id],
+        };
       }
 
-      return {
-        ...baseChat,
-        name: `${interlocutor.user.firstName} ${interlocutor.user.lastName}`,
-        isOnline: !!onlineUserSocketIdMap[interlocutor.user.id],
-      };
-    }
-
-    return baseChat;
-  });
+      return baseChat;
+    });
+  } catch (error) {
+    logger.error(
+      { error, userId },
+      "Failed to build chat DTOs in chats service",
+    );
+    return [null, new Error("Unknown error")];
+  }
 
   return [chatDtos, null];
 }
