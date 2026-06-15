@@ -1,11 +1,6 @@
 import { and, eq, inArray, ne, sql } from "drizzle-orm";
 import { db } from "../db";
-import {
-  chatParticipantsTable,
-  chatTable,
-  messageTable,
-  userTable,
-} from "../db/schema";
+import { chatParticipantsTable, messageTable, userTable } from "../db/schema";
 import { logger } from "../logger";
 import { asyncTryCatch } from "../util/asyncTryCatch";
 import type {
@@ -40,38 +35,6 @@ async function findAuthorUserMessageGroups(messageIds: string[]) {
     .groupBy(userTable.id);
 
   return data;
-}
-
-async function findDirectInterlocutorIds(userId: string) {
-  const rawDirectChatIds = await db
-    .select({ chatId: chatTable.id })
-    .from(chatParticipantsTable)
-    .innerJoin(chatTable, eq(chatParticipantsTable.chatId, chatTable.id))
-    .where(
-      and(
-        eq(chatParticipantsTable.userId, userId),
-        eq(chatTable.type, "DIRECT"),
-      ),
-    );
-
-  if (rawDirectChatIds.length === 0) {
-    return [];
-  }
-
-  const directChatIds = rawDirectChatIds.map((item) => item.chatId);
-
-  const rawInterlocutors = await db
-    .select({ userId: userTable.id })
-    .from(chatParticipantsTable)
-    .innerJoin(userTable, eq(userTable.id, chatParticipantsTable.userId))
-    .where(
-      and(
-        inArray(chatParticipantsTable.chatId, directChatIds),
-        ne(chatParticipantsTable.userId, userId),
-      ),
-    );
-
-  return rawInterlocutors.map((item) => item.userId);
 }
 
 async function findUserIdsDirectChats({
@@ -120,6 +83,5 @@ export const userRepository = {
   findFirstBy,
   updateBy,
   findAuthorUserMessageGroups,
-  findDirectInterlocutorIds,
   findUserIdsDirectChats,
 } as const;
