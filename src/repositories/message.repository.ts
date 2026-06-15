@@ -6,6 +6,8 @@ import {
   messageTable,
 } from "../db/schema";
 import { type MessageInsert, MessageStatusEnum } from "../db/types";
+import { logger } from "../logger";
+import { asyncTryCatch } from "../util/asyncTryCatch";
 
 async function createWithStatuses(messageModel: MessageInsert) {
   const res = await db.transaction(async (tx) => {
@@ -78,54 +80,41 @@ async function findManyByChatId({
   userId: string;
   chatId: string;
 }) {
-  const rawMessages = await db.query.messageTable.findMany({
-    where: eq(messageTable.chatId, chatId),
-    with: {
-      sender: { columns: { firstName: true, lastName: true } },
-      messageStatuses: {
-        columns: { userId: true, read: true },
-        with: {
-          user: { columns: { id: true, firstName: true, lastName: true } },
+  logger.info(
+    { userId, chatId },
+    "Fetching messages from database for user by chat id",
+  );
+
+  const [rows, error] = await asyncTryCatch(
+    db.query.messageTable.findMany({
+      where: eq(messageTable.chatId, chatId),
+      with: {
+        sender: { columns: { firstName: true, lastName: true } },
+        messageStatuses: {
+          columns: { userId: true, read: true },
+          with: {
+            user: { columns: { id: true, firstName: true, lastName: true } },
+          },
         },
       },
-    },
-  });
+    }),
+  );
 
-  const messageDtos = rawMessages.map((msg) => {
-    const { messageStatuses, sender, ...restMessage } = msg;
-
-    const isAuthorMessage = msg.userId === userId;
-
-    const messageReadReceipts = messageStatuses
-      .filter((messageStatus) => {
-        return isAuthorMessage
-          ? messageStatus.userId !== msg.userId
-          : messageStatus.userId === userId;
-      })
-      .map((messageStatus) => {
-        return {
-          userId: messageStatus.userId,
-          userName: `${messageStatus.user.firstName} ${messageStatus.user.lastName}`,
-          read: messageStatus.read,
-        };
-      });
-
-    const isReadMessage = !!(
-      msg.messageStatuses.length &&
-      msg.messageStatuses.every((messageStatus) => messageStatus.read)
+  if (error) {
+    logger.error(
+      { error, userId, chatId },
+      "Database error while fetching messages for user by chat id",
     );
 
-    return {
-      ...restMessage,
-      reads: messageReadReceipts,
-      status: isReadMessage ? MessageStatusEnum.READ : MessageStatusEnum.SENT,
-      senderName: sender
-        ? `${sender.firstName} ${sender.lastName}`
-        : "Deleted user",
-    };
-  });
+    return [null, error] as const;
+  }
 
-  return messageDtos;
+  logger.info(
+    { userId, chatId },
+    "Messages successfully fetched from database for user by chat id",
+  );
+
+  return [rows, null] as const;
 }
 
 export const messageRepository = {
