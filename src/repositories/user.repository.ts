@@ -6,6 +6,8 @@ import {
   messageTable,
   userTable,
 } from "../db/schema";
+import { logger } from "../logger";
+import { asyncTryCatch } from "../util/asyncTryCatch";
 import type {
   UserFilterFields,
   UserUpdateByArgs,
@@ -72,9 +74,52 @@ async function findDirectInterlocutorIds(userId: string) {
   return rawInterlocutors.map((item) => item.userId);
 }
 
+async function findUserIdsDirectChats({
+  directChatIds,
+  userId,
+}: {
+  directChatIds: string[];
+  userId: string;
+}) {
+  logger.info(
+    { userId, directChatIds },
+    "Fetching user ids of direct chats from database",
+  );
+
+  const [rows, error] = await asyncTryCatch(
+    db
+      .select({ userId: userTable.id })
+      .from(chatParticipantsTable)
+      .innerJoin(userTable, eq(userTable.id, chatParticipantsTable.userId))
+      .where(
+        and(
+          inArray(chatParticipantsTable.chatId, directChatIds),
+          ne(chatParticipantsTable.userId, userId),
+        ),
+      ),
+  );
+
+  if (error) {
+    logger.error(
+      { error, userId, directChatIds },
+      "Database error while fetching user ids of direct chats",
+    );
+
+    return [null, error] as const;
+  }
+
+  logger.info(
+    { userId },
+    "User ids of direct chats successfully fetched from database",
+  );
+
+  return [rows, null] as const;
+}
+
 export const userRepository = {
   findFirstBy,
   updateBy,
   findAuthorUserMessageGroups,
   findDirectInterlocutorIds,
+  findUserIdsDirectChats,
 } as const;
