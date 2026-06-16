@@ -22,8 +22,6 @@ export const disconnectHandler = (args: DisconnectHandlerArgs) => async () => {
       { error: errorInterlocutorIds.message, userId },
       "Failed to fetch direct interlocutor ids in socket disconnect handler",
     );
-
-    throw new Error("Unknown error");
   }
 
   const onlineInterlocutorSocketIds =
