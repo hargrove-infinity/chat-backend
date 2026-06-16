@@ -52,3 +52,12 @@ export const CHAT_EVENTS = {
   // Server → Client(s) (to the author(s)): Notifies the message author(s) that their message was read by the interlocutor
   NOTIFY_AUTHOR_MESSAGE_WAS_READ: "chat:notify_author_message_was_read",
 } as const;
+
+export const ERROR_EVENTS = {
+  /**
+   * Server → Client: emitted when an error occurs during
+   * chat namespace connection initialization.
+   * After this event is sent, the server disconnects the socket.
+   */
+  CHAT_NAMESPACE_ERROR: "chat:namespace:error",
+} as const;
