@@ -1,6 +1,7 @@
 import { CONNECTION_EVENTS } from "../../../common/socket";
-import { userRepository } from "../../../repositories/user.repository";
+import { logger } from "../../../logger";
 import { presenceService } from "../../../services/presence.service";
+import { usersService } from "../../../services/users.service";
 import type { ChatSocket } from "../chat.types";
 
 type DisconnectHandlerArgs = {
@@ -13,8 +14,16 @@ export const disconnectHandler = (args: DisconnectHandlerArgs) => async () => {
 
   await presenceService.deletePresence({ userId, socketId: socket.id });
 
-  const interlocutorIds =
-    await userRepository.findDirectInterlocutorIds(userId);
+  const [interlocutorIds, errorInterlocutorIds] =
+    await usersService.findDirectInterlocutorIds(userId);
+
+  if (errorInterlocutorIds) {
+    logger.warn(
+      { error: errorInterlocutorIds.message, userId },
+      "Failed to fetch direct interlocutor ids in socket disconnect handler",
+    );
+    return;
+  }
 
   const onlineInterlocutorSocketIds =
     await presenceService.getSocketIdList(interlocutorIds);

@@ -1,8 +1,8 @@
 import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
 import { logger } from "../../logger";
 import { chatParticipantsRepository } from "../../repositories/chatParticipants.repository";
-import { userRepository } from "../../repositories/user.repository";
 import { presenceService } from "../../services/presence.service";
+import { usersService } from "../../services/users.service";
 import { handleEvent } from "./chat.helpers";
 import type { ChatSocket, ReadReceiptPayload } from "./chat.types";
 import { disconnectHandler } from "./handlers/disconnect.handler";
@@ -32,8 +32,17 @@ export async function registerChatHandlers(socket: ChatSocket) {
     socket.join(chatIds);
   }
 
-  const interlocutorIds =
-    await userRepository.findDirectInterlocutorIds(userId);
+  const [interlocutorIds, errorInterlocutorIds] =
+    await usersService.findDirectInterlocutorIds(userId);
+
+  if (errorInterlocutorIds) {
+    logger.warn(
+      { error: errorInterlocutorIds.message, userId },
+      "Failed to fetch direct interlocutor ids in socket chat handlers",
+    );
+
+    throw new Error("Unknown error");
+  }
 
   const onlineInterlocutorSocketIds =
     await presenceService.getSocketIdList(interlocutorIds);
