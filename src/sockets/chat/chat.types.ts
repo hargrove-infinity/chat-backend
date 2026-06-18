@@ -1,5 +1,9 @@
 import type { Namespace, Socket } from "socket.io";
-import { CHAT_EVENTS, CONNECTION_EVENTS } from "../../common/socket";
+import {
+  CHAT_EVENTS,
+  CONNECTION_EVENTS,
+  ERROR_EVENTS,
+} from "../../common/socket";
 import type { MessageDTO } from "../../db/types";
 
 /* ====================== PAYLOAD TYPES ====================== */
@@ -54,6 +58,14 @@ type SendMessageAckFailure = {
 };
 
 /**
+ * Error payload sent when chat namespace initialization fails.
+ * Emitted before the socket is forcibly disconnected.
+ */
+type ChatNamespaceErrorPayload = {
+  message: string;
+};
+
+/**
  * Acknowledgment response from server after sending a message
  * Discriminated union based on success/failure
  */
@@ -83,6 +95,9 @@ type ServerToClientEventsChatsNamespace = {
   [CONNECTION_EVENTS.OFFLINE]: (userId: string) => void;
   [CHAT_EVENTS.NOTIFY_AUTHOR_MESSAGE_WAS_READ]: (
     payload: ReadReceiptPayload,
+  ) => void;
+  [ERROR_EVENTS.CHAT_NAMESPACE_ERROR]: (
+    payload: ChatNamespaceErrorPayload,
   ) => void;
 };
 
