@@ -1,5 +1,5 @@
 import { CHAT_EVENTS } from "../../../common/socket";
-import { messageRepository } from "../../../repositories/message.repository";
+import { messagesService } from "../../../services/messages.service";
 import type { ChatSocket, SendMessageCallback } from "../chat.types";
 
 type SendMessageHandlerArgs = {
@@ -17,7 +17,18 @@ export const sendMessageHandler =
 
     const messageModel = { chatId: chatId, content: content, userId };
 
-    const messageDto = await messageRepository.createWithStatuses(messageModel);
+    const [messageDto, messageDtoError] =
+      await messagesService.sendMessage(messageModel);
+
+    if (messageDtoError) {
+      // TODO: Is this correct handling of error?
+      acknowledge({
+        ok: false,
+        tempId: tempId,
+        error: messageDtoError.message,
+      });
+      return;
+    }
 
     acknowledge({
       ok: true,
