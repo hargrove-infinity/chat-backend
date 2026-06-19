@@ -23,7 +23,6 @@ async function updateBy(args: UserUpdateByArgs) {
   return user;
 }
 
-// TODO: Maybe move this into chatParticipantsRepository?
 async function findUserIdsDirectChats({
   directChatIds,
   userId,

@@ -100,7 +100,6 @@ async function sendMessage(
   );
 
   if (!participant) {
-    // TODO: Should it sent to the client?
     return [null, new Error("Participant is not found")];
   }
 

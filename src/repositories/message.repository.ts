@@ -16,7 +16,6 @@ async function createWithStatuses(messageModel: MessageInsert) {
     "Creating message with statuses in database",
   );
 
-  // TODO: Do I need to apply asyncTryCatch to the whole transaction or each operation in transaction?
   const [result, error] = await asyncTryCatch(
     db.transaction(async (tx) => {
       const [createdMessage] = await tx

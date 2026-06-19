@@ -21,7 +21,6 @@ export const sendMessageHandler =
       await messagesService.sendMessage(messageModel);
 
     if (messageDtoError) {
-      // TODO: Is this correct handling of error?
       acknowledge({
         ok: false,
         tempId: tempId,
