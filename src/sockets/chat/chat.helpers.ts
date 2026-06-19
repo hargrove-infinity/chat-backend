@@ -1,5 +1,5 @@
+import { messageRepository } from "../../repositories/message.repository";
 import { messageStatusRepository } from "../../repositories/messageStatus.repository";
-import { userRepository } from "../../repositories/user.repository";
 import { presenceService } from "../../services/presence.service";
 import type { ReadReceiptPayload } from "./chat.types";
 
@@ -26,7 +26,7 @@ export async function processMessageReadReceipt(
   // where userId = readerId and read = false (skips already-read rows)
   await messageStatusRepository.updateMessagesAsRead(payload);
 
-  const authorGroups = await userRepository.findAuthorUserMessageGroups(
+  const authorGroups = await messageRepository.findAuthorUserMessageGroups(
     payload.messageIds,
   );
 

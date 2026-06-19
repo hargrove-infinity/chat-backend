@@ -1,9 +1,10 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "../db";
 import {
   chatParticipantsTable,
   messageStatusTable,
   messageTable,
+  userTable,
 } from "../db/schema";
 import type { MessageInsert } from "../db/types";
 import { logger } from "../logger";
@@ -109,7 +110,22 @@ async function findManyByChatId({
   return [rows, null] as const;
 }
 
+async function findAuthorUserMessageGroups(messageIds: string[]) {
+  const data = await db
+    .select({
+      authorUserId: userTable.id,
+      messageIds: sql<string[]>`array_agg(${messageTable.id})`,
+    })
+    .from(messageTable)
+    .innerJoin(userTable, eq(userTable.id, messageTable.userId))
+    .where(inArray(messageTable.id, messageIds))
+    .groupBy(userTable.id);
+
+  return data;
+}
+
 export const messageRepository = {
   createWithStatuses,
   findManyByChatId,
+  findAuthorUserMessageGroups,
 } as const;
