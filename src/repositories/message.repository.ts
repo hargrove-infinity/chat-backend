@@ -1,76 +1,68 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "../db";
 import {
   chatParticipantsTable,
   messageStatusTable,
   messageTable,
+  userTable,
 } from "../db/schema";
-import { type MessageInsert, MessageStatusEnum } from "../db/types";
+import type { MessageInsert } from "../db/types";
 import { logger } from "../logger";
 import { asyncTryCatch } from "../util/asyncTryCatch";
 
 async function createWithStatuses(messageModel: MessageInsert) {
-  const res = await db.transaction(async (tx) => {
-    const [createdMessage] = await tx
-      .insert(messageTable)
-      .values(messageModel)
-      .returning();
+  logger.info(
+    { chatId: messageModel.chatId, userId: messageModel.userId },
+    "Creating message with statuses in database",
+  );
 
-    if (!createdMessage) {
-      throw new Error("Failed to create message");
-    }
+  const [result, error] = await asyncTryCatch(
+    db.transaction(async (tx) => {
+      const [createdMessage] = await tx
+        .insert(messageTable)
+        .values(messageModel)
+        .returning();
 
-    const participants = await tx.query.chatParticipantsTable.findMany({
-      where: eq(chatParticipantsTable.chatId, messageModel.chatId),
-      with: { user: { columns: { firstName: true, lastName: true } } },
-    });
+      if (!createdMessage) {
+        throw new Error("Failed to create message");
+      }
 
-    const messageStatusesInsert = participants.map(({ userId }) => ({
-      userId,
-      messageId: createdMessage.id,
-      read: userId === createdMessage.userId,
-    }));
-
-    await tx.insert(messageStatusTable).values(messageStatusesInsert);
-
-    if (!createdMessage.userId) {
-      throw new Error("Message has no userId");
-    }
-
-    const reads = participants
-      .filter((participant) => {
-        return participant.userId !== createdMessage.userId;
-      })
-      .map((participant) => {
-        return {
-          userId: participant.userId,
-          userName: `${participant.user.firstName} ${participant.user.lastName}`,
-          read: false,
-        };
+      const participants = await tx.query.chatParticipantsTable.findMany({
+        where: eq(chatParticipantsTable.chatId, messageModel.chatId),
+        with: { user: { columns: { firstName: true, lastName: true } } },
       });
 
-    const participant = participants.find(
-      (participant) => participant.userId === createdMessage.userId,
+      const messageStatusesInsert = participants.map(({ userId }) => ({
+        userId,
+        messageId: createdMessage.id,
+        read: userId === createdMessage.userId,
+      }));
+
+      await tx.insert(messageStatusTable).values(messageStatusesInsert);
+
+      if (!createdMessage.userId) {
+        throw new Error("Message has no userId");
+      }
+
+      return { createdMessage, participants };
+    }),
+  );
+
+  if (error) {
+    logger.error(
+      { error, chatId: messageModel.chatId, userId: messageModel.userId },
+      "Database error while creating message with statuses",
     );
 
-    if (!participant) {
-      throw new Error("Participant is not found");
-    }
+    return [null, error] as const;
+  }
 
-    return {
-      id: createdMessage.id,
-      chatId: createdMessage.chatId,
-      userId: createdMessage.userId,
-      content: createdMessage.content,
-      createdAt: createdMessage.createdAt,
-      updatedAt: createdMessage.updatedAt,
-      senderName: `${participant.user.firstName} ${participant.user.lastName}`,
-      status: MessageStatusEnum.SENT,
-      reads,
-    };
-  });
+  logger.info(
+    { chatId: messageModel.chatId, userId: messageModel.userId },
+    "Message with statuses successfully created in database",
+  );
 
-  return res;
+  return [result, null] as const;
 }
 
 async function findManyByChatId({
@@ -117,7 +109,34 @@ async function findManyByChatId({
   return [rows, null] as const;
 }
 
+async function findAuthorUserMessageGroups(messageIds: string[]) {
+  logger.info("Fetching author message groups from database");
+
+  const [rows, error] = await asyncTryCatch(
+    db
+      .select({
+        authorUserId: userTable.id,
+        messageIds: sql<string[]>`array_agg(${messageTable.id})`,
+      })
+      .from(messageTable)
+      .innerJoin(userTable, eq(userTable.id, messageTable.userId))
+      .where(inArray(messageTable.id, messageIds))
+      .groupBy(userTable.id),
+  );
+
+  if (error) {
+    logger.error("Database error while author message groups from database");
+
+    return [null, error] as const;
+  }
+
+  logger.info("Author message groups successfully fetched from database");
+
+  return [rows, null] as const;
+}
+
 export const messageRepository = {
   createWithStatuses,
   findManyByChatId,
+  findAuthorUserMessageGroups,
 } as const;
