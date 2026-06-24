@@ -26,9 +26,13 @@ export async function processMessageReadReceipt(
   // where userId = readerId and read = false (skips already-read rows)
   await messageStatusRepository.updateMessagesAsRead(payload);
 
-  const authorGroups = await messageRepository.findAuthorUserMessageGroups(
-    payload.messageIds,
-  );
+  const [authorGroups, error] =
+    await messageRepository.findAuthorUserMessageGroups(payload.messageIds);
+
+  if (error) {
+    // TODO: How to handle this error ?
+    return;
+  }
 
   const userIds = authorGroups.map((group) => group.authorUserId);
 

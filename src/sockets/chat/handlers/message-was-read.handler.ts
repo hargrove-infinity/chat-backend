@@ -6,6 +6,8 @@ export const messageWasReadHandler =
   (socket: ChatSocket) => async (payload: ReadReceiptPayload) => {
     const authorNotifications = await processMessageReadReceipt(payload);
 
+    // TODO: How to handle  error from processMessageReadReceipt(payload) ?
+
     if (authorNotifications.length) {
       for (const notification of authorNotifications) {
         socket

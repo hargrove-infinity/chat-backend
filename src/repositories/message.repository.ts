@@ -110,17 +110,29 @@ async function findManyByChatId({
 }
 
 async function findAuthorUserMessageGroups(messageIds: string[]) {
-  const data = await db
-    .select({
-      authorUserId: userTable.id,
-      messageIds: sql<string[]>`array_agg(${messageTable.id})`,
-    })
-    .from(messageTable)
-    .innerJoin(userTable, eq(userTable.id, messageTable.userId))
-    .where(inArray(messageTable.id, messageIds))
-    .groupBy(userTable.id);
+  logger.info("Fetching author message groups from database");
 
-  return data;
+  const [rows, error] = await asyncTryCatch(
+    db
+      .select({
+        authorUserId: userTable.id,
+        messageIds: sql<string[]>`array_agg(${messageTable.id})`,
+      })
+      .from(messageTable)
+      .innerJoin(userTable, eq(userTable.id, messageTable.userId))
+      .where(inArray(messageTable.id, messageIds))
+      .groupBy(userTable.id),
+  );
+
+  if (error) {
+    logger.error("Database error while author message groups from database");
+
+    return [null, error] as const;
+  }
+
+  logger.info("Author message groups successfully fetched from database");
+
+  return [rows, null] as const;
 }
 
 export const messageRepository = {
