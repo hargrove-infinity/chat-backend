@@ -1,3 +1,4 @@
+import { logger } from "../../logger";
 import { messageRepository } from "../../repositories/message.repository";
 import { messageStatusRepository } from "../../repositories/messageStatus.repository";
 import { presenceService } from "../../services/presence.service";
@@ -16,22 +17,33 @@ import type { ReadReceiptPayload } from "./chat.types";
 export async function processMessageReadReceipt(
   payload: ReadReceiptPayload,
 ): Promise<
-  Array<{
-    authorSocketId: string;
-    readerId: string;
-    messageIds: string[];
-  }>
+  | [
+      Array<{
+        authorSocketId: string;
+        readerId: string;
+        messageIds: string[];
+      }>,
+      null,
+    ]
+  | [null, Error]
 > {
   // Sets read = true in messageStatusTable for all given messageIds
   // where userId = readerId and read = false (skips already-read rows)
   await messageStatusRepository.updateMessagesAsRead(payload);
 
-  const [authorGroups, error] =
+  const [authorGroups, authorGroupsError] =
     await messageRepository.findAuthorUserMessageGroups(payload.messageIds);
 
-  if (error) {
-    // TODO: How to handle this error ?
-    return;
+  if (authorGroupsError) {
+    logger.warn(
+      {
+        error: authorGroupsError.message,
+        readerId: payload.readerId,
+        messageIds: payload.messageIds,
+      },
+      "Failed to fetch author message groups while processing read receipt",
+    );
+    return [null, new Error("Unknown error")];
   }
 
   const userIds = authorGroups.map((group) => group.authorUserId);
@@ -48,10 +60,12 @@ export async function processMessageReadReceipt(
         typeof group.authorSocketId === "string",
     );
 
-  return onlineAuthorGroups.map((group) => ({
+  const authorNotifications = onlineAuthorGroups.map((group) => ({
     ...group,
     readerId: payload.readerId,
   }));
+
+  return [authorNotifications, null];
 }
 
 type ErrorAck = { ok: false; error: string };

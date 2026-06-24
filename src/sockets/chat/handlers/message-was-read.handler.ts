@@ -4,9 +4,12 @@ import type { ChatSocket, ReadReceiptPayload } from "../chat.types";
 
 export const messageWasReadHandler =
   (socket: ChatSocket) => async (payload: ReadReceiptPayload) => {
-    const authorNotifications = await processMessageReadReceipt(payload);
+    const [authorNotifications, authorNotificationsError] =
+      await processMessageReadReceipt(payload);
 
-    // TODO: How to handle  error from processMessageReadReceipt(payload) ?
+    if (authorNotificationsError) {
+      throw new Error("Unknown error");
+    }
 
     if (authorNotifications.length) {
       for (const notification of authorNotifications) {
