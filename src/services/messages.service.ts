@@ -100,7 +100,7 @@ async function sendMessage(
   );
 
   if (!participant) {
-    return [null, new Error("Participant is not found")];
+    return [null, new Error("Unknown error")];
   }
 
   const messageDto: MessageDTO = {
