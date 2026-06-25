@@ -37,7 +37,19 @@ export async function registerChatHandlers(socket: ChatSocket) {
     throw new Error("User id is missing");
   }
 
-  const chatIds = await chatParticipantsRepository.findManyByUserId(userId);
+  const [chatParticipantsByUserId, chatParticipantsByUserIdError] =
+    await chatParticipantsRepository.findManyByUserId(userId);
+
+  if (chatParticipantsByUserIdError) {
+    logger.warn(
+      { error: chatParticipantsByUserIdError.message },
+      "Failed to fetch chat participant ids in socket register chat handlers",
+    );
+
+    throw new Error("Unknown error");
+  }
+
+  const chatIds = chatParticipantsByUserId.map((item) => item.chatId);
 
   if (chatIds.length) {
     socket.join(chatIds);

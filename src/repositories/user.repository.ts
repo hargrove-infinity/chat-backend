@@ -3,24 +3,25 @@ import { db } from "../db";
 import { chatParticipantsTable, userTable } from "../db/schema";
 import { logger } from "../logger";
 import { asyncTryCatch } from "../util/asyncTryCatch";
-import type {
-  UserFilterFields,
-  UserUpdateByArgs,
-} from "./user.repository.types";
+import type { UserFilterFields } from "./user.repository.types";
 import { buildWhereClause } from "./user.repository.utils";
 
 async function findFirstBy(where: UserFilterFields) {
-  return db.query.userTable.findFirst({ where: buildWhereClause(where) });
-}
+  logger.info("Fetching first user from database");
 
-async function updateBy(args: UserUpdateByArgs) {
-  const [user] = await db
-    .update(userTable)
-    .set(args.set)
-    .where(buildWhereClause(args.where))
-    .returning();
+  const [rows, error] = await asyncTryCatch(
+    db.query.userTable.findFirst({ where: buildWhereClause(where) }),
+  );
 
-  return user;
+  if (error) {
+    logger.error({ error }, "Database error while fetching first user");
+
+    return [null, error] as const;
+  }
+
+  logger.info("First user successfully fetched from database for user");
+
+  return [rows, null] as const;
 }
 
 async function findUserIdsDirectChats({
@@ -67,6 +68,5 @@ async function findUserIdsDirectChats({
 
 export const userRepository = {
   findFirstBy,
-  updateBy,
   findUserIdsDirectChats,
 } as const;

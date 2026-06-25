@@ -48,22 +48,38 @@ async function updateMessagesAsRead({
   readerId: string;
   messageIds: string[];
 }) {
+  logger.info("Starting updateMessagesAsRead");
+
   if (!messageIds.length) {
-    return;
+    logger.info("Skipping updateMessagesAsRead: no message IDs provided");
+
+    return [null, new Error("Messages was not provided")];
   }
 
-  const data = await db
-    .update(messageStatusTable)
-    .set({ read: true })
-    .where(
-      and(
-        inArray(messageStatusTable.messageId, messageIds),
-        eq(messageStatusTable.userId, readerId),
-        eq(messageStatusTable.read, false),
-      ),
-    );
+  logger.info("Updating unread messages as read in database");
 
-  return data;
+  const [rows, error] = await asyncTryCatch(
+    db
+      .update(messageStatusTable)
+      .set({ read: true })
+      .where(
+        and(
+          inArray(messageStatusTable.messageId, messageIds),
+          eq(messageStatusTable.userId, readerId),
+          eq(messageStatusTable.read, false),
+        ),
+      ),
+  );
+
+  if (error) {
+    logger.error("Database error while updating messages as read in database");
+
+    return [null, error] as const;
+  }
+
+  logger.info("Messages updated as read in database successfully");
+
+  return [rows, null] as const;
 }
 
 export const messageStatusRepository = {

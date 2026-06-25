@@ -1,5 +1,6 @@
 import { type Request, type Response, Router } from "express";
 import { paths } from "../common/paths";
+import { logger } from "../logger";
 import { parsePlainTextJson } from "../middlewares/parse-plain-text-json.middleware";
 import { validate } from "../middlewares/validation.middleware";
 import { logRepository } from "../repositories/log.repository";
@@ -17,19 +18,17 @@ metricsRouter.post(
   parsePlainTextJson,
   validate({ schema: logArraySchema }),
   async (req: Request<object, object, LogArrayInput>, res: Response) => {
-    try {
-      const { body } = req;
+    const { body } = req;
 
-      await logRepository.create(body);
+    const [, error] = await logRepository.create(body);
 
-      res.send({ payload: {} });
-    } catch (error) {
-      // TODO: change later
-      if (error instanceof Error) {
-        res.status(500).send({ errors: [error.message] });
-        return;
-      }
+    if (error) {
+      logger.error("Failed to save logs in POST /metrics/logs");
+
       res.status(500).send({ errors: ["Unknown error"] });
+      return;
     }
+
+    res.send({ payload: {} });
   },
 );

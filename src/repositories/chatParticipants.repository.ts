@@ -5,14 +5,32 @@ import { logger } from "../logger";
 import { asyncTryCatch } from "../util/asyncTryCatch";
 
 async function findManyByUserId(userId: string) {
-  const chatParticipantsByUserId =
-    await db.query.chatParticipantsTable.findMany({
+  logger.info(
+    { userId },
+    "Fetching chat participants by user id from database for user",
+  );
+
+  const [rows, error] = await asyncTryCatch(
+    db.query.chatParticipantsTable.findMany({
       where: eq(chatParticipantsTable.userId, userId),
-    });
+    }),
+  );
 
-  const chatIdsByUserId = chatParticipantsByUserId.map((item) => item.chatId);
+  if (error) {
+    logger.error(
+      { error, userId },
+      "Database error while fetching chat participants for user",
+    );
 
-  return chatIdsByUserId;
+    return [null, error] as const;
+  }
+
+  logger.info(
+    { userId },
+    "Chat participants successfully fetched from database for user",
+  );
+
+  return [rows, null] as const;
 }
 
 async function findChatSummariesByUserId(userId: string) {

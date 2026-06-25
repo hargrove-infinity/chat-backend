@@ -29,7 +29,20 @@ export async function processMessageReadReceipt(
 > {
   // Sets read = true in messageStatusTable for all given messageIds
   // where userId = readerId and read = false (skips already-read rows)
-  await messageStatusRepository.updateMessagesAsRead(payload);
+  const [, updateMessagesAsReadError] =
+    await messageStatusRepository.updateMessagesAsRead(payload);
+
+  if (updateMessagesAsReadError) {
+    logger.warn(
+      {
+        error: updateMessagesAsReadError.message,
+        readerId: payload.readerId,
+        messageIds: payload.messageIds,
+      },
+      "Failed to update messages as read while processing read receipt",
+    );
+    return [null, new Error("Unknown error")];
+  }
 
   const [authorGroups, authorGroupsError] =
     await messageRepository.findAuthorUserMessageGroups(payload.messageIds);
