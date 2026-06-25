@@ -48,7 +48,20 @@ export async function processMessageReadReceipt(
 
   const userIds = authorGroups.map((group) => group.authorUserId);
 
-  const onlineUserSocketIdMap = await presenceService.getUserSocketMap(userIds);
+  const [onlineUserSocketIdMap, onlineUserSocketIdMapError] =
+    await presenceService.getUserSocketMap(userIds);
+
+  if (onlineUserSocketIdMapError) {
+    logger.warn(
+      {
+        error: onlineUserSocketIdMapError.message,
+        readerId: payload.readerId,
+        messageIds: payload.messageIds,
+      },
+      "Failed to fetch online user socket id map while processing read receipt",
+    );
+    return [null, new Error("Unknown error")];
+  }
 
   const onlineAuthorGroups = authorGroups
     .map((group) => ({

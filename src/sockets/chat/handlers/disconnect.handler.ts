@@ -12,7 +12,19 @@ type DisconnectHandlerArgs = {
 export const disconnectHandler = (args: DisconnectHandlerArgs) => async () => {
   const { userId, socket } = args;
 
-  await presenceService.deletePresence({ userId, socketId: socket.id });
+  const [, deletePresenceError] = await presenceService.deletePresence({
+    userId,
+    socketId: socket.id,
+  });
+
+  if (deletePresenceError) {
+    logger.warn(
+      { error: deletePresenceError.message },
+      "Failed to delete presence in Redis in socket disconnect handler",
+    );
+
+    throw new Error("Unknown error");
+  }
 
   const [interlocutorIds, errorInterlocutorIds] =
     await usersService.findDirectInterlocutorIds(userId);
@@ -22,11 +34,21 @@ export const disconnectHandler = (args: DisconnectHandlerArgs) => async () => {
       { error: errorInterlocutorIds.message, userId },
       "Failed to fetch direct interlocutor ids in socket disconnect handler",
     );
-    return;
+
+    throw new Error("Unknown error");
   }
 
-  const onlineInterlocutorSocketIds =
+  const [onlineInterlocutorSocketIds, onlineInterlocutorSocketIdsError] =
     await presenceService.getSocketIdList(interlocutorIds);
+
+  if (onlineInterlocutorSocketIdsError) {
+    logger.warn(
+      { error: onlineInterlocutorSocketIdsError.message },
+      "Failed to fetch online interlocutor socket ids from Redis in socket disconnect handler",
+    );
+
+    throw new Error("Unknown error");
+  }
 
   if (onlineInterlocutorSocketIds.length) {
     socket

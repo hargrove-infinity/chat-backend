@@ -51,8 +51,18 @@ async function findManyByUserId(
     })
     .filter((id): id is string => id !== undefined);
 
-  const onlineUserSocketIdMap =
+  const [onlineUserSocketIdMap, onlineUserSocketIdMapError] =
     await presenceService.getUserSocketMap(interlocutorIds);
+
+  if (onlineUserSocketIdMapError) {
+    logger.warn(
+      {
+        error: onlineUserSocketIdMapError.message,
+      },
+      "Failed to fetch online user socket id map in chatsService.findManyByUserId",
+    );
+    return [null, new Error("Unknown error")];
+  }
 
   let chatDtos: ChatDTO[];
 
