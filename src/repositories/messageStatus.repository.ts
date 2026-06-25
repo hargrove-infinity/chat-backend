@@ -2,7 +2,6 @@ import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../db";
 import { messageStatusTable } from "../db/schema";
 import { logger } from "../logger";
-import type { ReadReceiptPayload } from "../sockets/chat/chat.types";
 import { asyncTryCatch } from "../util/asyncTryCatch";
 
 async function findUnreadByUserId(userId: string) {
@@ -42,9 +41,13 @@ async function findUnreadByUserId(userId: string) {
   return [rows, null] as const;
 }
 
-async function updateMessagesAsRead(payload: ReadReceiptPayload) {
-  const { messageIds, readerId } = payload;
-
+async function updateMessagesAsRead({
+  readerId,
+  messageIds,
+}: {
+  readerId: string;
+  messageIds: string[];
+}) {
   if (!messageIds.length) {
     return;
   }
