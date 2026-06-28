@@ -34,7 +34,7 @@ export async function chatMiddleware(
       { error: userError },
       "Failed to find user in chat middleware",
     );
-    const err: ExtendedError = new Error("User is not found");
+    const err: ExtendedError = new Error("Unknown error");
     err.data = { namespace: CHAT_NAMESPACE, source: "middleware" };
     return next(err);
   }
