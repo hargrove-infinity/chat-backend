@@ -125,7 +125,10 @@ async function findAuthorUserMessageGroups(messageIds: string[]) {
   );
 
   if (error) {
-    logger.error("Database error while author message groups from database");
+    logger.error(
+      { error },
+      "Database error while author message groups from database",
+    );
 
     return [null, error] as const;
   }

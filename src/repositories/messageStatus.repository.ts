@@ -72,7 +72,10 @@ async function updateMessagesAsRead({
   );
 
   if (error) {
-    logger.error("Database error while updating messages as read in database");
+    logger.error(
+      { error },
+      "Database error while updating messages as read in database",
+    );
 
     return [null, error] as const;
   }

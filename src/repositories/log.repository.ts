@@ -12,7 +12,10 @@ async function create(logModels: LogInsert[]) {
   );
 
   if (error) {
-    logger.error("Database error while inserting logs into database");
+    logger.error(
+      { error },
+      "Database error while inserting logs into database",
+    );
 
     return [null, error] as const;
   }
