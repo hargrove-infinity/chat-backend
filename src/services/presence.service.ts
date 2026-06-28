@@ -163,7 +163,18 @@ async function deletePresence(
    * the disconnecting socket id (`socketId` arg) — meaning a newer connection
    * has taken over. Only delete the stale `socketId` — leave the new one untouched.
    */
-  const currentSocketId = await redis.get(keys.userToSocket(userId));
+  const [currentSocketId, currentSocketIdError] = await asyncTryCatch(
+    redis.get(keys.userToSocket(userId)),
+  );
+
+  if (currentSocketIdError) {
+    logger.error(
+      { error: currentSocketIdError },
+      "Redis error while fetching current socket ID for user",
+    );
+
+    return [null, currentSocketIdError] as const;
+  }
 
   if (currentSocketId !== socketId) {
     const [, staleSocketDeleteError] = await asyncTryCatch(
