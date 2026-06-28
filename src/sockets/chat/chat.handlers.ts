@@ -20,13 +20,36 @@ export async function registerChatHandlers(socket: ChatSocket) {
    */
   socket.emit(CONNECTION_EVENTS.CONNECTED);
 
-  const userId = await presenceService.getUserId(socket.id);
+  const [userId, userIdError] = await presenceService.getUserId(socket.id);
+
+  if (userIdError) {
+    logger.warn(
+      { error: userIdError.message },
+      "Failed to fetch user id from Redis in socket register chat handlers",
+    );
+
+    throw new Error("Unknown error");
+  }
 
   if (!userId) {
+    logger.warn("User id from Redis is null in socket register chat handlers");
+
     throw new Error("User id is missing");
   }
 
-  const chatIds = await chatParticipantsRepository.findManyByUserId(userId);
+  const [chatParticipantsByUserId, chatParticipantsByUserIdError] =
+    await chatParticipantsRepository.findManyByUserId(userId);
+
+  if (chatParticipantsByUserIdError) {
+    logger.warn(
+      { error: chatParticipantsByUserIdError.message },
+      "Failed to fetch chat participant ids in socket register chat handlers",
+    );
+
+    throw new Error("Unknown error");
+  }
+
+  const chatIds = chatParticipantsByUserId.map((item) => item.chatId);
 
   if (chatIds.length) {
     socket.join(chatIds);
@@ -38,14 +61,23 @@ export async function registerChatHandlers(socket: ChatSocket) {
   if (errorInterlocutorIds) {
     logger.warn(
       { error: errorInterlocutorIds.message, userId },
-      "Failed to fetch direct interlocutor ids in socket chat handlers",
+      "Failed to fetch direct interlocutor ids in socket register chat handlers",
     );
 
     throw new Error("Unknown error");
   }
 
-  const onlineInterlocutorSocketIds =
+  const [onlineInterlocutorSocketIds, onlineInterlocutorSocketIdsError] =
     await presenceService.getSocketIdList(interlocutorIds);
+
+  if (onlineInterlocutorSocketIdsError) {
+    logger.warn(
+      { error: onlineInterlocutorSocketIdsError.message },
+      "Failed to fetch online interlocutor socket ids from Redis in socket register chat handlers",
+    );
+
+    throw new Error("Unknown error");
+  }
 
   if (onlineInterlocutorSocketIds.length) {
     socket
