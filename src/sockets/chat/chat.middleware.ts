@@ -40,7 +40,21 @@ export async function chatMiddleware(
   }
 
   if (user) {
-    await presenceService.setPresence({ userId: user.id, socketId: socket.id });
+    const [, setPresenceError] = await presenceService.setPresence({
+      userId: user.id,
+      socketId: socket.id,
+    });
+
+    if (setPresenceError) {
+      logger.error(
+        { error: setPresenceError },
+        "Failed to set presence in Redis in chat middleware",
+      );
+
+      const err: ExtendedError = new Error("Failed to set presence");
+      err.data = { namespace: CHAT_NAMESPACE, source: "middleware" };
+      return next(err);
+    }
   }
 
   next();
