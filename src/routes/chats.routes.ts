@@ -2,8 +2,10 @@ import { Router } from "express";
 import { paths } from "../common/paths";
 import { logger } from "../logger";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { validate } from "../middlewares/validation.middleware";
 import { chatsService } from "../services/chats.service";
 import { messagesService } from "../services/messages.service";
+import { queryParamsChatIdSchema } from "../validation/chats";
 
 export const chatsRoutes = Router();
 
@@ -46,9 +48,9 @@ chatsRoutes.get(
 chatsRoutes.get(
   paths.chats.messagesByChatId,
   authMiddleware("header"),
+  validate({ schema: queryParamsChatIdSchema, key: "params" }),
   async (req, res) => {
     const { user, params } = req;
-    // TODO: add validation for chatId
     const { chatId } = params;
 
     if (!user) {
