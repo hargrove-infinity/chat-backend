@@ -1,11 +1,14 @@
-import { Router } from "express";
+import { type Request, Router } from "express";
 import { paths } from "../common/paths";
 import { logger } from "../logger";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validation.middleware";
 import { chatsService } from "../services/chats.service";
 import { messagesService } from "../services/messages.service";
-import { queryParamsChatIdSchema } from "../validation/chats";
+import {
+  type QueryParamsChatIdInput,
+  queryParamsChatIdSchema,
+} from "../validation/chats";
 
 export const chatsRoutes = Router();
 
@@ -49,17 +52,12 @@ chatsRoutes.get(
   paths.chats.messagesByChatId,
   authMiddleware("header"),
   validate({ schema: queryParamsChatIdSchema, key: "params" }),
-  async (req, res) => {
+  async (req: Request<QueryParamsChatIdInput>, res) => {
     const { user, params } = req;
     const { chatId } = params;
 
     if (!user) {
       res.status(400).send({ errors: ["User is not attached"] });
-      return;
-    }
-
-    if (typeof chatId !== "string") {
-      res.status(400).send({ errors: ["Chat id is not string"] });
       return;
     }
 
