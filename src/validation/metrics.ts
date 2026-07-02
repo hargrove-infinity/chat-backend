@@ -11,6 +11,11 @@ const logSchema = z.object({
   timestamp: z.coerce.date(),
 });
 
-export const logArraySchema = z.array(logSchema);
+const logArraySchema = z.array(logSchema);
 
-export type LogArrayInput = z.infer<typeof logArraySchema>;
+export const metricsPayloadSchema = z.object({
+  token: z.string(),
+  logs: logArraySchema,
+});
+
+export type MetricsPayloadInput = z.infer<typeof metricsPayloadSchema>;
