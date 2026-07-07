@@ -4,6 +4,14 @@ import { logger } from "../logger";
 
 export const redis = new Redis(envVariables.redisUrl);
 
+redis.on("error", (error) => {
+  logger.error({ error }, "Redis client error");
+});
+
+redis.on("reconnecting", () => {
+  logger.warn("Redis client reconnecting");
+});
+
 export async function checkRedisConnection() {
   try {
     logger.info("Checking Redis connection...");
