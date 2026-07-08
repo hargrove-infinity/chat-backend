@@ -22,6 +22,13 @@
       "when": 1783531651358,
       "tag": "0002_enable_pg_trgm",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1783532137167,
+      "tag": "0003_add_users_search_trgm_index",
+      "breakpoints": true
     }
   ]
 }
