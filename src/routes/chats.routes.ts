@@ -10,13 +10,13 @@ import {
   queryParamsChatIdSchema,
 } from "../validation/chats";
 
-export const chatsRoutes = Router();
+export const chatsRouter = Router();
 
 /**
  * Returns all chats for the authenticated user,
  * including the last message and resolved chat name for direct chats
  */
-chatsRoutes.get(
+chatsRouter.get(
   paths.chats.list,
   authMiddleware("header"),
   async (req, res) => {
@@ -48,7 +48,7 @@ chatsRoutes.get(
  * Returns all messages for a specific chat,
  * including resolved sender name and message status
  */
-chatsRoutes.get(
+chatsRouter.get(
   paths.chats.messagesByChatId,
   authMiddleware("header"),
   validate({ schema: queryParamsChatIdSchema, key: "params" }),
