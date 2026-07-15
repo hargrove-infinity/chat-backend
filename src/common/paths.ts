@@ -9,4 +9,7 @@ export const paths = {
   metrics: {
     logs: "/metrics/logs",
   },
+  users: {
+    list: "/users",
+  },
 };

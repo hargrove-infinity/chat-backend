@@ -1,3 +1,4 @@
+import type { UserDTO } from "../db/types";
 import { logger } from "../logger";
 import { chatRepository } from "../repositories/chat.repository";
 import { userRepository } from "../repositories/user.repository";
@@ -43,6 +44,42 @@ async function findDirectInterlocutorIds(
   return [directInterlocutorIds, null];
 }
 
+async function findByText({
+  text,
+  page,
+  size,
+}: {
+  text: string;
+  page: string;
+  size: string;
+}): Promise<[UserDTO, null] | [null, Error]> {
+  const [rawUsers, rawUsersError] = await userRepository.findByText({
+    text,
+    limit: +size,
+    offset: +page * +size,
+  });
+
+  if (rawUsersError) {
+    logger.warn(
+      { error: rawUsersError.message },
+      "Failed to fetch users by text in users service",
+    );
+
+    return [null, new Error("Unknown error")];
+  }
+
+  const [content, totalElements] = rawUsers;
+
+  const payload = {
+    content,
+    hasMore: totalElements > +page * +size,
+    pageNumber: +page,
+  };
+
+  return [payload, null];
+}
+
 export const usersService = {
   findDirectInterlocutorIds,
+  findByText,
 } as const;
