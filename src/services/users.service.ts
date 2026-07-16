@@ -72,7 +72,7 @@ async function findByText({
 
   const payload = {
     content,
-    hasMore: totalElements > +page * +size,
+    hasMore: totalElements > (+page + 1) * +size,
     pageNumber: +page,
   };
 
