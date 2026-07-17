@@ -2,8 +2,12 @@ import { type Request, type Response, Router } from "express";
 import { paths } from "../common/paths";
 import { logger } from "../logger";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { validate } from "../middlewares/validation.middleware";
 import { usersService } from "../services/users.service";
-import type { QueryParamsUsersSearchInput } from "../validation/users";
+import {
+  type QueryParamsUsersSearchInput,
+  queryParamsUsersSearchSchema,
+} from "../validation/users";
 
 export const usersRouter = Router();
 
@@ -14,6 +18,7 @@ export const usersRouter = Router();
 usersRouter.get(
   paths.users.list,
   authMiddleware("header"),
+  validate({ schema: queryParamsUsersSearchSchema, key: "query" }),
   async (
     req: Request<object, object, object, QueryParamsUsersSearchInput>,
     res: Response,

@@ -18,7 +18,16 @@ export function validate<T>({
       return;
     }
 
-    req[key] = result.data;
+    if (key === "query") {
+      Object.defineProperty(req, "query", {
+        value: result.data,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+    } else {
+      req[key] = result.data;
+    }
 
     next();
   };
