@@ -11,6 +11,10 @@ import {
 
 export const usersRouter = Router();
 
+type UsersSearchLocals = {
+  query: QueryParamsUsersSearchInput;
+};
+
 /**
  * Returns a paginated list of users matching a search text,
  * filtered by first name, last name, or email
@@ -19,12 +23,9 @@ usersRouter.get(
   paths.users.list,
   authMiddleware("header"),
   validate({ schema: queryParamsUsersSearchSchema, key: "query" }),
-  async (
-    req: Request<object, object, object, QueryParamsUsersSearchInput>,
-    res: Response,
-  ) => {
+  async (req: Request, res: Response<unknown, UsersSearchLocals>) => {
     const { user } = req;
-    const { text, page, size } = req.query;
+    const { text, page, size } = res.locals.query;
 
     if (!user) {
       logger.warn("User is not attached to request in GET /users");

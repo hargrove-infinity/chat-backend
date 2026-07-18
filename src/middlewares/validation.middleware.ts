@@ -18,16 +18,7 @@ export function validate<T>({
       return;
     }
 
-    if (key === "query") {
-      Object.defineProperty(req, "query", {
-        value: result.data,
-        writable: true,
-        enumerable: true,
-        configurable: true,
-      });
-    } else {
-      req[key] = result.data;
-    }
+    res.locals[key] = result.data;
 
     next();
   };
