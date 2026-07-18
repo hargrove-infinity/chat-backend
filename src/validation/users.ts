@@ -5,7 +5,7 @@ const stringifiedNumberSchema = z
   .regex(/^\d+$/, "Must be a stringified number");
 
 export const queryParamsUsersSearchSchema = z.object({
-  text: z.string().min(1),
+  text: z.string().trim().min(1),
   page: stringifiedNumberSchema,
   size: stringifiedNumberSchema,
 });
