@@ -1,4 +1,4 @@
-import { type Request, Router } from "express";
+import { type Request, type Response, Router } from "express";
 import { paths } from "../common/paths";
 import { logger } from "../logger";
 import { authMiddleware } from "../middlewares/auth.middleware";
@@ -10,13 +10,13 @@ import {
   queryParamsChatIdSchema,
 } from "../validation/chats";
 
-export const chatsRoutes = Router();
+export const chatsRouter = Router();
 
 /**
  * Returns all chats for the authenticated user,
  * including the last message and resolved chat name for direct chats
  */
-chatsRoutes.get(
+chatsRouter.get(
   paths.chats.list,
   authMiddleware("header"),
   async (req, res) => {
@@ -44,17 +44,21 @@ chatsRoutes.get(
   },
 );
 
+type MessagesByChatIdLocals = {
+  params: QueryParamsChatIdInput;
+};
+
 /**
  * Returns all messages for a specific chat,
  * including resolved sender name and message status
  */
-chatsRoutes.get(
+chatsRouter.get(
   paths.chats.messagesByChatId,
   authMiddleware("header"),
   validate({ schema: queryParamsChatIdSchema, key: "params" }),
-  async (req: Request<QueryParamsChatIdInput>, res) => {
-    const { user, params } = req;
-    const { chatId } = params;
+  async (req: Request, res: Response<unknown, MessagesByChatIdLocals>) => {
+    const { user } = req;
+    const { chatId } = res.locals.params;
 
     if (!user) {
       res.status(400).send({ errors: ["User is not attached"] });

@@ -12,6 +12,10 @@ import {
 
 export const metricsRouter = Router();
 
+type MetricsLocals = {
+  body: MetricsPayloadInput;
+};
+
 /**
  * Receives an array of error logs from the client
  */
@@ -21,8 +25,8 @@ metricsRouter.post(
   parsePlainTextJson,
   authMiddleware("body"),
   validate({ schema: metricsPayloadSchema }),
-  async (req: Request<object, object, MetricsPayloadInput>, res: Response) => {
-    const { body } = req;
+  async (_req: Request, res: Response<unknown, MetricsLocals>) => {
+    const { body } = res.locals;
 
     const [, error] = await logRepository.create(body.logs);
 

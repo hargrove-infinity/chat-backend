@@ -1,4 +1,4 @@
-import { and, eq, inArray, ne } from "drizzle-orm";
+import { and, eq, ilike, inArray, ne, sql } from "drizzle-orm";
 import { db } from "../db";
 import { chatParticipantsTable, userTable } from "../db/schema";
 import { logger } from "../logger";
@@ -66,7 +66,54 @@ async function findUserIdsDirectChats({
   return [rows, null] as const;
 }
 
+async function findByText({
+  text,
+  limit,
+  offset,
+}: {
+  text: string;
+  limit: number;
+  offset: number;
+}) {
+  logger.info({ text, limit, offset }, "Searching users by text");
+
+  const fullNameAndEmail = sql`(${userTable.firstName} || ' ' || ${userTable.lastName} || ' ' || ${userTable.email})`;
+
+  const whereCondition = ilike(fullNameAndEmail, `%${text}%`);
+
+  const contentQuery = db
+    .select({
+      firstName: userTable.firstName,
+      lastName: userTable.lastName,
+      email: userTable.email,
+    })
+    .from(userTable)
+    .where(whereCondition)
+    .limit(limit)
+    .offset(offset);
+
+  const totalCountQuery = db.$count(userTable, whereCondition);
+
+  const [result, error] = await asyncTryCatch(
+    Promise.all([contentQuery, totalCountQuery]),
+  );
+
+  if (error) {
+    logger.error({ error, text }, "Database error while searching users");
+
+    return [null, error] as const;
+  }
+
+  logger.info(
+    { text },
+    "Users successfully fetched from database (search by text)",
+  );
+
+  return [result, null] as const;
+}
+
 export const userRepository = {
   findFirstBy,
   findUserIdsDirectChats,
+  findByText,
 } as const;

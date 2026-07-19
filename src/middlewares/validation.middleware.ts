@@ -18,7 +18,7 @@ export function validate<T>({
       return;
     }
 
-    req[key] = result.data;
+    res.locals[key] = result.data;
 
     next();
   };

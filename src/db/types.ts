@@ -1,36 +1,20 @@
 import type { chatTable, logTable, messageTable, userTable } from "./schema";
 
-// Types
+// ===== User =====
+
 export type UserSelect = typeof userTable.$inferSelect;
 
 export type UserInsert = typeof userTable.$inferInsert;
 
+type UserAbbreviated = Pick<UserSelect, "firstName" | "lastName" | "email">;
+
+export type UserDTO = {
+  content: UserAbbreviated[];
+} & Pagination;
+
+// ===== Chat =====
+
 export type ChatSelect = typeof chatTable.$inferSelect;
-
-export type MessageSelect = typeof messageTable.$inferSelect;
-
-export type MessageInsert = typeof messageTable.$inferInsert;
-
-export type LogInsert = typeof logTable.$inferInsert;
-
-export enum MessageStatusEnum {
-  /** Message is being sent to server */
-  SENDING = "SENDING",
-  /** Message successfully delivered to server */
-  SENT = "SENT",
-  /** Message read by all participants in a chat */
-  READ = "READ",
-  /** Message failed to send */
-  ERROR = "ERROR",
-}
-
-type MessageReads = { userId: string; userName: string; read: boolean };
-
-export type MessageDTO = MessageSelect & {
-  senderName: string | null;
-  status: MessageStatusEnum;
-  reads: MessageReads[]; // all reads of message except sender because sender already read it
-};
 
 type Participant = { id: string; name: string; isTyping: boolean };
 
@@ -76,3 +60,36 @@ export type ChatDTO = Omit<
    */
   unreadMessages: number;
 };
+
+// ===== Message =====
+
+export type MessageSelect = typeof messageTable.$inferSelect;
+
+export type MessageInsert = typeof messageTable.$inferInsert;
+
+export enum MessageStatusEnum {
+  /** Message is being sent to server */
+  SENDING = "SENDING",
+  /** Message successfully delivered to server */
+  SENT = "SENT",
+  /** Message read by all participants in a chat */
+  READ = "READ",
+  /** Message failed to send */
+  ERROR = "ERROR",
+}
+
+type MessageReads = { userId: string; userName: string; read: boolean };
+
+export type MessageDTO = MessageSelect & {
+  senderName: string | null;
+  status: MessageStatusEnum;
+  reads: MessageReads[]; // all reads of message except sender because sender already read it
+};
+
+// ===== Log =====
+
+export type LogInsert = typeof logTable.$inferInsert;
+
+// ===== Shared / Pagination =====
+
+type Pagination = { hasMore: boolean; pageNumber: number };

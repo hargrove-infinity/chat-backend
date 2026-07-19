@@ -1,0 +1,54 @@
+import { type Request, type Response, Router } from "express";
+import { paths } from "../common/paths";
+import { logger } from "../logger";
+import { authMiddleware } from "../middlewares/auth.middleware";
+import { validate } from "../middlewares/validation.middleware";
+import { usersService } from "../services/users.service";
+import {
+  type QueryParamsUsersSearchInput,
+  queryParamsUsersSearchSchema,
+} from "../validation/users";
+
+export const usersRouter = Router();
+
+type UsersSearchLocals = {
+  query: QueryParamsUsersSearchInput;
+};
+
+/**
+ * Returns a paginated list of users matching a search text,
+ * filtered by first name, last name, or email
+ */
+usersRouter.get(
+  paths.users.list,
+  authMiddleware("header"),
+  validate({ schema: queryParamsUsersSearchSchema, key: "query" }),
+  async (req: Request, res: Response<unknown, UsersSearchLocals>) => {
+    const { user } = req;
+    const { text, page, size } = res.locals.query;
+
+    if (!user) {
+      logger.warn("User is not attached to request in GET /users");
+      res.status(400).send({ errors: ["User is not attached"] });
+      return;
+    }
+
+    const [users, error] = await usersService.findByText({
+      text,
+      page,
+      size,
+    });
+
+    if (error) {
+      logger.error(
+        { error, userId: user.id },
+        "Failed to fetch chats in GET /users",
+      );
+
+      res.status(500).send({ errors: [error.message] });
+      return;
+    }
+
+    res.send({ payload: users });
+  },
+);

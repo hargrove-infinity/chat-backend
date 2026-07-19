@@ -3,13 +3,13 @@ import { paths } from "../common/paths";
 import { logger } from "../logger";
 import { userRepository } from "../repositories/user.repository";
 
-export const authRoutes = Router();
+export const authRouter = Router();
 
 /**
  * Authenticates user credentials against mocked data,
  * and returns a base64-encoded user payload on successful login
  */
-authRoutes.post(paths.auth.login, async (req, res) => {
+authRouter.post(paths.auth.login, async (req, res) => {
   const { email, password } = req.body;
 
   const [user, userError] = await userRepository.findFirstBy({

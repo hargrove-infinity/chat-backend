@@ -1,9 +1,10 @@
 import cors from "cors";
 import express from "express";
 
-import { authRoutes } from "./routes/auth.routes";
-import { chatsRoutes } from "./routes/chats.routes";
+import { authRouter } from "./routes/auth.routes";
+import { chatsRouter } from "./routes/chats.routes";
 import { metricsRouter } from "./routes/metrics.routes";
+import { usersRouter } from "./routes/users.routes";
 
 export function createApp() {
   // Initialize Express application
@@ -20,13 +21,15 @@ export function createApp() {
 
   /**
    * Register application routes:
-   * - authRoutes: handles authentication-related endpoints (login, register, etc.)
-   * - chatsRoutes: handles chat-related endpoints (chats, messages, etc.)
+   * - authRouter: handles authentication-related endpoints (login, register, etc.)
+   * - chatsRouter: handles chat-related endpoints (chats, messages, etc.)
    * - metricsRouter: handles metrics-related endpoints (logs, etc.)
+   * - usersRouter: handles user-related endpoints (search, etc.)
    */
-  app.use(authRoutes);
-  app.use(chatsRoutes);
+  app.use(authRouter);
+  app.use(chatsRouter);
   app.use(metricsRouter);
+  app.use(usersRouter);
 
   return app;
 }
