@@ -6,7 +6,10 @@ export type UserSelect = typeof userTable.$inferSelect;
 
 export type UserInsert = typeof userTable.$inferInsert;
 
-type UserAbbreviated = Pick<UserSelect, "firstName" | "lastName" | "email">;
+type UserAbbreviated = Pick<
+  UserSelect,
+  "id" | "firstName" | "lastName" | "email"
+>;
 
 export type UserDTO = {
   content: UserAbbreviated[];

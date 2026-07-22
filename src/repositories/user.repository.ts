@@ -83,6 +83,7 @@ async function findByText({
 
   const contentQuery = db
     .select({
+      id: userTable.id,
       firstName: userTable.firstName,
       lastName: userTable.lastName,
       email: userTable.email,
