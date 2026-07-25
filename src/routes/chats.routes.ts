@@ -6,11 +6,54 @@ import { validate } from "../middlewares/validation.middleware";
 import { chatsService } from "../services/chats.service";
 import { messagesService } from "../services/messages.service";
 import {
+  type InsertChatInput,
+  insertChatSchema,
   type QueryParamsChatIdInput,
   queryParamsChatIdSchema,
 } from "../validation/chats";
 
 export const chatsRouter = Router();
+
+type ChatsLocals = {
+  body: InsertChatInput;
+};
+
+/**
+ * Creates a new chat.
+ * The authenticated user is automatically added as a chat participant.
+ */
+chatsRouter.post(
+  paths.chats.list,
+  authMiddleware("header"),
+  validate({ schema: insertChatSchema }),
+  async (req: Request, res: Response<unknown, ChatsLocals>) => {
+    const { user } = req;
+    const { body } = res.locals;
+
+    if (!user) {
+      logger.warn("User is not attached to request in POST /chats");
+      res.status(400).send({ errors: ["User is not attached"] });
+      return;
+    }
+
+    const [chat, error] = await chatsService.create({
+      ...body,
+      chatCreatorId: user.id,
+    });
+
+    if (error) {
+      logger.error(
+        { error, userId: user.id },
+        "Failed to create chat in POST /chats",
+      );
+
+      res.status(500).send({ errors: [error.message] });
+      return;
+    }
+
+    res.send({ payload: chat });
+  },
+);
 
 /**
  * Returns all chats for the authenticated user,
