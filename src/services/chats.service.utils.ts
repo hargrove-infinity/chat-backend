@@ -87,3 +87,16 @@ export const getOnlineStatus = ({
 
   return false;
 };
+
+export const hasDuplicates = (uuids: string[]): boolean => {
+  const seen = new Set<string>();
+
+  for (const uuid of uuids) {
+    if (seen.has(uuid)) {
+      return true;
+    }
+    seen.add(uuid);
+  }
+
+  return false;
+};

@@ -8,6 +8,7 @@ import {
   getChatName,
   getInterlocutorIds,
   getOnlineStatus,
+  hasDuplicates,
 } from "./chats.service.utils";
 import { presenceService } from "./presence.service";
 
@@ -136,6 +137,11 @@ async function create(
       null,
       new Error("DIRECT chat must include two participants at maximum"),
     ];
+  }
+
+  if (hasDuplicates(allParticipantIds)) {
+    logger.warn("ParticipantIds have duplicates");
+    return [null, new Error("ParticipantIds have duplicates")];
   }
 
   if (body.type === "GROUP" && !body.name) {
