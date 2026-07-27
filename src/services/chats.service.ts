@@ -123,6 +123,13 @@ async function findManyByUserId(
 async function create(
   body: InsertChatInput & { chatCreatorId: string },
 ): Promise<[ChatDTO, null] | [null, Error]> {
+  const allParticipantIds = [...body.participantIds, body.chatCreatorId];
+
+  if (allParticipantIds.length < 2) {
+    logger.warn("Chat must include at least two participants");
+    return [null, new Error("Chat must include at least two participants")];
+  }
+
   if (body.type === "GROUP" && !body.name) {
     logger.warn("Name is not passed for GROUP type chat");
     return [null, new Error("Name must be provided for GROUP type chat")];
