@@ -152,7 +152,7 @@ async function create(
   const [rawChat, rawChatError] = await chatRepository.createWithParticipants({
     type: body.type,
     name: body.name,
-    participantIds: [...body.participantIds, body.chatCreatorId],
+    participantIds: allParticipantIds,
   });
 
   if (rawChatError) {
