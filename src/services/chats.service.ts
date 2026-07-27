@@ -130,6 +130,14 @@ async function create(
     return [null, new Error("Chat must include at least two participants")];
   }
 
+  if (body.type === "DIRECT" && allParticipantIds.length > 2) {
+    logger.warn("DIRECT chat must include two participants at maximum");
+    return [
+      null,
+      new Error("DIRECT chat must include two participants at maximum"),
+    ];
+  }
+
   if (body.type === "GROUP" && !body.name) {
     logger.warn("Name is not passed for GROUP type chat");
     return [null, new Error("Name must be provided for GROUP type chat")];
