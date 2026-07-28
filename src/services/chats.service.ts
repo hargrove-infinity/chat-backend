@@ -149,6 +149,25 @@ async function create(
     return [null, new Error("Name must be provided for GROUP type chat")];
   }
 
+  if (body.type === "DIRECT") {
+    const [existingDirectChatIdInfo, existingDirectChatIdInfoError] =
+      await chatRepository.findDirectChatBetweenTwoUsers(allParticipantIds);
+
+    if (existingDirectChatIdInfoError) {
+      logger.warn(
+        { error: existingDirectChatIdInfoError.message },
+        "Failed to check DIRECT chat existence in chats service",
+      );
+
+      return [null, new Error("Unknown error")];
+    }
+
+    if (existingDirectChatIdInfo.length) {
+      logger.warn("DIRECT chat between two users already existed");
+      return [null, new Error("DIRECT chat between two users already existed")];
+    }
+  }
+
   const [rawChat, rawChatError] = await chatRepository.createWithParticipants({
     type: body.type,
     name: body.name,
