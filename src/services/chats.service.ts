@@ -78,7 +78,7 @@ async function findManyByUserId(
     chatDtos = rawChats.map((rawChat) => {
       const participants = rawChat.chat.chatParticipants.map((p) => ({
         id: p.user.id,
-        name: `${p.user.firstName} ${p.user.lastName}`,
+        name: p.user.name,
         isTyping: false,
       }));
 
@@ -103,7 +103,7 @@ async function findManyByUserId(
 
         return {
           ...baseChat,
-          name: `${interlocutor.user.firstName} ${interlocutor.user.lastName}`,
+          name: interlocutor.user.name,
           isOnline: !!onlineUserSocketIdMap[interlocutor.user.id],
         };
       }
@@ -210,7 +210,7 @@ async function create(
 
   const participants = chatWithParticipantsRaw.chatParticipants.map((p) => ({
     id: p.user.id,
-    name: `${p.user.firstName} ${p.user.lastName}`,
+    name: p.user.name,
     isTyping: false,
   }));
 

@@ -39,7 +39,7 @@ async function findManyByChatId({
       .map((messageStatus) => {
         return {
           userId: messageStatus.userId,
-          userName: `${messageStatus.user.firstName} ${messageStatus.user.lastName}`,
+          userName: messageStatus.user.name,
           read: messageStatus.read,
         };
       });
@@ -53,9 +53,7 @@ async function findManyByChatId({
       ...restMessage,
       reads: messageReadReceipts,
       status: isReadMessage ? MessageStatusEnum.READ : MessageStatusEnum.SENT,
-      senderName: sender
-        ? `${sender.firstName} ${sender.lastName}`
-        : "Deleted user",
+      senderName: sender ? sender.name : "Deleted user",
     };
   });
 
@@ -90,7 +88,7 @@ async function sendMessage(
     .map((participant) => {
       return {
         userId: participant.userId,
-        userName: `${participant.user.firstName} ${participant.user.lastName}`,
+        userName: participant.user.name,
         read: false,
       };
     });
@@ -110,7 +108,7 @@ async function sendMessage(
     content: createdMessage.content,
     createdAt: createdMessage.createdAt,
     updatedAt: createdMessage.updatedAt,
-    senderName: `${participant.user.firstName} ${participant.user.lastName}`,
+    senderName: participant.user.name,
     status: MessageStatusEnum.SENT,
     reads,
   };

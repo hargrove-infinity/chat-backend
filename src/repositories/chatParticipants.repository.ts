@@ -52,15 +52,7 @@ async function findChatSummariesByUserId(userId: string) {
             },
             chatParticipants: {
               columns: { userId: false, chatId: false },
-              with: {
-                user: {
-                  columns: {
-                    id: true,
-                    firstName: true,
-                    lastName: true,
-                  },
-                },
-              },
+              with: { user: { columns: { id: true, name: true } } },
             },
           },
         },

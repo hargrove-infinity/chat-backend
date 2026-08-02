@@ -9,13 +9,7 @@ type CreatedChat = {
 type ChatWithParticipantsRaw = {
   type: "GROUP" | "DIRECT";
   name: string | null;
-  chatParticipants: {
-    user: {
-      id: string;
-      firstName: string;
-      lastName: string;
-    };
-  }[];
+  chatParticipants: { user: { id: string; name: string | null } }[];
 };
 
 export const getInterlocutorIds = ({
@@ -56,7 +50,7 @@ export const getChatName = ({
   );
 
   if (interlocutor) {
-    return `${interlocutor.user.firstName} ${interlocutor.user.lastName}`;
+    return interlocutor.user.name;
   }
 
   return null;

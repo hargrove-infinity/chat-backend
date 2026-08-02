@@ -5,4 +5,6 @@ export const envSchema = z.object({
   databaseUrl: z.url(),
   redisUrl: z.url(),
   frontendUrl: z.url(),
+  sendEmailApiKey: z.string(),
+  sendEmailFrom: z.email(),
 });

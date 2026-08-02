@@ -29,7 +29,7 @@ async function createWithStatuses(messageModel: MessageInsert) {
 
       const participants = await tx.query.chatParticipantsTable.findMany({
         where: eq(chatParticipantsTable.chatId, messageModel.chatId),
-        with: { user: { columns: { firstName: true, lastName: true } } },
+        with: { user: { columns: { name: true } } },
       });
 
       const messageStatusesInsert = participants.map(({ userId }) => ({
@@ -81,12 +81,10 @@ async function findManyByChatId({
     db.query.messageTable.findMany({
       where: eq(messageTable.chatId, chatId),
       with: {
-        sender: { columns: { firstName: true, lastName: true } },
+        sender: { columns: { name: true } },
         messageStatuses: {
           columns: { userId: true, read: true },
-          with: {
-            user: { columns: { id: true, firstName: true, lastName: true } },
-          },
+          with: { user: { columns: { id: true, name: true } } },
         },
       },
     }),
