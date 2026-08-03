@@ -28,6 +28,7 @@ export const auth = betterAuth({
     updateAge: ONE_DAY_IN_SECONDS,
     disableSessionRefresh: false,
   },
+  verification: { modelName: "verificationTable" },
   advanced: { database: { generateId: "uuid" } },
   trustedOrigins: [envVariables.frontendUrl],
   emailAndPassword: { enabled: true, requireEmailVerification: true },
