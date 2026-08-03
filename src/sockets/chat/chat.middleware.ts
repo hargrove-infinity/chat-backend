@@ -23,13 +23,29 @@ export async function chatMiddleware(
     return next(err);
   }
 
-  const session = await auth.api.getSession({
-    headers: new Headers({ Authorization: `Bearer ${token}` }),
-  });
+  let session: Awaited<ReturnType<typeof auth.api.getSession>>;
+
+  try {
+    session = await auth.api.getSession({
+      headers: new Headers({ Authorization: `Bearer ${token}` }),
+    });
+  } catch (error) {
+    logger.error({ error }, "Failed to validate session in chatMiddleware");
+    const err: ExtendedError = new Error("Failed to validate session");
+    err.data = { namespace: CHAT_NAMESPACE, source: "middleware" };
+    return next(err);
+  }
 
   if (!session) {
     logger.error("Invalid or expired token in chat middleware");
     const err: ExtendedError = new Error("Unauthorized");
+    err.data = { namespace: CHAT_NAMESPACE, source: "middleware" };
+    return next(err);
+  }
+
+  if (!session.user.emailVerified) {
+    logger.error("Email not verified in chat middleware");
+    const err: ExtendedError = new Error("Email not verified");
     err.data = { namespace: CHAT_NAMESPACE, source: "middleware" };
     return next(err);
   }
