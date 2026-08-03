@@ -8,6 +8,8 @@ import { emailService, transporter } from "../services/email.service";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg" }),
+  baseURL: envVariables.betterAuthUrl,
+  secret: envVariables.betterAuthSecret,
   plugins: [bearer()],
   user: {
     modelName: "userTable",

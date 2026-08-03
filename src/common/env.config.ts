@@ -8,4 +8,6 @@ export const envVariables = envSchema.parse({
   frontendUrl: process.env.FRONTEND_URL,
   sendEmailApiKey: process.env.SEND_EMAIL_API_KEY,
   sendEmailFrom: process.env.SEND_EMAIL_FROM,
+  betterAuthUrl: process.env.BETTER_AUTH_URL,
+  betterAuthSecret: process.env.BETTER_AUTH_SECRET,
 });
