@@ -8,5 +8,5 @@ export const envSchema = z.object({
   sendEmailApiKey: z.string().min(1),
   sendEmailFrom: z.email(),
   betterAuthUrl: z.url(),
-  betterAuthSecret: z.string().min(1),
+  betterAuthSecret: z.string().min(32),
 });
