@@ -4,6 +4,7 @@ import { bearer } from "better-auth/plugins";
 import { ONE_DAY_IN_SECONDS, SEVEN_DAYS_IN_SECONDS } from "../common/constants";
 import { envVariables } from "../common/env.config";
 import { db } from "../db";
+import { logger } from "../logger";
 import { emailService, transporter } from "../services/email.service";
 
 export const auth = betterAuth({
@@ -37,12 +38,27 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url }) => {
-      emailService.sendEmail({
-        transporter: transporter,
-        toEmail: user.email,
-        subject: "Registration",
-        html: `Click the link to verify your email: ${url}`,
-      });
+      void emailService
+        .sendEmail({
+          transporter,
+          toEmail: user.email,
+          subject: "Registration",
+          html: `Click the link to verify your email: ${url}`,
+        })
+        .then((result) => {
+          if (result[1]) {
+            logger.error(
+              { error: result[1], email: user.email },
+              "Failed to send verification email",
+            );
+          }
+        })
+        .catch((error) => {
+          logger.error(
+            { error: error, email: user.email },
+            "Failed to send verification email",
+          );
+        });
     },
   },
 });
