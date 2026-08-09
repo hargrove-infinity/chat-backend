@@ -29,6 +29,55 @@
       "when": 1783532137167,
       "tag": "0003_add_users_search_trgm_index",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785590309368,
+      "tag": "0004_red_dark_phoenix",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785590673588,
+      "tag": "0005_busy_gwen_stacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785601338856,
+      "tag": "0006_fat_prodigy",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1785601833271,
+      "tag": "0007_handy_warpath",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1785602352405,
+      "tag": "0008_fantastic_ultron",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1785604473065,
+      "tag": "0009_busy_the_hand",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1785687702834,
+      "tag": "0010_boring_sister_grimm",
+      "breakpoints": true
     }
   ]
 }

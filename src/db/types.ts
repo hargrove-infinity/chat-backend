@@ -6,10 +6,7 @@ export type UserSelect = typeof userTable.$inferSelect;
 
 export type UserInsert = typeof userTable.$inferInsert;
 
-type UserAbbreviated = Pick<
-  UserSelect,
-  "id" | "firstName" | "lastName" | "email"
->;
+type UserAbbreviated = Pick<UserSelect, "id" | "email" | "name">;
 
 export type UserDTO = {
   content: UserAbbreviated[];
@@ -81,7 +78,7 @@ export enum MessageStatusEnum {
   ERROR = "ERROR",
 }
 
-type MessageReads = { userId: string; userName: string; read: boolean };
+type MessageReads = { userId: string; userName: string | null; read: boolean };
 
 export type MessageDTO = MessageSelect & {
   senderName: string | null;

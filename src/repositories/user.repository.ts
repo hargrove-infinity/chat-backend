@@ -77,17 +77,12 @@ async function findByText({
 }) {
   logger.info({ text, limit, offset }, "Searching users by text");
 
-  const fullNameAndEmail = sql`(${userTable.firstName} || ' ' || ${userTable.lastName} || ' ' || ${userTable.email})`;
+  const fullNameAndEmail = sql`(${userTable.name} || ' ' || ${userTable.email})`;
 
   const whereCondition = ilike(fullNameAndEmail, `%${text}%`);
 
   const contentQuery = db
-    .select({
-      id: userTable.id,
-      firstName: userTable.firstName,
-      lastName: userTable.lastName,
-      email: userTable.email,
-    })
+    .select({ id: userTable.id, name: userTable.name, email: userTable.email })
     .from(userTable)
     .where(whereCondition)
     .limit(limit)

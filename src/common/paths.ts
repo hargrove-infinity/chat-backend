@@ -1,6 +1,7 @@
 export const paths = {
+  // Catch-all route for Better Auth's own endpoints (sign-in, sign-up, session, etc.) — Express 5 syntax
   auth: {
-    login: "/login",
+    all: "/api/auth/*splat",
   },
   chats: {
     list: "/chats",
