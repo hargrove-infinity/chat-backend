@@ -1,5 +1,8 @@
 import { CHAT_EVENTS } from "../../../common/socket";
+import { logger } from "../../../logger";
+import { chatParticipantsRepository } from "../../../repositories/chatParticipants.repository";
 import { messagesService } from "../../../services/messages.service";
+import { presenceService } from "../../../services/presence.service";
 import type { ChatSocket, SendMessageCallback } from "../chat.types";
 
 type SendMessageHandlerArgs = {
@@ -34,6 +37,36 @@ export const sendMessageHandler =
       tempId: tempId,
       message: { ...messageDto },
     });
+
+    const [participants, participantsError] =
+      await chatParticipantsRepository.findUserIdsByChatId(chatId);
+
+    if (participantsError) {
+      logger.warn(
+        { error: participantsError.message },
+        "Failed to fetch participantIds from database in socket sendMessageHandler handler",
+      );
+
+      throw new Error("Unknown error");
+    }
+
+    const participantIds = participants.map((p) => p.userId);
+
+    const [socketIds, socketIdsError] =
+      await presenceService.getSocketIdList(participantIds);
+
+    if (socketIdsError) {
+      logger.warn(
+        { error: socketIdsError.message },
+        "Failed to fetch socketIds in Redis in socket sendMessageHandler handler",
+      );
+
+      throw new Error("Unknown error");
+    }
+
+    if (socketIds) {
+      socket.nsp.in(socketIds).socketsJoin(chatId);
+    }
 
     socket.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, messageDto);
   };
