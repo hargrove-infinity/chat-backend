@@ -38,6 +38,16 @@ export const sendMessageHandler =
       message: { ...messageDto },
     });
 
+    // Problem: When User A creates a new chat and sends a message,
+    // User B receives nothing — their socket only joins rooms once, at
+    // connection time, so it never joined this chat's room since the
+    // chat didn't exist yet.
+    // Solution:
+    // Look up the chat's participants and find which of them are online,
+    // so we can join their sockets (including the sender's) to the room
+    // before broadcasting. This lazily subscribes sockets to rooms created
+    // after they connected, so the recipient gets this first message
+    // without a reconnect/refresh.
     const [participants, participantsError] =
       await chatParticipantsRepository.findUserIdsByChatId(chatId);
 
