@@ -49,7 +49,7 @@ export const sendMessageHandler =
     // after they connected, so the recipient gets this first message
     // without a reconnect/refresh.
     const [participants, participantsError] =
-      await chatParticipantsRepository.findUserIdsByChatId(chatId);
+      await chatParticipantsRepository.findByChatId(chatId);
 
     if (participantsError) {
       logger.warn(

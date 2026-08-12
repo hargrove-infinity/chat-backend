@@ -77,7 +77,7 @@ async function findChatSummariesByUserId(userId: string) {
   return [rows, null] as const;
 }
 
-async function findUserIdsByChatId(chatId: string) {
+async function findByChatId(chatId: string) {
   logger.info(
     { chatId },
     "Fetching chat participants by chat id from database",
@@ -106,5 +106,5 @@ async function findUserIdsByChatId(chatId: string) {
 export const chatParticipantsRepository = {
   findManyByUserId,
   findChatSummariesByUserId,
-  findUserIdsByChatId,
+  findByChatId,
 } as const;
