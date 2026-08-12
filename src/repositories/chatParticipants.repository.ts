@@ -90,7 +90,10 @@ async function findByChatId(chatId: string) {
   );
 
   if (error) {
-    logger.error({ chatId }, "Database error while fetching chat participants");
+    logger.error(
+      { error, chatId },
+      "Database error while fetching chat participants",
+    );
 
     return [null, error] as const;
   }
