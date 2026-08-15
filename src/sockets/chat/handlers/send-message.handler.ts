@@ -55,29 +55,27 @@ export const sendMessageHandler =
       const [participants, participantsError] =
         await chatParticipantsRepository.findByChatId(chatId);
 
-      if (participantsError) {
+      if (participantsError || !participants) {
         logger.warn(
           { error: participantsError.message },
           "Failed to fetch participantIds from database in socket sendMessageHandler handler",
         );
+      } else {
+        const participantIds = participants.map((p) => p.userId);
 
-        throw new Error("Unknown error");
-      }
+        const [socketIds, socketIdsError] =
+          await presenceService.getSocketIdList(participantIds);
 
-      const participantIds = participants.map((p) => p.userId);
+        if (socketIdsError) {
+          logger.warn(
+            { error: socketIdsError.message },
+            "Failed to fetch socketIds in Redis in socket sendMessageHandler handler",
+          );
+        }
 
-      const [socketIds, socketIdsError] =
-        await presenceService.getSocketIdList(participantIds);
-
-      if (socketIdsError) {
-        logger.warn(
-          { error: socketIdsError.message },
-          "Failed to fetch socketIds in Redis in socket sendMessageHandler handler",
-        );
-      }
-
-      if (socketIds) {
-        socket.nsp.in(socketIds).socketsJoin(chatId);
+        if (socketIds) {
+          socket.nsp.in(socketIds).socketsJoin(chatId);
+        }
       }
     }
 
