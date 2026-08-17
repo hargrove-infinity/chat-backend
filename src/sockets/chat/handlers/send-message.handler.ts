@@ -1,5 +1,8 @@
 import { CHAT_EVENTS } from "../../../common/socket";
+import { logger } from "../../../logger";
+import { chatParticipantsRepository } from "../../../repositories/chatParticipants.repository";
 import { messagesService } from "../../../services/messages.service";
+import { presenceService } from "../../../services/presence.service";
 import type { ChatSocket, SendMessageCallback } from "../chat.types";
 
 type SendMessageHandlerArgs = {
@@ -34,6 +37,47 @@ export const sendMessageHandler =
       tempId: tempId,
       message: { ...messageDto },
     });
+
+    // Problem: When User A creates a new chat and sends a message,
+    // User B receives nothing — their socket only joins rooms once, at
+    // connection time, so it never joined this chat's room since the
+    // chat didn't exist yet.
+    // Solution:
+    // If the sender's own socket hasn't joined this room yet (i.e. this
+    // is the first message in the chat), look up the chat's participants
+    // and find which of them are online, so we can join their sockets
+    // (including the sender's) to the room before broadcasting. This
+    // lazily subscribes sockets to rooms created after they connected,
+    // so the recipient gets this first message without a reconnect/refresh.
+    // On later messages the sender's socket is already in the room, so
+    // this lookup/join work can be skipped — but we still need to emit below.
+    if (!socket.rooms.has(chatId)) {
+      const [participants, participantsError] =
+        await chatParticipantsRepository.findByChatId(chatId);
+
+      if (participantsError || !participants) {
+        logger.warn(
+          { error: participantsError.message },
+          "Failed to fetch participantIds from database in socket sendMessageHandler handler",
+        );
+      } else {
+        const participantIds = participants.map((p) => p.userId);
+
+        const [socketIds, socketIdsError] =
+          await presenceService.getSocketIdList(participantIds);
+
+        if (socketIdsError) {
+          logger.warn(
+            { error: socketIdsError.message },
+            "Failed to fetch socketIds in Redis in socket sendMessageHandler handler",
+          );
+        }
+
+        if (socketIds) {
+          socket.nsp.in(socketIds).socketsJoin(chatId);
+        }
+      }
+    }
 
     socket.to(chatId).emit(CHAT_EVENTS.NEW_MESSAGE, messageDto);
   };

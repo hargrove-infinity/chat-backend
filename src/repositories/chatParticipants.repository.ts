@@ -77,7 +77,37 @@ async function findChatSummariesByUserId(userId: string) {
   return [rows, null] as const;
 }
 
+async function findByChatId(chatId: string) {
+  logger.info(
+    { chatId },
+    "Fetching chat participants by chat id from database",
+  );
+
+  const [rows, error] = await asyncTryCatch(
+    db.query.chatParticipantsTable.findMany({
+      where: eq(chatParticipantsTable.chatId, chatId),
+    }),
+  );
+
+  if (error) {
+    logger.error(
+      { error, chatId },
+      "Database error while fetching chat participants",
+    );
+
+    return [null, error] as const;
+  }
+
+  logger.info(
+    { chatId },
+    "Chat participants successfully fetched from database for user",
+  );
+
+  return [rows, null] as const;
+}
+
 export const chatParticipantsRepository = {
   findManyByUserId,
   findChatSummariesByUserId,
+  findByChatId,
 } as const;
