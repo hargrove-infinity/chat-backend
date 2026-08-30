@@ -1,7 +1,11 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { bearer } from "better-auth/plugins";
-import { ONE_DAY_IN_SECONDS, SEVEN_DAYS_IN_SECONDS } from "../common/constants";
+import {
+  EMAIL_VERIFICATION_CONFIRMED,
+  ONE_DAY_IN_SECONDS,
+  SEVEN_DAYS_IN_SECONDS,
+} from "../common/constants";
 import { envVariables } from "../common/env.config";
 import { db } from "../db";
 import { logger } from "../logger";
@@ -51,30 +55,46 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
     onExistingUserSignUp: async ({ user }) => {
-      void emailService
-        .sendEmail({
-          transporter,
-          toEmail: user.email,
-          subject: "Sign-up attempt detected",
-          html: buildSignUpAttemptDetectedTemplate({
-            name: user.name,
-            email: user.email,
-          }),
-        })
-        .then((result) => {
-          if (result[1]) {
+      if (user.emailVerified) {
+        void emailService
+          .sendEmail({
+            transporter,
+            toEmail: user.email,
+            subject: "Sign-up attempt detected",
+            html: buildSignUpAttemptDetectedTemplate({
+              name: user.name,
+              email: user.email,
+            }),
+          })
+          .then((result) => {
+            if (result[1]) {
+              logger.error(
+                { error: result[1], email: user.email },
+                "Failed to send sign-up attempt detected email",
+              );
+            }
+          })
+          .catch((error) => {
             logger.error(
-              { error: result[1], email: user.email },
+              { error, email: user.email },
               "Failed to send sign-up attempt detected email",
             );
-          }
-        })
-        .catch((error) => {
-          logger.error(
-            { error: error, email: user.email },
-            "Failed to send sign-up attempt detected email",
-          );
-        });
+          });
+      } else {
+        void auth.api
+          .sendVerificationEmail({
+            body: {
+              email: user.email,
+              callbackURL: `${envVariables.frontendUrl}${EMAIL_VERIFICATION_CONFIRMED}`,
+            },
+          })
+          .catch((error) => {
+            logger.error(
+              { error, email: user.email },
+              "Failed to trigger verification email",
+            );
+          });
+      }
     },
   },
   emailVerification: {
