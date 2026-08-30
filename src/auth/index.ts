@@ -10,6 +10,7 @@ import { envVariables } from "../common/env.config";
 import { db } from "../db";
 import { logger } from "../logger";
 import { emailService, transporter } from "../services/email.service";
+import { redisService } from "../services/redis.service";
 
 const buildEmailVerificationTemplate = (url: string): string => {
   return `Click the link to verify your email: ${url}`;
@@ -55,6 +56,12 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
     onExistingUserSignUp: async ({ user }) => {
+      const [lockAcquired, lockAcquiredError] =
+        await redisService.trySetSignUpAttemptEmailLock(user.id);
+
+      if (lockAcquiredError) return;
+      if (lockAcquired !== "OK") return;
+
       if (user.emailVerified) {
         void emailService
           .sendEmail({
